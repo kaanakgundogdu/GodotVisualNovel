@@ -1,0 +1,211 @@
+[gd_scene load_steps=10 format=3 uid="uid://cfysjupcuv28w"]
+
+[ext_resource type="Theme" uid="uid://cs3l84mx1fn5d" path="res://themes/dialogboxtheme.tres" id="1_3s2y2"]
+[ext_resource type="Script" path="res://scripts/dialog/speaker_box_controller.gd" id="2_etk4x"]
+[ext_resource type="Script" path="res://scripts/dialog/dialog_box_controller.gd" id="2_twhaf"]
+[ext_resource type="Script" path="res://scripts/menu/open_menu.gd" id="3_wyo00"]
+[ext_resource type="Script" path="res://scripts/button/button_icon_controller.gd" id="4_3pgvf"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_r32qe"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wxodx"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xhgr1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6xex4"]
+
+[node name="DialogUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_3s2y2")
+
+[node name="SpeakerText_Control" type="Control" parent="." node_paths=PackedStringArray("speaker_name_path")]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -198.0
+offset_right = 200.0
+offset_bottom = -150.0
+grow_vertical = 0
+script = ExtResource("2_etk4x")
+speaker_name_path = NodePath("SpeakerMarginContainer/Label")
+
+[node name="SpeakerBoxPanel" type="PanelContainer" parent="SpeakerText_Control"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -25.0
+offset_right = 100.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="SpeakerText_Control"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -24.0
+offset_right = 100.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Speaker"
+label_settings = SubResource("LabelSettings_r32qe")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SpeakerMarginContainer" type="MarginContainer" parent="SpeakerText_Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="SpeakerText_Control/SpeakerMarginContainer"]
+layout_mode = 2
+text = "adasd"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="DialogBox_Control" type="Control" parent="." node_paths=PackedStringArray("spnode2_path", "dialogbox_path")]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_twhaf")
+spnode2_path = NodePath("../SpeakerText_Control")
+dialogbox_path = NodePath("MarginContainer/RichTextLabel")
+
+[node name="DialogBoxPanel" type="PanelContainer" parent="DialogBox_Control"]
+custom_minimum_size = Vector2(20, 2)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -149.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="DialogBox_Control"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = -126.0
+offset_right = -64.0
+offset_bottom = -23.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="RichTextLabel" type="RichTextLabel" parent="DialogBox_Control/MarginContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "Hello godot visual novel engine test v1, Hello godot visual novel engine test v1, Hello godot visual novel engine test v1, Hello godot visual novel engine test v1, Hello godot visual novel engine test v1, Hello godot visual novel engine test v1, Hello godot visual novel engine test v1, Hello godot visual novel engine test v1, Hello godot visual novel engine test v1, Hello godot visual novel engine test v1, Hello godot visual novel engine test v1, Hello godot visual novel engine test v1, Hello godot visual novel engine test v1, "
+
+[node name="ButtonsControl" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="ButtonsHBox" type="HBoxContainer" parent="ButtonsControl"]
+layout_mode = 0
+offset_left = -188.0
+offset_top = -150.0
+offset_right = 39.0
+offset_bottom = -110.0
+
+[node name="AutoMargin" type="MarginContainer" parent="ButtonsControl/ButtonsHBox"]
+layout_mode = 2
+
+[node name="CheckButton" type="CheckButton" parent="ButtonsControl/ButtonsHBox/AutoMargin"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_wxodx")
+button_pressed = true
+text = "Auto"
+
+[node name="SkipMargin" type="MarginContainer" parent="ButtonsControl/ButtonsHBox"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="ButtonsControl/ButtonsHBox/SkipMargin"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_xhgr1")
+text = "Skip"
+
+[node name="MenuMargin" type="MarginContainer" parent="ButtonsControl/ButtonsHBox" node_paths=PackedStringArray("menu_button_path")]
+layout_mode = 2
+script = ExtResource("3_wyo00")
+menu_button_path = NodePath("Button")
+menu_scene_path = "res://scenes/main_menu.tscn"
+
+[node name="Button" type="Button" parent="ButtonsControl/ButtonsHBox/MenuMargin"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_xhgr1")
+text = "Menu"
+
+[node name="LogMargin" type="MarginContainer" parent="ButtonsControl/ButtonsHBox"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="ButtonsControl/ButtonsHBox/LogMargin"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_xhgr1")
+text = "Log"
+
+[node name="NextButtonControl" type="Control" parent="." node_paths=PackedStringArray("button_path", "button_icon_path")]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("4_3pgvf")
+button_path = NodePath("NextButtonMarginContainer/Button")
+button_icon_path = NodePath("NextButtonMarginContainer/Button/triangle")
+
+[node name="NextButtonMarginContainer" type="MarginContainer" parent="NextButtonControl"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Button" type="Button" parent="NextButtonControl/NextButtonMarginContainer"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_6xex4")
+action_mode = 0
+
+[node name="triangle" type="Polygon2D" parent="NextButtonControl/NextButtonMarginContainer/Button"]
+polygon = PackedVector2Array(0, 0, 40, 20, 0, 40)
+
+[node name="Timer" type="Timer" parent="NextButtonControl"]

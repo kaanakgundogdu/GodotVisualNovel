@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=3 uid="uid://d4c80ha1278kv"]
+
+[ext_resource type="Texture2D" uid="uid://bkggkgri7ntoa" path="res://assets/bg/Futon_Room_Night.png" id="1_20tw5"]
+[ext_resource type="PackedScene" uid="uid://cv83pnl75en3x" path="res://scenes/prefabs/characterWoman.tscn" id="2_7c1ev"]
+[ext_resource type="PackedScene" uid="uid://cfysjupcuv28w" path="res://scenes/prefabs/dialog_ui.tscn" id="3_eyeia"]
+
+[node name="Node" type="Node"]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="BGImage" type="TextureRect" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_20tw5")
+expand_mode = 1
+
+[node name="CanvasLayer2" type="CanvasLayer" parent="."]
+
+[node name="Character_Control" type="Control" parent="CanvasLayer2"]
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="character" parent="CanvasLayer2/Character_Control" instance=ExtResource("2_7c1ev")]
+position = Vector2(0, -270)
+scale = Vector2(0.5, 0.5)
+
+[node name="DialogUI" parent="CanvasLayer2" instance=ExtResource("3_eyeia")]

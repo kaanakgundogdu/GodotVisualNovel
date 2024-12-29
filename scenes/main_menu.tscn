@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://dypbg0bs8nqva"]
+
+[ext_resource type="PackedScene" uid="uid://er78fo3qwngd" path="res://scenes/prefabs/menu_object.tscn" id="1_0obtu"]
+[ext_resource type="PackedScene" uid="uid://dlwvaapk805cv" path="res://scenes/prefabs/options_menu.tscn" id="2_1o23l"]
+
+[node name="Menu" type="Node2D"]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="MenuObject" parent="CanvasLayer" instance=ExtResource("1_0obtu")]
+options_scene_path = ExtResource("2_1o23l")
