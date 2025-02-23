@@ -1,0 +1,75 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8qksieihpgnc"]
+
+[ext_resource type="Script" path="res://scripts/menu/load_save.gd" id="1_4utjp"]
+
+[node name="SaveMenu" type="Node2D" node_paths=PackedStringArray("canvas_layer", "main_menu_button_path")]
+script = ExtResource("1_4utjp")
+canvas_layer = NodePath("SaveMenuCanvasLayer")
+main_menu_button_path = NodePath("SaveMenuCanvasLayer/SaveMenuControl/BackToMenuMargin/BackToMainMenu6")
+
+[node name="SaveMenuCanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="SaveMenuControl" type="Control" parent="SaveMenuCanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SaveMenuMargin" type="MarginContainer" parent="SaveMenuCanvasLayer/SaveMenuControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -158.0
+offset_top = -159.0
+offset_right = 158.0
+offset_bottom = 159.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SaveMenuVBox" type="VBoxContainer" parent="SaveMenuCanvasLayer/SaveMenuControl/SaveMenuMargin"]
+layout_mode = 2
+
+[node name="SaveSlot1" type="Button" parent="SaveMenuCanvasLayer/SaveMenuControl/SaveMenuMargin/SaveMenuVBox"]
+layout_mode = 2
+text = "Save SLot"
+
+[node name="SaveSlot2" type="Button" parent="SaveMenuCanvasLayer/SaveMenuControl/SaveMenuMargin/SaveMenuVBox"]
+layout_mode = 2
+text = "Save SLot"
+
+[node name="SaveSlot3" type="Button" parent="SaveMenuCanvasLayer/SaveMenuControl/SaveMenuMargin/SaveMenuVBox"]
+layout_mode = 2
+text = "Save SLot"
+
+[node name="SaveSlot4" type="Button" parent="SaveMenuCanvasLayer/SaveMenuControl/SaveMenuMargin/SaveMenuVBox"]
+layout_mode = 2
+text = "Save SLot"
+
+[node name="SaveSlot5" type="Button" parent="SaveMenuCanvasLayer/SaveMenuControl/SaveMenuMargin/SaveMenuVBox"]
+layout_mode = 2
+text = "Save SLot"
+
+[node name="SaveSlot6" type="Button" parent="SaveMenuCanvasLayer/SaveMenuControl/SaveMenuMargin/SaveMenuVBox"]
+layout_mode = 2
+text = "Save SLot"
+
+[node name="BackToMenuMargin" type="MarginContainer" parent="SaveMenuCanvasLayer/SaveMenuControl"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="BackToMainMenu6" type="Button" parent="SaveMenuCanvasLayer/SaveMenuControl/BackToMenuMargin"]
+layout_mode = 2
+text = "Back To Main Menu"

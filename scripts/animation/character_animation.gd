@@ -5,6 +5,7 @@ class_name CharacterAnimationController
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 func _ready():
+	add_to_group("CharacterAnimation")
 	play_idle_animation()
 
 func play_idle_animation():

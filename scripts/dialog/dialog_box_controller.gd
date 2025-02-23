@@ -20,7 +20,7 @@ const dialog_utils_path = "res://scripts/dialog/dialog_utils.gd"
 var is_auto = true
 var dialog_idx = 0
 
-var dialogs = [
+var dixalogs = [
 	"Hello, [b]Godot[/b] [shake][color=#fcba03]Visual Novel Engine[/color][/shake] test v1.\nHello, [b]Godot[/b] [color=#FF0000]Visual[/color] Novel Engine test v1.",
 	"[i]Maybe Devlog[/i] coming soon. [color=#FF0000]Maybe not.[/color] I'm not sure.",
 	"[shake]This is very simple, I know, but I love it.[/shake]\nI also found all of these [b]assets[/b] on the internet.\n[color=#FF0000]Bye![/color]"
@@ -30,31 +30,31 @@ var dialogs = [
 func _ready():
 	dialogbox.clear()
 	await get_tree().create_timer(delay_on_start).timeout
-	var message = get_dialog(dialog_idx)
-	call_speaker_controller("asdsadsa")
-	await update_dialog_box(message)
+	#var message = get_dialog(dialog_idx)
+	#call_speaker_controller("asdsadsa")
+	#await update_dialog_box(message)
 
 
-func call_speaker_controller(speaker_name: String):
-	print("Updating speaker box for: ", speaker_name)
-	spnode2.update_speaker_box(speaker_name)
+#func call_speaker_controller(speaker_name: String):
+	#print("Updating speaker box for: ", speaker_name)
+	#spnode2.update_speaker_box(speaker_name)
 
-func dialog_loop():
-	if is_auto:
-		var dialog = get_dialog(dialog_idx)
-		await update_dialog_box(dialog)
+#func dialog_loop():
+	#if is_auto:
+		#var dialog = get_dialog(dialog_idx)
+		#await update_dialog_box(dialog)
 
 
-func next_dialog():
-	var dialog = get_dialog(dialog_idx)
-	await update_dialog_box(dialog)
-
-func get_dialog(idx):
-	print(dialogs.size())
-	if idx >= dialogs.size():
-		return null
-
-	return dialogs[idx]
+#func next_dialog():
+	#var dialog = get_dialog(dialog_idx)
+	#await update_dialog_box(dialog)
+#
+#func get_dialog(idx):
+	#print(dialogs.size())
+	#if idx >= dialogs.size():
+		#return null
+#
+	#return dialogs[idx]
 
 
 func update_dialog_box(dialog):
@@ -71,4 +71,4 @@ func update_dialog_box(dialog):
 	
 	await get_tree().create_timer(delay_for_messages).timeout
 	dialog_idx = dialog_idx + 1
-	dialog_loop()
+	#dialog_loop()

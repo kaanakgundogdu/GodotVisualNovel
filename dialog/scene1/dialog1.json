@@ -1,0 +1,76 @@
+{
+	"dialogs": [
+		{
+			"id": 0,
+			"time_stamp": "02.22.2025",
+			"speaker": "Woman1",
+			"expression_sprite": "woman1_smile",
+			"animation": "woman1_talk",
+			"before_dialog_event": [
+				{
+					"change_bg": "bg1"
+				}
+			],
+			"after_dialog_event": [
+				{
+					"change_music": "bgm1"
+				}
+			],
+			"dialog": "Hello, [b]Godot[/b] [shake][color=#fcba03]Visual Novel Engine[/color][/shake] test v1.\nHello, [b]Godot[/b] [color=#FF0000]Visual[/color] Novel Engine test v1.",
+			"choice_title": null,
+			"choices": [],
+			"next_dialog_id": 1
+		},
+		{
+			"id": 1,
+			"time_stamp": "02.22.2025",
+			"speaker": "Woman1",
+			"expression_sprite": "woman1_smile",
+			"animation": "woman1_talk",
+			"before_dialog_event": [
+				{
+					"change_bg": "bedroom1"
+				}
+			],
+			"after_dialog_event": [
+				{
+					"change_music": "jazz"
+				}
+			],
+			"dialog": "[i]Maybe Devlog[/i] coming soon. [color=#FF0000]Maybe not.[/color] I'm not sure.",
+			"choice_title": "",
+			"choices": [],
+			"next_dialog_id": 2
+		},
+		{
+			"id": 2,
+			"time_stamp": "02.22.2025",
+			"speaker": "Woman1",
+			"expression_sprite": "woman1_smile",
+			"animation": "woman1_talk",
+			"before_dialog_event": [
+				{
+					"change_bg": "bedroom1"
+				}
+			],
+			"after_dialog_event": [
+				{
+					"change_music": "jazz"
+				}
+			],
+			"dialog": "[shake]This is very simple, I know, but I love it.[/shake]\nI also found all of these [b]assets[/b] on the internet.\n[color=#FF0000]Bye![/color]",
+			"choice_title": "I need to ask question",
+			"choices": [
+				{
+					"text": "Who did it?",
+					"next_dialog_id": 12
+				},
+				{
+					"text": "When this happened?",
+					"next_dialog_id": 13
+				}
+			],
+			"next_dialog_id": -1
+		}
+	]
+}

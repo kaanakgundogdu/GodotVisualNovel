@@ -1,0 +1,84 @@
+[gd_scene load_steps=2 format=3 uid="uid://8peqnucw5sk0"]
+
+[ext_resource type="Script" path="res://scripts/menu/load_save.gd" id="1_0mley"]
+
+[node name="LoadMenu" type="Node2D" node_paths=PackedStringArray("canvas_layer", "main_menu_button_path")]
+script = ExtResource("1_0mley")
+canvas_layer = NodePath("LoadMenuCanvasLayer")
+main_menu_button_path = NodePath("LoadMenuCanvasLayer/BackToMenuMargin/BackToMainMenu")
+
+[node name="LoadMenuCanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="LoadMenuControl" type="Control" parent="LoadMenuCanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="LoadMenuCanvasLayer/LoadMenuControl"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "There is no save"
+horizontal_alignment = 1
+
+[node name="LoadMenuMargin" type="MarginContainer" parent="LoadMenuCanvasLayer/LoadMenuControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -158.0
+offset_top = -159.0
+offset_right = 158.0
+offset_bottom = 159.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LoadMenuVBox" type="VBoxContainer" parent="LoadMenuCanvasLayer/LoadMenuControl/LoadMenuMargin"]
+layout_mode = 2
+
+[node name="SaveSlot1" type="Button" parent="LoadMenuCanvasLayer/LoadMenuControl/LoadMenuMargin/LoadMenuVBox"]
+layout_mode = 2
+text = "Save Slot 1"
+
+[node name="SaveSlot2" type="Button" parent="LoadMenuCanvasLayer/LoadMenuControl/LoadMenuMargin/LoadMenuVBox"]
+layout_mode = 2
+text = "Save Slot 2"
+
+[node name="SaveSlot3" type="Button" parent="LoadMenuCanvasLayer/LoadMenuControl/LoadMenuMargin/LoadMenuVBox"]
+layout_mode = 2
+text = "Save Slot 3"
+
+[node name="SaveSlot4" type="Button" parent="LoadMenuCanvasLayer/LoadMenuControl/LoadMenuMargin/LoadMenuVBox"]
+layout_mode = 2
+text = "Save Slot 4"
+
+[node name="SaveSlot5" type="Button" parent="LoadMenuCanvasLayer/LoadMenuControl/LoadMenuMargin/LoadMenuVBox"]
+layout_mode = 2
+text = "Save Slot 5"
+
+[node name="SaveSlot6" type="Button" parent="LoadMenuCanvasLayer/LoadMenuControl/LoadMenuMargin/LoadMenuVBox"]
+layout_mode = 2
+text = "Save Slot 6"
+
+[node name="BackToMenuMargin" type="MarginContainer" parent="LoadMenuCanvasLayer"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="BackToMainMenu" type="Button" parent="LoadMenuCanvasLayer/BackToMenuMargin"]
+layout_mode = 2
+text = "Back To Main Menu"

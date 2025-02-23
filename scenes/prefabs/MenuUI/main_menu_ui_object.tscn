@@ -1,0 +1,62 @@
+[gd_scene load_steps=3 format=3 uid="uid://rj4xx6t2emn7"]
+
+[ext_resource type="Script" path="res://scripts/menu/maın_menu.gd" id="1_yixiu"]
+[ext_resource type="PackedScene" uid="uid://d4c80ha1278kv" path="res://scenes/scene1.tscn" id="2_12aak"]
+
+[node name="MainMenuUIObject" type="Node2D" node_paths=PackedStringArray("main_menu_canvas_layer", "load_button_path", "new_game_button_path", "options_button_path", "credits_button_path", "quit_button_path")]
+script = ExtResource("1_yixiu")
+main_menu_canvas_layer = NodePath("MainMenuUICanvasLayer")
+load_button_path = NodePath("MainMenuUICanvasLayer/Control/MainMenuMargin/ButtonVBox/Load")
+new_game_button_path = NodePath("MainMenuUICanvasLayer/Control/MainMenuMargin/ButtonVBox/New Game")
+options_button_path = NodePath("MainMenuUICanvasLayer/Control/MainMenuMargin/ButtonVBox/Options")
+credits_button_path = NodePath("MainMenuUICanvasLayer/Control/MainMenuMargin/ButtonVBox/Credits")
+quit_button_path = NodePath("MainMenuUICanvasLayer/Control/MainMenuMargin/ButtonVBox/Quit")
+new_game_scene_path = ExtResource("2_12aak")
+
+[node name="MainMenuUICanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="MainMenuUICanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainMenuMargin" type="MarginContainer" parent="MainMenuUICanvasLayer/Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -158.0
+offset_top = -159.0
+offset_right = 158.0
+offset_bottom = 159.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ButtonVBox" type="VBoxContainer" parent="MainMenuUICanvasLayer/Control/MainMenuMargin"]
+layout_mode = 2
+
+[node name="Load" type="Button" parent="MainMenuUICanvasLayer/Control/MainMenuMargin/ButtonVBox"]
+layout_mode = 2
+text = "Load Game"
+
+[node name="New Game" type="Button" parent="MainMenuUICanvasLayer/Control/MainMenuMargin/ButtonVBox"]
+layout_mode = 2
+text = "New Game"
+
+[node name="Options" type="Button" parent="MainMenuUICanvasLayer/Control/MainMenuMargin/ButtonVBox"]
+layout_mode = 2
+text = "Options
+"
+
+[node name="Credits" type="Button" parent="MainMenuUICanvasLayer/Control/MainMenuMargin/ButtonVBox"]
+layout_mode = 2
+text = "Credits"
+
+[node name="Quit" type="Button" parent="MainMenuUICanvasLayer/Control/MainMenuMargin/ButtonVBox"]
+layout_mode = 2
+text = "Quit"

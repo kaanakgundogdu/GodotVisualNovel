@@ -1,0 +1,56 @@
+[gd_scene load_steps=2 format=3 uid="uid://57t46kab1tlt"]
+
+[ext_resource type="Script" path="res://scripts/menu/credits.gd" id="1_3wfmq"]
+
+[node name="CreditsMenu" type="Node2D" node_paths=PackedStringArray("canvas_layer", "main_menu_button_path")]
+script = ExtResource("1_3wfmq")
+canvas_layer = NodePath("CreditsMenuCanvasLayer")
+main_menu_button_path = NodePath("CreditsMenuCanvasLayer/CreditsControl/BacToMainMenuMarginContainer/BackToMain_menu")
+
+[node name="CreditsMenuCanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="CreditsControl" type="Control" parent="CreditsMenuCanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CreditsMargin" type="MarginContainer" parent="CreditsMenuCanvasLayer/CreditsControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -158.0
+offset_top = -159.0
+offset_right = 158.0
+offset_bottom = 159.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="CreditsMenuCanvasLayer/CreditsControl/CreditsMargin"]
+layout_mode = 2
+text = "Me
+Myself
+I"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BacToMainMenuMarginContainer" type="MarginContainer" parent="CreditsMenuCanvasLayer/CreditsControl"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="BackToMain_menu" type="Button" parent="CreditsMenuCanvasLayer/CreditsControl/BacToMainMenuMarginContainer"]
+layout_mode = 2
+text = "Back To Main Menu"

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://copekpbwx5mrd"]
 
-[ext_resource type="PackedScene" uid="uid://dlwvaapk805cv" path="res://scenes/prefabs/options_menu.tscn" id="1_t6qxs"]
+[ext_resource type="PackedScene" uid="uid://dlwvaapk805cv" path="res://scenes/prefabs/MenuUI/options_menu.tscn" id="1_t6qxs"]
 
 [node name="Options" type="Node2D"]
 

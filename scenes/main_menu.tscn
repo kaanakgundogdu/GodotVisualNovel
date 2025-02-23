@@ -1,11 +1,32 @@
-[gd_scene load_steps=3 format=3 uid="uid://dypbg0bs8nqva"]
+[gd_scene load_steps=4 format=3 uid="uid://dypbg0bs8nqva"]
 
-[ext_resource type="PackedScene" uid="uid://er78fo3qwngd" path="res://scenes/prefabs/menu_object.tscn" id="1_0obtu"]
-[ext_resource type="PackedScene" uid="uid://dlwvaapk805cv" path="res://scenes/prefabs/options_menu.tscn" id="2_1o23l"]
+[ext_resource type="Script" path="res://scripts/menu/main_menu_controller.gd" id="1_d6gys"]
+[ext_resource type="PackedScene" uid="uid://rj4xx6t2emn7" path="res://scenes/prefabs/MenuUI/main_menu_ui_object.tscn" id="1_hi14o"]
+[ext_resource type="Texture2D" uid="uid://dvutyqkfkwwh2" path="res://assets/bg/bgdeneme.jpg" id="4_cac6q"]
 
-[node name="Menu" type="Node2D"]
+[node name="MainMenu" type="Node2D" node_paths=PackedStringArray("main_menu_ui")]
+script = ExtResource("1_d6gys")
+main_menu_ui = NodePath("MainMenuUIObject")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="MenuObject" parent="CanvasLayer" instance=ExtResource("1_0obtu")]
-options_scene_path = ExtResource("2_1o23l")
+[node name="Control" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_cac6q")
+expand_mode = 1
+
+[node name="MainMenuUIObject" parent="." node_paths=PackedStringArray("main_menu_controller") instance=ExtResource("1_hi14o")]
+main_menu_controller = NodePath("..")

@@ -1,7 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://cfysjupcuv28w"]
+[gd_scene load_steps=12 format=3 uid="uid://cfysjupcuv28w"]
 
 [ext_resource type="Theme" uid="uid://cs3l84mx1fn5d" path="res://themes/dialogboxtheme.tres" id="1_3s2y2"]
+[ext_resource type="Script" path="res://scripts/dialog/dialog_reader.gd" id="2_66goe"]
 [ext_resource type="Script" path="res://scripts/dialog/speaker_box_controller.gd" id="2_etk4x"]
+[ext_resource type="Script" path="res://scripts/dialog/dialog_loop.gd" id="2_pot8h"]
 [ext_resource type="Script" path="res://scripts/dialog/dialog_box_controller.gd" id="2_twhaf"]
 [ext_resource type="Script" path="res://scripts/menu/open_menu.gd" id="3_wyo00"]
 [ext_resource type="Script" path="res://scripts/button/button_icon_controller.gd" id="4_3pgvf"]
@@ -14,7 +16,7 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6xex4"]
 
-[node name="DialogUI" type="Control"]
+[node name="DialogUI" type="Control" node_paths=PackedStringArray("db_controller", "sb_controller", "dialog_reader")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -22,6 +24,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_3s2y2")
+script = ExtResource("2_pot8h")
+db_controller = NodePath("DialogBox_Control")
+sb_controller = NodePath("SpeakerText_Control")
+dialog_reader = NodePath("DialogrReader")
 
 [node name="SpeakerText_Control" type="Control" parent="." node_paths=PackedStringArray("speaker_name_path")]
 layout_mode = 1
@@ -209,3 +215,6 @@ action_mode = 0
 polygon = PackedVector2Array(0, 0, 40, 20, 0, 40)
 
 [node name="Timer" type="Timer" parent="NextButtonControl"]
+
+[node name="DialogrReader" type="Node" parent="."]
+script = ExtResource("2_66goe")

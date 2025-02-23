@@ -1,0 +1,59 @@
+[gd_scene load_steps=2 format=3 uid="uid://dlwvaapk805cv"]
+
+[ext_resource type="Script" path="res://scripts/menu/options_menu.gd" id="1_g5xw1"]
+
+[node name="OptionsMenu" type="Node2D" node_paths=PackedStringArray("graphics_button_path", "audio_button_path", "save_button_path", "load_button_path", "canvas_layer", "main_menu_button_path")]
+script = ExtResource("1_g5xw1")
+graphics_button_path = NodePath("OptionsMenuCanvasLayer/OptionsControl/OptionsMargin/OptionsVBox/Graphics")
+audio_button_path = NodePath("OptionsMenuCanvasLayer/OptionsControl/OptionsMargin/OptionsVBox/Audio")
+save_button_path = NodePath("OptionsMenuCanvasLayer/OptionsControl/OptionsMargin/OptionsVBox/Save")
+load_button_path = NodePath("OptionsMenuCanvasLayer/OptionsControl/OptionsMargin/OptionsVBox/Load")
+canvas_layer = NodePath("OptionsMenuCanvasLayer")
+main_menu_button_path = NodePath("OptionsMenuCanvasLayer/OptionsControl/OptionsMargin/OptionsVBox/Main_menu")
+
+[node name="OptionsMenuCanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="OptionsControl" type="Control" parent="OptionsMenuCanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="OptionsMargin" type="MarginContainer" parent="OptionsMenuCanvasLayer/OptionsControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -158.0
+offset_top = -159.0
+offset_right = 158.0
+offset_bottom = 159.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="OptionsVBox" type="VBoxContainer" parent="OptionsMenuCanvasLayer/OptionsControl/OptionsMargin"]
+layout_mode = 2
+
+[node name="Graphics" type="Button" parent="OptionsMenuCanvasLayer/OptionsControl/OptionsMargin/OptionsVBox"]
+layout_mode = 2
+text = "Graphics"
+
+[node name="Audio" type="Button" parent="OptionsMenuCanvasLayer/OptionsControl/OptionsMargin/OptionsVBox"]
+layout_mode = 2
+text = "Audio"
+
+[node name="Save" type="Button" parent="OptionsMenuCanvasLayer/OptionsControl/OptionsMargin/OptionsVBox"]
+layout_mode = 2
+text = "Save"
+
+[node name="Load" type="Button" parent="OptionsMenuCanvasLayer/OptionsControl/OptionsMargin/OptionsVBox"]
+layout_mode = 2
+text = "Load"
+
+[node name="Main_menu" type="Button" parent="OptionsMenuCanvasLayer/OptionsControl/OptionsMargin/OptionsVBox"]
+layout_mode = 2
+text = "Main Menu"

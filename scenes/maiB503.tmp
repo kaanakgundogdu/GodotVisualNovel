@@ -1,0 +1,45 @@
+[gd_scene load_steps=7 format=3 uid="uid://dypbg0bs8nqva"]
+
+[ext_resource type="Script" path="res://scripts/menu/main_menu_controller.gd" id="1_d6gys"]
+[ext_resource type="PackedScene" uid="uid://rj4xx6t2emn7" path="res://scenes/prefabs/main_menu_ui_object.tscn" id="1_hi14o"]
+[ext_resource type="PackedScene" uid="uid://dlwvaapk805cv" path="res://scenes/prefabs/options_menu.tscn" id="2_1o23l"]
+[ext_resource type="Texture2D" uid="uid://dvutyqkfkwwh2" path="res://assets/bg/bgdeneme.jpg" id="4_cac6q"]
+[ext_resource type="PackedScene" uid="uid://57t46kab1tlt" path="res://scenes/prefabs/credits.tscn" id="5_ce2q6"]
+[ext_resource type="PackedScene" uid="uid://8peqnucw5sk0" path="res://scenes/prefabs/load_save.tscn" id="6_c1vtv"]
+
+[node name="MainMenu" type="Node2D" node_paths=PackedStringArray("deneme", "main_menu_ui", "options_menu_ui", "load_saves_ui", "credits_ui")]
+script = ExtResource("1_d6gys")
+deneme = NodePath("MainMenuUIObject")
+main_menu_ui = NodePath("MainMenuUIObject")
+options_menu_ui = NodePath("OptionsMenu")
+load_saves_ui = NodePath("LoadMenu")
+credits_ui = NodePath("CreditsMenu")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_cac6q")
+
+[node name="MainMenuUIObject" parent="." node_paths=PackedStringArray("main_menu_controller") instance=ExtResource("1_hi14o")]
+main_menu_controller = NodePath("..")
+
+[node name="OptionsMenu" parent="." node_paths=PackedStringArray("main_menu_controller") instance=ExtResource("2_1o23l")]
+main_menu_controller = NodePath("..")
+
+[node name="CreditsMenu" parent="." instance=ExtResource("5_ce2q6")]
+
+[node name="LoadMenu" parent="." instance=ExtResource("6_c1vtv")]

@@ -1,0 +1,114 @@
+[gd_scene format=3 uid="uid://bxqss4srxpxjt"]
+
+[node name="GraphicsMenu" type="Node2D"]
+
+[node name="GraphicsMenuCanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="GraphicsMenuControl" type="Control" parent="GraphicsMenuCanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GraphicsMenuMargin" type="MarginContainer" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -158.0
+offset_top = -159.0
+offset_right = 158.0
+offset_bottom = 159.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GraphicsMenuVBox" type="VBoxContainer" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin"]
+layout_mode = 2
+
+[node name="GQHBoxContainer" type="HBoxContainer" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin/GraphicsMenuVBox"]
+layout_mode = 2
+
+[node name="GraphicsQualityLabel" type="Label" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin/GraphicsMenuVBox/GQHBoxContainer"]
+layout_mode = 2
+text = "GraphicsQuality"
+
+[node name="OptionButton" type="OptionButton" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin/GraphicsMenuVBox/GQHBoxContainer"]
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "High"
+popup/item_0/id = 0
+popup/item_1/text = "Medium"
+popup/item_1/id = 1
+popup/item_2/text = "Low"
+popup/item_2/id = 2
+
+[node name="ShadowsHBoxContainer2" type="HBoxContainer" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin/GraphicsMenuVBox"]
+layout_mode = 2
+
+[node name="GraphicsQualityLabel" type="Label" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin/GraphicsMenuVBox/ShadowsHBoxContainer2"]
+layout_mode = 2
+text = "GraphicsQuality"
+
+[node name="OptionButton" type="OptionButton" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin/GraphicsMenuVBox/ShadowsHBoxContainer2"]
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "High"
+popup/item_0/id = 0
+popup/item_1/text = "Medium"
+popup/item_1/id = 1
+popup/item_2/text = "Low"
+popup/item_2/id = 2
+
+[node name="TextureHBoxContainer3" type="HBoxContainer" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin/GraphicsMenuVBox"]
+layout_mode = 2
+
+[node name="GraphicsQualityLabel" type="Label" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin/GraphicsMenuVBox/TextureHBoxContainer3"]
+layout_mode = 2
+text = "GraphicsQuality"
+
+[node name="OptionButton" type="OptionButton" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin/GraphicsMenuVBox/TextureHBoxContainer3"]
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "High"
+popup/item_0/id = 0
+popup/item_1/text = "Medium"
+popup/item_1/id = 1
+popup/item_2/text = "Low"
+popup/item_2/id = 2
+
+[node name="ImagesHBoxContainer4" type="HBoxContainer" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin/GraphicsMenuVBox"]
+layout_mode = 2
+
+[node name="GraphicsQualityLabel" type="Label" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin/GraphicsMenuVBox/ImagesHBoxContainer4"]
+layout_mode = 2
+text = "GraphicsQuality"
+
+[node name="OptionButton" type="OptionButton" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/GraphicsMenuMargin/GraphicsMenuVBox/ImagesHBoxContainer4"]
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "High"
+popup/item_0/id = 0
+popup/item_1/text = "Medium"
+popup/item_1/id = 1
+popup/item_2/text = "Low"
+popup/item_2/id = 2
+
+[node name="BackToMenuMargin" type="MarginContainer" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="BackToMainMenu" type="Button" parent="GraphicsMenuCanvasLayer/GraphicsMenuControl/BackToMenuMargin"]
+layout_mode = 2
+text = "Back To Main Menu"

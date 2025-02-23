@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://cnojkr41epiaf"]
+
+[node name="AudioMenu" type="Node2D"]
+
+[node name="AudioMenuCanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="AudioMenuControl" type="Control" parent="AudioMenuCanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AudioMenuMargin" type="MarginContainer" parent="AudioMenuCanvasLayer/AudioMenuControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -158.0
+offset_top = -159.0
+offset_right = 158.0
+offset_bottom = 159.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AudioMenuVBox" type="VBoxContainer" parent="AudioMenuCanvasLayer/AudioMenuControl/AudioMenuMargin"]
+layout_mode = 2
+
+[node name="MasterVolumeLabel" type="Label" parent="AudioMenuCanvasLayer/AudioMenuControl/AudioMenuMargin/AudioMenuVBox"]
+layout_mode = 2
+text = "Master Volume"
+
+[node name="MasterVolumeHSlider" type="HSlider" parent="AudioMenuCanvasLayer/AudioMenuControl/AudioMenuMargin/AudioMenuVBox"]
+layout_mode = 2
+
+[node name="VoiceVolumeLabel2" type="Label" parent="AudioMenuCanvasLayer/AudioMenuControl/AudioMenuMargin/AudioMenuVBox"]
+layout_mode = 2
+text = "Voice Volume"
+
+[node name="VoiceVolumeHSlider2" type="HSlider" parent="AudioMenuCanvasLayer/AudioMenuControl/AudioMenuMargin/AudioMenuVBox"]
+layout_mode = 2
+
+[node name="SFXVolumeLabel3" type="Label" parent="AudioMenuCanvasLayer/AudioMenuControl/AudioMenuMargin/AudioMenuVBox"]
+layout_mode = 2
+text = "SFX Volume"
+
+[node name="SFXVolumeHSlider3" type="HSlider" parent="AudioMenuCanvasLayer/AudioMenuControl/AudioMenuMargin/AudioMenuVBox"]
+layout_mode = 2
+
+[node name="BackToMenuMargin" type="MarginContainer" parent="AudioMenuCanvasLayer"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="BackToMainMenu" type="Button" parent="AudioMenuCanvasLayer/BackToMenuMargin"]
+layout_mode = 2
+text = "Back To Main Menu"
