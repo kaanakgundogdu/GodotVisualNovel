@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="AssetMap" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://addons/vn_engine/defs/asset_map.gd" id="1_script"]
+[ext_resource type="Script" path="res://addons/vn_engine/defs/asset_map_entry.gd" id="2_entryscript"]
+[ext_resource type="Resource" path="res://game/config/asset_map/background.tres" id="3_background"]
+[ext_resource type="Resource" path="res://game/config/asset_map/character.tres" id="4_character"]
+[ext_resource type="Resource" path="res://game/config/asset_map/music.tres" id="5_music"]
+[ext_resource type="Resource" path="res://game/config/asset_map/sfx.tres" id="6_sfx"]
+[ext_resource type="Resource" path="res://game/config/asset_map/voice.tres" id="7_voice"]
+[ext_resource type="Resource" path="res://game/config/asset_map/movie.tres" id="8_movie"]
+[ext_resource type="Resource" path="res://game/config/asset_map/cg.tres" id="9_cg"]
+
+[resource]
+script = ExtResource("1_script")
+entries = Array[ExtResource("2_entryscript")]([ExtResource("3_background"), ExtResource("4_character"), ExtResource("5_music"), ExtResource("6_sfx"), ExtResource("7_voice"), ExtResource("8_movie"), ExtResource("9_cg")])

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="CreditsSection" load_steps=2 format=3 uid="uid://c8s0l5x5y7e0p"]
+
+[ext_resource type="Script" uid="uid://bp6ldo4ke0iy2" path="res://addons/vn_engine/defs/credits_section.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+role_key = "Art and Assets"
+names = PackedStringArray("Backgrounds: \"Cozy Cottage\" by vanilleblooms (CC BY 4.0)", "Character: Free Female Character by Odyssey Creations")

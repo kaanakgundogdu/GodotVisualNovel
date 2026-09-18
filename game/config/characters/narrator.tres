@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CastMember" load_steps=2 format=3 uid="uid://kv4mhn1clbv"]
+
+[ext_resource type="Script" uid="uid://ctewnvr5khiu6" path="res://addons/vn_engine/defs/cast_member.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "narrator"
+display_name = ""
+is_narrator = true
+name_color = Color(1, 1, 1, 1)
+default_outfit = ""
+default_pose = ""
+default_expression = ""
+default_shot = "mid"

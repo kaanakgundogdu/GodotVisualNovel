@@ -1,0 +1,15 @@
+extends Resource
+class_name ChoiceOption
+
+
+@export var text: String = ""
+@export var target: String = ""
+@export var target_index: int = -1
+@export var condition: String = ""
+@export var disabled_if: String = ""
+@export var once: bool = false
+@export var line_id: String = ""
+@export var line: int = 0
+
+func is_conditional() -> bool:
+	return condition != "" or disabled_if != ""

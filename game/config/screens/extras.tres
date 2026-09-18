@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ExtrasDef" load_steps=3 format=3 uid="uid://cgp5gexr3c2kg"]
+
+[ext_resource type="Script" uid="uid://bthvv7cvkgg84" path="res://addons/vn_engine/defs/extras_item.gd" id="1_pvrf1"]
+[ext_resource type="Script" uid="uid://bw52xfetpm6a3" path="res://addons/vn_engine/defs/extras_def.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+show_gallery = true
+show_music = true
+show_endings = true
+show_movies = true
+locked_style = "placeholder"
+locked_text = "?"
+locked_name_text = "???"
+secret_ending_text = "???"
+locked_image = ""
+blur_strength = 4.0
+gallery_items = Array[ExtResource("1_pvrf1")]([])
+music_items = Array[ExtResource("1_pvrf1")]([])
+movie_items = Array[ExtResource("1_pvrf1")]([])

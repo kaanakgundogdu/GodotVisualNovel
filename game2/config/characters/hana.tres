@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CastMember" load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://ctewnvr5khiu6" path="res://addons/vn_engine/defs/cast_member.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "hana"
+display_name = "Hana"
+default_outfit = "casual"
+default_pose = "base"
+default_expression = "normal"
+default_shot = "mid"
+name_color = Color(0.478431, 0.658824, 0.909804, 1)
+is_narrator = false

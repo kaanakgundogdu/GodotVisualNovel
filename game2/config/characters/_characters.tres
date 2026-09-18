@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Cast" load_steps=6 format=3 uid="uid://ewq55722nrujn"]
+
+[ext_resource type="Script" uid="uid://dw1mql7n7cprh" path="res://addons/vn_engine/defs/cast.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://ctewnvr5khiu6" path="res://addons/vn_engine/defs/cast_member.gd" id="2_entryscript"]
+[ext_resource type="Resource" path="res://game2/config/characters/mei.tres" id="3_mei"]
+[ext_resource type="Resource" path="res://game2/config/characters/hana.tres" id="4_hana"]
+[ext_resource type="Resource" path="res://game2/config/characters/narrator.tres" id="5_narrator"]
+
+[resource]
+script = ExtResource("1_script")
+characters = Array[ExtResource("2_entryscript")]([ExtResource("3_mei"), ExtResource("4_hana"), ExtResource("5_narrator")])

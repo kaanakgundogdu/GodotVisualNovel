@@ -1,0 +1,115 @@
+[gd_scene load_steps=16 format=3 uid="uid://cj5o8a3kqqhot"]
+
+[ext_resource type="Script" uid="uid://baosghbi08wld" path="res://addons/vn_engine/screens/vn_stage_screen.gd" id="1_1rp5n"]
+[ext_resource type="Script" uid="uid://yai5jjwx5sag" path="res://addons/vn_engine/core/runtime/story_runner.gd" id="1_v2td6"]
+[ext_resource type="PackedScene" uid="uid://bi2onwwmvnhmi" path="res://addons/vn_engine/systems/scenes/background_system.tscn" id="3_ae7nf"]
+[ext_resource type="PackedScene" uid="uid://dfp4gfwud3o4r" path="res://addons/vn_engine/systems/scenes/audio_system.tscn" id="3_rql6n"]
+[ext_resource type="Script" uid="uid://db2pv408tlxpr" path="res://addons/vn_engine/defs/audio_channel.gd" id="4_66d8l"]
+[ext_resource type="PackedScene" path="res://addons/vn_engine/ui/scenes/character_layer.tscn" id="5_charlayer"]
+[ext_resource type="PackedScene" uid="uid://ck4ghbsetqnae" path="res://addons/vn_engine/ui/scenes/dialog_ui.tscn" id="6_rql6n"]
+[ext_resource type="Script" uid="uid://ctvyapet837sr" path="res://addons/vn_engine/systems/video_system.gd" id="7_f8etk"]
+[ext_resource type="Script" uid="uid://dldhxw53dqsdm" path="res://addons/vn_engine/ui/choice_ui.gd" id="7_jeh3n"]
+[ext_resource type="PackedScene" uid="uid://dlvfeh13qe0ij" path="res://addons/vn_engine/ui/scenes/choice_ui.tscn" id="7_rql6n"]
+[ext_resource type="PackedScene" uid="uid://cndsg3hnyd68m" path="res://addons/vn_engine/ui/scenes/in_game_menu.tscn" id="9_jeh3n"]
+[ext_resource type="Script" uid="uid://dpke8s8iqrv2p" path="res://addons/vn_engine/systems/camera_system.gd" id="13_ns7t1"]
+
+[sub_resource type="Resource" id="Resource_3ka1s"]
+script = ExtResource("4_66d8l")
+command_name = "music"
+use_fade = true
+bus_name = "Music"
+base_volume_db = 0.0
+metadata/_custom_type_script = "uid://db2pv408tlxpr"
+
+[sub_resource type="Resource" id="Resource_ttgfo"]
+script = ExtResource("4_66d8l")
+command_name = "sfx"
+use_fade = false
+bus_name = "Sfx"
+base_volume_db = 0.0
+metadata/_custom_type_script = "uid://db2pv408tlxpr"
+
+[sub_resource type="Resource" id="Resource_f8etk"]
+script = ExtResource("4_66d8l")
+command_name = "voice"
+use_fade = false
+bus_name = "Voice"
+base_volume_db = 0.0
+metadata/_custom_type_script = "uid://db2pv408tlxpr"
+
+[node name="DialogSystem" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_1rp5n")
+
+[node name="StoryRunner" type="Node" parent="."]
+script = ExtResource("1_v2td6")
+
+[node name="AudioManager" parent="." node_paths=PackedStringArray("runner") instance=ExtResource("3_rql6n")]
+runner = NodePath("../StoryRunner")
+channels = Array[ExtResource("4_66d8l")]([SubResource("Resource_3ka1s"), SubResource("Resource_ttgfo"), SubResource("Resource_f8etk")])
+
+[node name="BackgroundManager" parent="." node_paths=PackedStringArray("runner") instance=ExtResource("3_ae7nf")]
+layout_mode = 1
+runner = NodePath("../StoryRunner")
+
+[node name="CharacterLayer" parent="." node_paths=PackedStringArray("runner") instance=ExtResource("5_charlayer")]
+layout_mode = 1
+runner = NodePath("../StoryRunner")
+
+[node name="VideoManager" type="VideoStreamPlayer" parent="." node_paths=PackedStringArray("runner", "dialog_ui")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("7_f8etk")
+runner = NodePath("../StoryRunner")
+dialog_ui = NodePath("../CanvasLayer/DialogUI")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="DialogUI" parent="CanvasLayer" node_paths=PackedStringArray("runner", "in_game_buttons", "choice_ui_root") instance=ExtResource("6_rql6n")]
+offset_left = -1.0
+offset_right = -1.0
+runner = NodePath("../../StoryRunner")
+in_game_buttons = NodePath("../InGameButtons")
+choice_ui_root = NodePath("../ChoiceControl")
+
+[node name="ChoiceControl" type="Control" parent="CanvasLayer" node_paths=PackedStringArray("runner", "button_container")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("7_jeh3n")
+runner = NodePath("../../StoryRunner")
+button_container = NodePath("ChoiceUI")
+
+[node name="ChoiceUI" parent="CanvasLayer/ChoiceControl" instance=ExtResource("7_rql6n")]
+layout_mode = 1
+anchor_top = 0.359
+anchor_bottom = 0.359
+offset_left = -550.0
+offset_top = 0.0
+offset_right = 550.0
+offset_bottom = 0.0
+script = null
+
+[node name="InGameButtons" parent="CanvasLayer" node_paths=PackedStringArray("runner") instance=ExtResource("9_jeh3n")]
+offset_left = -844.0
+offset_top = -80.0
+offset_right = -84.0
+offset_bottom = -30.0
+runner = NodePath("../../StoryRunner")
+
+[node name="CameraManager" type="Camera2D" parent="." node_paths=PackedStringArray("runner")]
+anchor_mode = 0
+script = ExtResource("13_ns7t1")
+runner = NodePath("../StoryRunner")

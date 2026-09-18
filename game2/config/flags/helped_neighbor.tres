@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="FlagDef" load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://d2dnko38v3qdu" path="res://addons/vn_engine/defs/flag_def.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "helped_neighbor"
+type = "bool"
+default_value = "false"
+scope = "playthrough"
+min_value = -999999
+max_value = 999999
+debug_name = "Did you help Hana with her laundry basket"

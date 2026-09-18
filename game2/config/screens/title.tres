@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TitleScreenDef" load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://bcaqj1hj3hp64" path="res://addons/vn_engine/defs/title_screen_def.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+background = "bg_cottage_ext_day"
+bgm = "bgm_calm"
+logo = ""
+cleared_background = ""
+cleared_bgm = ""
+show_extras_when = ""
+show_chapter_select_when = "cleared_once"

@@ -1,0 +1,66 @@
+class_name CmdShow
+extends VNCommand
+
+func command_name() -> String:
+	return "show"
+
+func apply(args: String, ctx: CommandContext) -> void:
+	var tokens := args.strip_edges().split(" ", false)
+	if tokens.is_empty():
+		VNLog.warn("CmdShow", "Missing argument: '@show' expects a character id")
+		return
+
+	var id := tokens[0].to_lower()
+	var expression := ""
+	var outfit := ""
+	var pose := ""
+	var shot := ""
+	var position := ""
+	var transition := ""
+
+	var i := 1
+	if i < tokens.size() and tokens[i] != "at" and tokens[i] != "with" and not tokens[i].contains("="):
+		expression = tokens[i]
+		i += 1
+
+	while i < tokens.size():
+		if tokens[i] == "at" and i + 1 < tokens.size():
+			position = tokens[i + 1]
+			i += 2
+		elif tokens[i] == "with" and i + 1 < tokens.size():
+			transition = tokens[i + 1]
+			i += 2
+		elif tokens[i].begins_with("outfit="):
+			outfit = tokens[i].substr(7)
+			i += 1
+		elif tokens[i].begins_with("pose="):
+			pose = tokens[i].substr(5)
+			i += 1
+		elif tokens[i].begins_with("shot="):
+			shot = tokens[i].substr(5)
+			i += 1
+		else:
+			i += 1
+
+	var entry: CastMember = null
+	if ctx.characters and ctx.characters.cast:
+		entry = ctx.characters.cast.get_entry(id)
+
+	if expression == "" and entry:
+		expression = entry.default_expression
+	if outfit == "" and entry:
+		outfit = entry.default_outfit
+	if pose == "" and entry:
+		pose = entry.default_pose
+	if shot == "" and entry:
+		shot = entry.default_shot
+
+	if position == "":
+		position = "center"
+	if transition == "":
+		transition = "fade"
+
+	ctx.state.characters[id] = {"expression": expression, "position": position, "outfit": outfit, "pose": pose, "shot": shot}
+
+	if ctx.characters:
+		ctx.characters.show_character(id, outfit, pose, expression, shot, position, transition)

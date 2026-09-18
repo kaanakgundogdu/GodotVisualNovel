@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BootDef" load_steps=4 format=3 uid="uid://3nprlfhqlfnu"]
+
+[ext_resource type="Script" uid="uid://bw206ai1f0hq4" path="res://addons/vn_engine/defs/boot_def.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://jk36c7l1q1me" path="res://addons/vn_engine/defs/boot_screen_def.gd" id="2_splashscript"]
+[ext_resource type="Resource" path="res://game/config/boot/01_godot.tres" id="3_godot"]
+
+[resource]
+script = ExtResource("1_script")
+boot_screens = Array[ExtResource("2_splashscript")]([ExtResource("3_godot")])

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UiDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/vn_engine/defs/ui_def.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+overlay_backdrop_color = Color(0.02, 0.02, 0.04, 0.92)
+confirm_quit = true
+confirm_overwrite_save = true
+log_use_character_colors = true

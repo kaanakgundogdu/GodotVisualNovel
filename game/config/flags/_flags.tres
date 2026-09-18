@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="FlagList" load_steps=5 format=3]
+
+[ext_resource type="Script" uid="uid://cmlb5h8kxa82" path="res://addons/vn_engine/defs/flag_list.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://d2dnko38v3qdu" path="res://addons/vn_engine/defs/flag_def.gd" id="2_flagscript"]
+[ext_resource type="Resource" path="res://game/config/flags/teased_hana.tres" id="3_teased_hana"]
+[ext_resource type="Resource" path="res://game/config/flags/hana_affection.tres" id="4_hana_affection"]
+
+[resource]
+script = ExtResource("1_script")
+flags = Array[ExtResource("2_flagscript")]([ExtResource("3_teased_hana"), ExtResource("4_hana_affection")])

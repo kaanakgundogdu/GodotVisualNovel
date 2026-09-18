@@ -1,0 +1,128 @@
+# id: 0
+@bg bg_cottage_ext_day
+@music bgm_calm
+@set_var teased_hana = false
+@set_var hana_affection = 0
+@movie op_main
+Narrator: It was a peaceful afternoon. The sun was slowly setting over the hills.
+
+# id: 1
+@show hana normal at center
+Hana: Oh, it's [b]you[/b]. I didn't expect to see you here.
+
+# id: 2
+Mei: Hey there! We were just heading to the arcade. Want to come?
+
+# id: 3
+@show hana angry at center
+Hana: Mei! Don't just invite people without asking me! And why are you staring at me like that? Do I have something on my face?!
+
+# id: 4
+- Sorry, I just zoned out for a second. -> 5
+- I was just admiring your... [i]unique[/i] fashion sense. -> 7
+- I bought you a snack from the convenience store! -> 10
+
+# id: 5
+@sfx sfx_ui_item
+@show hana shocked at center
+Hana: Wh-what? You zoned out?
+
+# id: 6
+@set_var hana_affection -= 5
+@show hana normal at center
+Hana: [color=gray]*sigh*[/color] You are always so spacey. Try to pay more attention to your surroundings!
+@jump 13
+
+# id: 7
+@set_var teased_hana = true
+@set_var hana_affection += 5
+@shake 20
+@show hana angry at center
+Hana: [color=red]EXCUSE ME?![/color] What exactly is wrong with my clothes?!
+
+# id: 8
+Mei: Calm down, Hana. I think it was a compliment... probably.
+
+# id: 9
+@show hana angry at center
+Hana: You have exactly [b]three seconds[/b] to run before I kick you!
+@jump 13
+
+# id: 10
+@set_var hana_affection += 20
+@show hana shocked at center
+Hana: Wait, really? For me? 
+
+# id: 11
+@sfx sfx_ui_item
+@show hana normal at center
+Hana: I... I suppose you can be somewhat thoughtful sometimes. 
+
+# id: 12
+Mei: Wow, you actually managed to calm her down. Impressive!
+@jump 13
+
+# id: 13
+@leave hana
+@bg bg_cottage_ext_dawn
+@cg cg_cottage_fire_01
+Narrator: We walked together along the path to the old cottage. The atmosphere was certainly something.
+
+# id: 14
+@cg_hide
+Narrator: As evening approached, the sky began to shift rapidly.
+
+# id: 15
+@jump_if hana_affection >= 15 -> 20
+@jump_if teased_hana == true -> 16
+@jump 24
+
+# id: 16
+@bg bg_cottage_ext_night
+@music stop
+Narrator: The weather suddenly turned terrible, matching her mood.
+
+# id: 17
+@show hana angry at center
+Hana: This is all your fault! If you hadn't made me mad, we would be home before the rain!
+
+# id: 18
+@leave hana
+Narrator: She ran off into the storm, leaving you completely alone on the path.
+@jump 27
+
+# id: 20
+@bg bg_cottage_int_night_fire
+Narrator: Inside, the fire painted the room in a warm, gentle glow.
+
+# id: 21
+@show hana normal at center
+Hana: You know... today wasn't [i]completely[/i] awful.
+
+# id: 22
+@sfx sfx_ui_item
+@show hana shocked at center
+Hana: D-don't get the wrong idea! I just meant the weather was nice! And the snack was... acceptable!
+
+# id: 23
+@leave hana
+Narrator: She quickly turned her head away and walked ahead to hide her blushing face.
+@jump 27
+
+# id: 24
+@bg bg_cottage_int_night
+Narrator: The lamps were lit and we sat in comfortable silence.
+
+# id: 25
+@show hana normal at center
+Hana: Well, it's late. See you tomorrow at school.
+
+# id: 26
+@leave hana
+Narrator: She waved briefly and went upstairs. A completely ordinary end to the day.
+@jump 27
+
+# id: 27
+@bg bg_cottage_ext_day
+@music stop
+Narrator: [center][b]--- END OF COMPREHENSIVE ENGINE TEST ---[/b][/center]

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="GameManifest" load_steps=8 format=3]
+
+[ext_resource type="Script" uid="uid://dukr7vcrg2qwd" path="res://addons/vn_engine/defs/game_manifest.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://xeegou1bnug5" path="res://addons/vn_engine/defs/chapter_def.gd" id="2_chapterscript"]
+[ext_resource type="Resource" path="res://addons/vn_engine/sample/config/chapters/chapter1.tres" id="3_chapter1"]
+[ext_resource type="Script" uid="uid://eprguh125fru" path="res://addons/vn_engine/defs/ending_def.gd" id="4_endingscript"]
+[ext_resource type="Resource" path="res://addons/vn_engine/sample/config/endings/sample_end.tres" id="5_sample_end"]
+[ext_resource type="Resource" path="res://addons/vn_engine/sample/config/flags/_flags.tres" id="6_flags"]
+[ext_resource type="Resource" path="res://addons/vn_engine/sample/config/screens/title.tres" id="7_title"]
+
+[resource]
+script = ExtResource("1_script")
+game_id = "vn_engine_sample"
+title_key = ""
+version = "0.1.0"
+first_chapter = "chapter1"
+default_ending = "sample_end"
+chapters = Array[ExtResource("2_chapterscript")]([ExtResource("3_chapter1")])
+endings = Array[ExtResource("4_endingscript")]([ExtResource("5_sample_end")])
+flags = ExtResource("6_flags")
+title = ExtResource("7_title")
+locales = PackedStringArray("en")

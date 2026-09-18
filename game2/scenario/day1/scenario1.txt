@@ -1,0 +1,62 @@
+# id: 0
+@bg bg_cottage_int_day
+@music bgm_calm
+@set_var helped_neighbor = false
+Narrator: It was a quiet Saturday morning at the cottage, as usual.
+
+# id: 1
+@show hana normal at center
+Hana: Wow, what a nice surprise to see you here! I was just folding my laundry.
+
+# id: 2
+- Help her carry the basket. -> 3
+- Just smile and mind your own business. -> 5
+
+# id: 3
+@set_var helped_neighbor = true
+@show hana happy at center
+Hana: Really? You're so kind, thank you!
+
+# id: 4
+@sfx sfx_ui_item
+Hana: Small gestures like this really brighten my day, you know.
+@jump 7
+
+# id: 5
+@show hana normal at center
+Hana: Ah, never mind... I guess I can manage on my own.
+
+# id: 6
+@show hana angry at center
+Hana: Hmph, you haven't changed a bit.
+@jump 7
+
+# id: 7
+@leave hana
+@bg bg_cottage_int_night
+@music stop
+Narrator: When evening came, you stopped by Mei's room to study.
+
+# id: 8
+Mei: How was your day? I heard you ran into Hana today.
+
+# id: 9
+@jump_if helped_neighbor == true -> 10
+@jump 12
+
+# id: 10
+Mei: Really? You... helped someone? That's not typical of you.
+
+# id: 11
+Mei: Joking aside, that was a nice thing to do. Keep it up.
+@jump 14
+
+# id: 12
+Mei: You acted like a complete selfish person again, didn't you?
+
+# id: 13
+Mei: It wouldn't hurt to think about others sometimes.
+@jump 14
+
+# id: 14
+Narrator: [center][b]--- END OF DAY ---[/b][/center]

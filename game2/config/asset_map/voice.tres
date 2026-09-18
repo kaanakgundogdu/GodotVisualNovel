@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="AssetMapEntry" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/vn_engine/defs/asset_map_entry.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+kind = "voice"
+root = "res://assets/voices/"
+extensions = Array[String]([".ogg"])

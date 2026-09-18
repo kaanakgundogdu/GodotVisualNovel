@@ -1,0 +1,11 @@
+# id: 0
+@bg bg_cottage_bed_dawn
+Narrator: The next morning came quietly. Chapter two is a short loading-screen test.
+
+# id: 1
+@show hana normal at center
+Hana: You're late. Again.
+
+# id: 2
+@leave hana
+Narrator: And so the story continues.

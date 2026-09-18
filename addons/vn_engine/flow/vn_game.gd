@@ -1,0 +1,426 @@
+extends Node
+
+enum AppState { BOOT, TITLE, OPENING, CHAPTER, ENDING, CREDITS, EXTRAS }
+
+var manifest: GameManifest = null
+
+var _state: AppState = AppState.TITLE
+
+var _shared_asset_resolver: AssetResolver
+
+var _diagnostics_reported: Dictionary = {}
+
+var _diagnostics_logged: Dictionary = {}
+
+var _ending_player: EndingPlayer
+
+var _chapter_cache: ChapterPreloader = null
+
+
+func _ready() -> void:
+	_shared_asset_resolver = AssetResolver.new()
+	_ending_player = EndingPlayer.new()
+
+	var asset_map_path: String = VNPaths.asset_map()
+	if ResourceLoader.exists(asset_map_path):
+		var asset_map: AssetMap = load(asset_map_path) as AssetMap
+		if asset_map == null:
+			VNLog.warn("VNGame", "Asset map failed to load: '%s'" % asset_map_path)
+		else:
+			_shared_asset_resolver.load_map(asset_map)
+
+	_load_manifest()
+
+
+func should_report_diagnostics(source: String) -> bool:
+	var key: String = source if source != "" else "(unknown source)"
+	if _diagnostics_reported.has(key):
+		return false
+	_diagnostics_reported[key] = true
+	return true
+
+
+func should_log_diagnostics(source: String) -> bool:
+	var key: String = source if source != "" else "(unknown source)"
+	if _diagnostics_logged.has(key):
+		return false
+	_diagnostics_logged[key] = true
+	return true
+
+
+func get_shared_asset_resolver() -> AssetResolver:
+	return _shared_asset_resolver
+
+
+func get_manifest() -> GameManifest:
+	return manifest
+
+
+func get_flag_list() -> FlagList:
+	if manifest == null:
+		return null
+	return manifest.flags
+
+
+func state() -> int:
+	return _state
+
+
+func take_preparsed_script(script_path: String) -> StoryScript:
+	if _chapter_cache == null:
+		return null
+	if _chapter_cache.script_path != script_path:
+		return null
+	if _chapter_cache.parsed_script == null:
+		return null
+
+	var result: StoryScript = _chapter_cache.parsed_script
+	_chapter_cache.parsed_script = null
+	return result
+
+
+func start_new_game() -> void:
+	VNSave.slot_to_load = -1
+	if manifest == null:
+		show_error("start_new_game", "Game manifest not loaded (missing game.tres)")
+		return
+	if manifest.first_chapter == "":
+		show_error("start_new_game", "Manifest has no first_chapter configured")
+		return
+	goto_chapter(manifest.first_chapter)
+
+
+func load_slot(slot_id: int) -> void:
+	VNSave.slot_to_load = slot_id
+	var root: VNMain = _vn_main()
+	_set_state(AppState.CHAPTER)
+
+	var ui: UiDef = manifest.get_ui() if manifest != null else UiDef.new()
+	var stage_path: String = ScreenStack.SCREEN_PATHS.get(&"stage", "")
+
+	var slot_chapter: ChapterDef = _slot_chapter(slot_id)
+	if slot_chapter != null:
+		_chapter_cache = ChapterPreloader.new()
+		_chapter_cache.build_plan(slot_chapter.script_path, _shared_asset_resolver, get_flag_list(), slot_chapter)
+		_chapter_cache.request_all()
+
+	if ui.loading_mode == "never" or stage_path == "" or not ScreenStack.SCREEN_PATHS.has(&"loading"):
+		root.screen_stack.replace_screen(&"stage", {})
+		return
+
+	var loading_params: Dictionary = {
+		"paths": PackedStringArray([stage_path]),
+		"next_screen": &"stage",
+		"next_params": {},
+		"mode": ui.loading_mode,
+	}
+	if _chapter_cache != null:
+		loading_params["preloader"] = _chapter_cache
+	if ui.loading_mode == "always":
+		loading_params["min_duration"] = ui.loading_min_duration
+	if ui.loading_show_chapter_title:
+		var title: String = _slot_chapter_title(slot_id)
+		if title != "":
+			loading_params["title"] = title
+
+	root.screen_stack.replace_screen(&"loading", loading_params)
+
+
+func _slot_chapter(slot_id: int) -> ChapterDef:
+	if manifest == null:
+		return null
+	var path: String = VNSave.get_save_dir() + "save_slot_" + str(slot_id) + ".json"
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return null
+	var text: String = file.get_as_text()
+	file.close()
+
+	var parsed: Variant = JSON.parse_string(text)
+	if not (parsed is Dictionary):
+		return null
+	var meta: Dictionary = (parsed as Dictionary).get("meta", {})
+	var chapter_id: String = String(meta.get("chapter_id", ""))
+	if chapter_id == "":
+		return null
+
+	return manifest.find_chapter(chapter_id)
+
+
+func _slot_chapter_title(slot_id: int) -> String:
+	var chapter: ChapterDef = _slot_chapter(slot_id)
+	if chapter == null:
+		return ""
+	return _chapter_title(chapter)
+
+
+func goto_chapter(chapter_id: String) -> void:
+	if manifest == null:
+		VNLog.warn("VNGame", "goto_chapter('%s'): manifest not loaded" % chapter_id)
+		return
+
+	var chapter: ChapterDef = manifest.find_chapter(chapter_id)
+	if chapter == null:
+		show_error("goto_chapter", "Chapter not found: '%s'" % chapter_id)
+		return
+
+	if chapter.bgm != "":
+		var bgm_path: String = _shared_asset_resolver.resolve("music", chapter.bgm)
+		if bgm_path != "":
+			_vn_main().persistent_audio.play_bgm(bgm_path)
+
+	var resume_state: Dictionary = {}
+	var stage: VNStageScreen = _current_stage_screen()
+	if stage != null:
+		resume_state = stage.story_runner.state.to_dict(true)
+
+	VNSave.slot_to_load = -1
+	call_deferred("_enter_chapter_via_loading", chapter, resume_state)
+	_set_state(AppState.CHAPTER)
+
+
+func return_to_title(_ask_confirm: bool = true) -> void:
+	var root: VNMain = _vn_main()
+	root.screen_stack.replace_screen(&"title")
+	_set_state(AppState.TITLE)
+
+
+func on_story_ended(reason: int, ending_id: String, state: StoryState) -> void:
+	match reason:
+		StoryRunner.EndReason.EXPLICIT_END:
+			if ending_id != "":
+				trigger_ending(ending_id)
+			else:
+				var chosen: EndingDef = _first_matching_ending(state)
+				if chosen != null:
+					trigger_ending(chosen.id)
+				else:
+					trigger_ending(manifest.default_ending if manifest != null else "")
+		StoryRunner.EndReason.SCRIPT_EXHAUSTED:
+			finish_chapter(state)
+		StoryRunner.EndReason.RUNAWAY_GUARD:
+			VNLog.warn("VNGame", "Runaway guard triggered, no ending selected, returning to title")
+			return_to_title(false)
+		_:
+			VNLog.error("VNGame", "on_story_ended(): unknown end_reason: %d" % reason)
+
+
+func finish_chapter(state: StoryState) -> void:
+	if manifest == null:
+		VNLog.warn("VNGame", "finish_chapter(): no manifest loaded")
+		return_to_title(false)
+		return
+
+	var chapter: ChapterDef = manifest.find_chapter(state.chapter_id)
+	if chapter == null:
+		VNLog.warn("VNGame", "finish_chapter(): current chapter not found: '%s', falling back to default_ending" % state.chapter_id)
+		trigger_ending(manifest.default_ending)
+		return
+
+	for branch in chapter.branches:
+		if branch == null:
+			continue
+		if ExpressionEvaluator.evaluate(branch.condition, state.flags):
+			goto_chapter(branch.chapter_id)
+			return
+
+	if chapter.next_chapter != "":
+		goto_chapter(chapter.next_chapter)
+		return
+
+	trigger_ending(manifest.default_ending)
+
+
+func trigger_ending(ending_id: String) -> void:
+	if ending_id == "":
+		VNLog.warn("VNGame", "trigger_ending(): empty ending_id, no ending selected")
+		return_to_title(false)
+		return
+
+	if manifest == null:
+		VNLog.warn("VNGame", "trigger_ending('%s'): no manifest loaded" % ending_id)
+		return_to_title(false)
+		return
+
+	var ending: EndingDef = manifest.find_ending(ending_id)
+	if ending == null:
+		VNLog.warn("VNGame", "trigger_ending(): ending not found: '%s'" % ending_id)
+		return_to_title(false)
+		return
+
+	VNSave.mark_ending_seen(ending.id)
+	VNSave.increment_cleared_count()
+	for unlock_id in ending.unlocks:
+		VNSave.set_global_flag(unlock_id, true)
+
+	var root: VNMain = _vn_main()
+	await _ending_player.present(root, ending, _current_stage_screen(), _shared_asset_resolver)
+
+	if ending.credits_variant == "none":
+		return_to_title(false)
+	else:
+		play_credits(ending.credits_variant)
+
+	_ending_player.release(root)
+
+
+func play_credits(_variant: String = "") -> void:
+	var root: VNMain = _vn_main()
+	root.screen_stack.replace_screen(&"credits", {"variant": _variant})
+	_set_state(AppState.CREDITS)
+
+
+func seed_flags(state: StoryState) -> void:
+	if manifest == null or manifest.flags == null:
+		return
+	var seed: Dictionary = manifest.flags.default_vars()
+	var globals: Dictionary = VNSave.global_data.get("flags", {})
+	for key in globals.keys():
+		seed[key] = globals[key]
+	for key in seed.keys():
+		if not state.flags.has(key):
+			state.flags[key] = seed[key]
+
+
+func backfill_chapter_id(state: StoryState) -> void:
+	if state.chapter_id != "":
+		return
+	if manifest == null:
+		return
+	for chapter in manifest.chapters:
+		if chapter == null:
+			continue
+		if chapter.script_path == state.current_file:
+			state.chapter_id = chapter.id
+			return
+	state.chapter_id = manifest.first_chapter
+
+
+func show_error(source: String, message: String) -> void:
+	var diagnostic: ParseDiagnostic = ParseDiagnostic.new(ParseDiagnostic.ERROR, 0, message)
+	var root: VNMain = _vn_main()
+	root.screen_stack.push_screen(&"diagnostics", {"source": source, "diagnostics": [diagnostic], "exit_to_title": true})
+
+
+func open_overlay(id: StringName, params: Dictionary = {}) -> Control:
+	var root: VNMain = _vn_main()
+	var final_params: Dictionary = params.duplicate()
+	if id == &"gallery":
+		final_params["asset_resolver"] = _shared_asset_resolver
+
+	return root.overlay_stack.open_overlay(id, final_params)
+
+
+func close_overlay() -> void:
+	_vn_main().overlay_stack.close_overlay()
+
+
+func _load_manifest() -> void:
+	var manifest_path: String = VNPaths.manifest()
+	if not ResourceLoader.exists(manifest_path):
+		return
+
+	var manifest_res: Resource = load(manifest_path)
+	manifest = manifest_res as GameManifest
+	if manifest == null:
+		VNLog.warn("VNGame", "Manifest failed to load or is not a GameManifest: '%s'" % manifest_path)
+		return
+
+	for chapter in manifest.chapters:
+		if chapter == null:
+			continue
+		var expected_id: String = chapter.script_path.get_base_dir().get_file()
+		if chapter.id != expected_id:
+			VNLog.warn("VNGame", "Chapter id '%s' does not match its folder name '%s'" % [chapter.id, expected_id])
+
+
+func _first_matching_ending(state: StoryState) -> EndingDef:
+	if manifest == null:
+		return null
+	for ending in manifest.endings:
+		if ending == null:
+			continue
+		if ending.condition == "":
+			continue
+		if ExpressionEvaluator.evaluate(ending.condition, state.flags):
+			return ending
+	return null
+
+
+func _enter_chapter_deferred(chapter: ChapterDef, resume_state: Dictionary) -> void:
+	var root: VNMain = _vn_main()
+	root.screen_stack.replace_screen(&"stage", {
+		"story_file": chapter.script_path,
+		"resume_state": resume_state,
+		"chapter_id": chapter.id,
+	})
+
+
+func _enter_chapter_via_loading(chapter: ChapterDef, resume_state: Dictionary) -> void:
+	var ui: UiDef = manifest.get_ui() if manifest != null else UiDef.new()
+
+	_chapter_cache = ChapterPreloader.new()
+	_chapter_cache.build_plan(chapter.script_path, _shared_asset_resolver, get_flag_list(), chapter)
+	_chapter_cache.request_all()
+
+	if ui.loading_mode == "never" or not ScreenStack.SCREEN_PATHS.has(&"loading"):
+		_enter_chapter_deferred(chapter, resume_state)
+		return
+
+	var stage_path: String = ScreenStack.SCREEN_PATHS.get(&"stage", "")
+	var preload_paths: PackedStringArray = PackedStringArray()
+	if stage_path != "":
+		preload_paths.append(stage_path)
+
+	if preload_paths.is_empty():
+		_enter_chapter_deferred(chapter, resume_state)
+		return
+
+	var root: VNMain = _vn_main()
+	var loading_params: Dictionary = {
+		"paths": preload_paths,
+		"next_screen": &"stage",
+		"next_params": {
+			"story_file": chapter.script_path,
+			"resume_state": resume_state,
+			"chapter_id": chapter.id,
+		},
+		"mode": ui.loading_mode,
+		"preloader": _chapter_cache,
+	}
+	if ui.loading_mode == "always":
+		loading_params["min_duration"] = ui.loading_min_duration
+	if ui.loading_show_chapter_title and chapter.intro_style == "none":
+		loading_params["title"] = _chapter_title(chapter)
+		loading_params["subtitle"] = _translated_or_empty(chapter.subtitle_key)
+	if chapter.intro_background != "":
+		loading_params["background_path"] = _shared_asset_resolver.resolve("background", chapter.intro_background)
+
+	root.screen_stack.replace_screen(&"loading", loading_params)
+
+
+func _chapter_title(chapter: ChapterDef) -> String:
+	var title: String = _translated_or_empty(chapter.title_key)
+	return title if title != "" else chapter.id.capitalize()
+
+
+func _translated_or_empty(key: String) -> String:
+	if key == "":
+		return ""
+	var text: String = tr(key)
+	return "" if text == key else text
+
+
+func _set_state(new_state: AppState) -> void:
+	_state = new_state
+
+
+func _vn_main() -> VNMain:
+	return VNMain.instance()
+
+
+func _current_stage_screen() -> VNStageScreen:
+	var screen: VNScreen = _vn_main().screen_stack.current_screen()
+	if screen is VNStageScreen:
+		return screen as VNStageScreen
+	return null
