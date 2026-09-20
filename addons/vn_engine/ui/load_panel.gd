@@ -152,10 +152,6 @@ func _build_card(slot_id: int, display_name: String) -> Button:
 			lbl.text = "Corrupted save"
 			tex_rect.modulate = Color(0, 0, 0, 0.5)
 			slot_btn.disabled = true
-		VNSave.SlotStatus.UNSUPPORTED:
-			lbl.text = "Save from a newer version"
-			tex_rect.modulate = Color(0, 0, 0, 0.5)
-			slot_btn.disabled = true
 		_:
 			lbl.text = display_name + " (Empty)"
 			tex_rect.modulate = Color(0, 0, 0, 0.5)
@@ -214,4 +210,4 @@ func _most_recent_quick_slot() -> int:
 
 
 func _slot_modified_time(slot_id: int) -> int:
-	return FileAccess.get_modified_time(VNSave.get_save_dir() + "save_slot_" + str(slot_id) + ".json")
+	return FileAccess.get_modified_time(VNSave.slot_path(slot_id))

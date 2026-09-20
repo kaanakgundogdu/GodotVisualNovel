@@ -74,8 +74,8 @@ func exists(kind: String, name: String) -> bool:
 	return resolve(kind, name) != ""
 
 
-func resolve_voice(lang: String, char_id: String, line_id: String) -> String:
-	var name: String = "%s/%s/%s" % [lang, char_id, line_id]
+func resolve_voice(char_id: String, line_id: String) -> String:
+	var name: String = "%s/%s" % [char_id, line_id]
 	var cache_key: String = "voice|%s" % name
 	if _cache.has(cache_key):
 		return _cache[cache_key]

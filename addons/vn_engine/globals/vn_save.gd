@@ -1,16 +1,16 @@
 extends Node
 
-enum SlotStatus { EMPTY, OK, CORRUPT, UNSUPPORTED }
+## Add save merge with different verisons of the save in the future
+## versions can be storen in dict. with variables like SAVE_FILE_VERSION, GLOBAL_DATA_VERSION  
+
+enum SlotStatus {EMPTY, OK, CORRUPT}
 
 const QUICKSAVE_SLOT := 99
 const AUTOSAVE_SLOT := 98
-const SAVE_FILE_VERSION := 3
-const GLOBAL_DATA_VERSION := 3
 
 var slot_to_load: int = -1
 
 var global_data: Dictionary = {
-	"version": GLOBAL_DATA_VERSION,
 	"seen_lines": {},
 	"unlocked_cgs": {},
 	"endings_seen": {},
@@ -60,7 +60,7 @@ func _resolve_save_namespace() -> String:
 
 
 func get_save_dir() -> String:
-	return "user://saves/" + _save_namespace + "/"
+	return VNPaths.save_dir(_save_namespace)
 
 
 func mark_line_seen(chapter_id: String, line_id: String) -> void:
@@ -82,7 +82,7 @@ func is_line_seen(chapter_id: String, line_id: String) -> bool:
 
 func save_game(state: StoryState, slot_id: int) -> void:
 	_flush_global_data()
-	var save_path: String = _slot_path(slot_id)
+	var save_path: String = slot_path(slot_id)
 	var image: Image = get_viewport().get_texture().get_image()
 
 	if image != null:
@@ -108,8 +108,7 @@ func save_game(state: StoryState, slot_id: int) -> void:
 	}
 
 	var data: Dictionary = {
-		"version": SAVE_FILE_VERSION,
-		"engine": "vn_engine/0.3",
+		"engine": "vn_engine/0.5",
 		"saved_at": int(Time.get_unix_time_from_system()),
 		"meta": meta,
 		"state": state.to_dict(),
@@ -123,7 +122,7 @@ func save_game(state: StoryState, slot_id: int) -> void:
 
 func load_game(slot_id: int) -> Variant:
 	var status: SlotStatus = get_slot_status(slot_id)
-	var save_path: String = _slot_path(slot_id)
+	var save_path: String = slot_path(slot_id)
 
 	match status:
 		SlotStatus.EMPTY:
@@ -132,16 +131,13 @@ func load_game(slot_id: int) -> Variant:
 		SlotStatus.CORRUPT:
 			VNLog.warn("VNSave", "Save file could not be parsed: %s" % save_path)
 			return null
-		SlotStatus.UNSUPPORTED:
-			VNLog.warn("VNSave", "Save file version is newer than supported: %s" % save_path)
-			return null
 
 	var raw: Variant = _read_json_dict(save_path)
-	return _migrate(raw)
+	return _extract_state(raw)
 
 
 func get_slot_status(slot_id: int) -> SlotStatus:
-	var save_path: String = _slot_path(slot_id)
+	var save_path: String = slot_path(slot_id)
 	if not FileAccess.file_exists(save_path):
 		return SlotStatus.EMPTY
 
@@ -150,13 +146,6 @@ func get_slot_status(slot_id: int) -> SlotStatus:
 		return SlotStatus.CORRUPT
 
 	var raw_dict: Dictionary = raw
-	if not raw_dict.has("version"):
-		return SlotStatus.OK
-
-	var version: int = int(raw_dict.get("version", 1))
-	if version > SAVE_FILE_VERSION:
-		return SlotStatus.UNSUPPORTED
-
 	var state_data: Dictionary = raw_dict.get("state", {})
 	if state_data.is_empty():
 		return SlotStatus.CORRUPT
@@ -165,7 +154,7 @@ func get_slot_status(slot_id: int) -> SlotStatus:
 
 
 func is_slot_used(slot_id: int) -> bool:
-	return FileAccess.file_exists(_slot_path(slot_id))
+	return FileAccess.file_exists(slot_path(slot_id))
 
 
 func get_save_thumbnail(slot_id: int) -> Texture2D:
@@ -183,7 +172,7 @@ func unlock_cg(cg_name: String) -> void:
 
 	if not global_data["unlocked_cgs"].has(cg_name):
 		global_data["unlocked_cgs"][cg_name] = true
-		_save_global_data()
+		_global_dirty = true
 
 
 func set_global_flag(id: String, value: Variant) -> void:
@@ -233,7 +222,7 @@ func increment_cleared_count() -> void:
 	_global_dirty = true
 
 
-func _slot_path(slot_id: int) -> String:
+func slot_path(slot_id: int) -> String:
 	return get_save_dir() + "save_slot_" + str(slot_id) + ".json"
 
 
@@ -289,110 +278,19 @@ func _load_global_data() -> void:
 		VNLog.error("VNSave", "global_data.json could not be parsed, renamed to '%s', continuing with defaults" % corrupt_path)
 		return
 
-	global_data = _migrate_global(raw)
+	global_data = _fill_global_defaults(raw)
 
 
-func _migrate_global_v1_to_v2(raw: Dictionary) -> Dictionary:
-	var raw_seen: Dictionary = raw.get("seen_nodes", {})
-	var new_seen: Dictionary = {}
-	for file_path in raw_seen.keys():
-		var value: Variant = raw_seen[file_path]
-		if value is Array:
-			var converted: Dictionary = {}
-			for node_id in value:
-				converted[str(node_id)] = true
-			new_seen[file_path] = converted
-		elif value is Dictionary:
-			new_seen[file_path] = value
-
-	return {
-		"version": 2,
-		"seen_nodes": new_seen,
-		"unlocked_cgs": raw.get("unlocked_cgs", []),
-	}
+func _fill_global_defaults(raw: Dictionary) -> Dictionary:
+	for key in global_data.keys():
+		if not raw.has(key):
+			raw[key] = global_data[key]
+	return raw
 
 
-func _migrate_global_v2_to_v3(raw: Dictionary) -> Dictionary:
-	return {
-		"version": GLOBAL_DATA_VERSION,
-		"seen_lines": {},
-		"unlocked_cgs": {},
-		"endings_seen": {},
-		"movies_seen": {},
-		"bgm_heard": {},
-		"flags": {},
-		"total_playtime_sec": 0,
-		"cleared_count": 0,
-		"first_clear_at": 0,
-	}
-
-
-func _migrate_global(raw: Dictionary) -> Dictionary:
-	var version: int = int(raw.get("version", 1))
-	if version >= GLOBAL_DATA_VERSION:
-		for key in global_data.keys():
-			if not raw.has(key):
-				raw[key] = global_data[key]
-		return raw
-
-	var migrated: Dictionary = raw
-	if version < 2:
-		migrated = _migrate_global_v1_to_v2(migrated)
-	migrated = _migrate_global_v2_to_v3(migrated)
-
-	var file: FileAccess = FileAccess.open(_global_data_path(), FileAccess.WRITE)
-	if file != null:
-		file.store_string(JSON.stringify(migrated, "\t"))
-		file.close()
-
-	return migrated
-
-
-func _migrate(raw: Dictionary) -> Variant:
-	if not raw.has("version"):
-		return _migrate_v1(raw)
-
-	var version: int = int(raw.get("version", 1))
-	if version > SAVE_FILE_VERSION:
-		VNLog.warn("VNSave", "Unsupported save version: %d" % version)
-		return null
-
+func _extract_state(raw: Dictionary) -> Variant:
 	var state_data: Dictionary = raw.get("state", {})
 	if state_data.is_empty():
-		VNLog.warn("VNSave", "Save file has no 'state' block: version %d" % version)
+		VNLog.warn("VNSave", "Save file has no 'state' block")
 		return null
 	return state_data
-
-
-func _migrate_v1(raw: Dictionary) -> Dictionary:
-	var characters: Dictionary = {}
-	var raw_characters: Dictionary = raw.get("saved_characters", {})
-	for id in raw_characters.keys():
-		var value: Variant = raw_characters[id]
-		if typeof(value) == TYPE_STRING:
-			characters[id] = {"expression": value, "position": "center"}
-		else:
-			characters[id] = value
-
-	return {
-		"current_file": raw.get("current_story_file", _fallback_story_file()),
-		"current_node_id": str(int(raw.get("current_id", 0))),
-		"flags": raw.get("flags", {}),
-		"bg": raw.get("saved_bg", ""),
-		"audio": raw.get("saved_audio", {}),
-		"characters": characters,
-		"last_speaker": "",
-		"seen_choices": {},
-		"call_stack": [],
-		"history": [],
-	}
-
-
-func _fallback_story_file() -> String:
-	var manifest: GameManifest = VNGame.manifest
-	if manifest == null:
-		return ""
-	var chapter: ChapterDef = manifest.find_chapter(manifest.first_chapter)
-	if chapter == null:
-		return ""
-	return chapter.script_path

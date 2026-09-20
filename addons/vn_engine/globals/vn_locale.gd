@@ -1,9 +1,10 @@
 extends Node
 
+## Translation not fully implemented
+
 signal locale_changed(code: String)
 
 var locale_themes: Dictionary = {}
-
 
 func set_language(code: String) -> void:
 	TranslationServer.set_locale(code)

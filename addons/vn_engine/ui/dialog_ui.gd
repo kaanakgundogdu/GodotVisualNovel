@@ -247,12 +247,11 @@ func _maybe_play_auto_voice(node: StoryNode) -> void:
 	if runner.ctx.assets == null or runner.ctx.audio == null:
 		return
 
-	var lang: String = VNSettings.data["audio"]["voice_language"]
-	var voice_path: String = runner.ctx.assets.resolve_voice(lang, node.speaker_id, node.line_id)
+	var voice_path: String = runner.ctx.assets.resolve_voice(node.speaker_id, node.line_id)
 	if voice_path == "":
 		return
 
-	var voice_file_name: String = "%s/%s/%s" % [lang, node.speaker_id, node.line_id]
+	var voice_file_name: String = "%s/%s" % [node.speaker_id, node.line_id]
 	runner.ctx.audio.play_channel("voice", voice_file_name, node.speaker_id)
 
 

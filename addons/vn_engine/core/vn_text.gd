@@ -1,6 +1,8 @@
 class_name VNText
 extends RefCounted
 
+## This class tries to find a translation. Otherwise, it falls back to the raw text.
+## TODO: Translation not fully implemented yet
 
 static func speaker_name(speaker_id: String) -> String:
 	if speaker_id.capitalize().is_empty():

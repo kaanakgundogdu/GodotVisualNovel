@@ -2,6 +2,7 @@
 extends RefCounted
 class_name VNPaths
 
+## A global static class that only holds read only paths for others
 
 const SETTING_KEY := "vn_engine/content/root"
 const DEFAULT_ROOT := "res://game/"
@@ -38,3 +39,9 @@ static func line_ids() -> String:
 
 static func dialog_csv() -> String:
 	return locale_dir() + "dialog.csv"
+
+static func settings_file() -> String:
+	return "user://settings.json"
+
+static func save_dir(save_namespace: String) -> String:
+	return "user://saves/" + save_namespace + "/"

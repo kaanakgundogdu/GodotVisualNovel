@@ -171,16 +171,14 @@ func _resolve_voice_path(speaker_id: String, line_id: String) -> String:
 	if runner.ctx.assets == null:
 		return ""
 
-	var lang: String = VNSettings.data["audio"]["voice_language"]
-	return runner.ctx.assets.resolve_voice(lang, speaker_id, line_id)
+	return runner.ctx.assets.resolve_voice(speaker_id, line_id)
 
 
 func _on_play_voice(speaker_id: String, line_id: String) -> void:
 	if runner == null or runner.ctx == null or runner.ctx.audio == null:
 		return
 
-	var lang: String = VNSettings.data["audio"]["voice_language"]
-	var voice_file_name: String = "%s/%s/%s" % [lang, speaker_id, line_id]
+	var voice_file_name: String = "%s/%s" % [speaker_id, line_id]
 	runner.ctx.audio.play_channel("voice", voice_file_name, speaker_id)
 
 

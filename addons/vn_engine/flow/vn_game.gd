@@ -1,10 +1,10 @@
 extends Node
 
-enum AppState { BOOT, TITLE, OPENING, CHAPTER, ENDING, CREDITS, EXTRAS }
+enum AppState { BOOT, TITLE, CHAPTER, ENDING, CREDITS }
 
 var manifest: GameManifest = null
 
-var _state: AppState = AppState.TITLE
+var _state: AppState = AppState.BOOT
 
 var _shared_asset_resolver: AssetResolver
 
@@ -129,7 +129,7 @@ func load_slot(slot_id: int) -> void:
 func _slot_chapter(slot_id: int) -> ChapterDef:
 	if manifest == null:
 		return null
-	var path: String = VNSave.get_save_dir() + "save_slot_" + str(slot_id) + ".json"
+	var path: String = VNSave.slot_path(slot_id)
 	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return null
@@ -248,6 +248,7 @@ func trigger_ending(ending_id: String) -> void:
 		return_to_title(false)
 		return
 
+	_set_state(AppState.ENDING)
 	VNSave.mark_ending_seen(ending.id)
 	VNSave.increment_cleared_count()
 	for unlock_id in ending.unlocks:
@@ -325,6 +326,8 @@ func _load_manifest() -> void:
 	if manifest == null:
 		VNLog.warn("VNGame", "Manifest failed to load or is not a GameManifest: '%s'" % manifest_path)
 		return
+
+	_state = AppState.BOOT if manifest.has_boot_sequence() else AppState.TITLE
 
 	for chapter in manifest.chapters:
 		if chapter == null:

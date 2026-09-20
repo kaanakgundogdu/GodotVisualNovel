@@ -2,8 +2,6 @@ extends Node
 
 signal settings_changed
 
-const SETTINGS_PATH := "user://settings.json"
-
 const TEXT_SPEED_MIN := 0.005
 const TEXT_SPEED_MAX := 0.10
 
@@ -11,10 +9,12 @@ const AUTO_SPEED_MIN := 0.5
 const AUTO_SPEED_MAX := 5.0
 
 const WINDOW_SIZES: Array[Vector2i] = [
+	Vector2i(960, 540),
 	Vector2i(1280, 720),
 	Vector2i(1600, 900),
 	Vector2i(1920, 1080),
 	Vector2i(2560, 1440),
+	Vector2i(3840, 2160),
 ]
 const FALLBACK_WINDOW_SIZE := Vector2i(1280, 720)
 
@@ -56,7 +56,6 @@ static func default_data() -> Dictionary:
 			"music": 1.0,
 			"sfx": 1.0,
 			"voice": 1.0,
-			"voice_language": "tr",
 			"voice_volume": {},
 			"mute_on_focus_loss": false,
 		},
@@ -72,7 +71,7 @@ static func default_data() -> Dictionary:
 
 
 func save_settings() -> void:
-	var file: FileAccess = FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
+	var file: FileAccess = FileAccess.open(VNPaths.settings_file(), FileAccess.WRITE)
 	if file != null:
 		file.store_string(JSON.stringify(data, "\t"))
 		file.close()
@@ -171,10 +170,10 @@ func _parse_size(text: String) -> Vector2i:
 
 
 func _load_settings() -> void:
-	if not FileAccess.file_exists(SETTINGS_PATH):
+	if not FileAccess.file_exists(VNPaths.settings_file()):
 		return
 
-	var file: FileAccess = FileAccess.open(SETTINGS_PATH, FileAccess.READ)
+	var file: FileAccess = FileAccess.open(VNPaths.settings_file(), FileAccess.READ)
 	var json_str: String = file.get_as_text()
 	file.close()
 
