@@ -36,6 +36,7 @@ Qaan: Let's look at two more things before we head out.
 - Ask about the telescope. -> topic_telescope once
 - Ask about Ely. (is this clickable?) -> topic_ely disabled_if met_ely == false
 - A bonus: peek at Qaan's notes. -> topic_notes disabled_if warmth < 2 once
+- A secret: the roof hatch. -> topic_roof if warmth >= 3 once
 - Move on. -> chapter_end
 
 # topic_telescope
@@ -47,6 +48,11 @@ Qaan: The telescope upstairs is older than the observatory itself. That was "@fl
 # topic_ely
 @flag warmth += 1
 Ely: Hello. I catalog the stars here. Asking about me just unlocked through "disabled_if", it needed "met_ely" to be true first.
+@jump hub
+
+# topic_roof
+@flag warmth += 1
+Qaan: Nobody knows about the roof hatch. This choice was hidden until warmth reached 3, that's "if" at work. A hidden choice does not show up at all.
 @jump hub
 
 # topic_notes
