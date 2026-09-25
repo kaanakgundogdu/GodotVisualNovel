@@ -8,7 +8,7 @@ func title() -> String:
 
 
 func run(ctx: AssetLintContext) -> void:
-	for kind in ["background", "music", "sfx", "movie"]:
+	for kind in ["background", "cg", "music", "sfx", "movie"]:
 		for ref in ctx.refs.get(kind, []):
 			var name: String = ref["name"]
 			if not ctx.resolver.exists(kind, name):

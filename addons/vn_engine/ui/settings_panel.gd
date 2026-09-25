@@ -40,6 +40,8 @@ var _preview_tween: Tween
 @onready var language_tab_root: Control = %Language
 @onready var language_option: OptionButton = %LanguageOption
 
+var controls_page: ControlsPage
+
 
 static func register_page(title: String, scene_path: String) -> void:
 	for page: Dictionary in _extra_pages:
@@ -70,15 +72,23 @@ func _ready() -> void:
 
 	language_option.item_selected.connect(_on_language_selected)
 
+	controls_page = ControlsPage.new()
+	controls_page.name = "Controls"
+	settings_tabs.add_child(controls_page)
+
 
 func open_panel() -> void:
 	show()
 	_add_extra_pages()
 	_refresh_controls()
+	controls_page.refresh()
 	fullscreen_toggle.grab_focus()
 
 
 func handle_back() -> bool:
+	if controls_page != null and controls_page.is_capturing():
+		controls_page.cancel_capture()
+		return true
 	_save_and_close()
 	return true
 

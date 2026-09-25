@@ -26,7 +26,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (_waiting_for_input or _current_skippable):
 		return
 
-	var is_advance: bool = event.is_action_pressed(&"vn_advance")
+	var is_advance: bool = event.is_action_pressed(VNInput.ADVANCE)
 	var is_left_click: bool = event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT
 	if not (is_advance or is_left_click):
 		return
@@ -118,6 +118,9 @@ func _start_screen(screen: BootScreenDef, token: int) -> void:
 	if screen.movie_path != "":
 		var stream: VideoStream = load(screen.movie_path) as VideoStream
 		if stream != null:
+			var root: VNMain = VNMain.instance()
+			if root != null:
+				root.persistent_audio.stop_bgm()
 			video_player.stream = stream
 			video_player.visible = true
 			video_player.play()
@@ -171,4 +174,4 @@ func _finish() -> void:
 		video_player.stop()
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
-	VNGame.return_to_title(false)
+	VNGame.return_to_title()

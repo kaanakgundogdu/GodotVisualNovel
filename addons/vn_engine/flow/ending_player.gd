@@ -5,13 +5,16 @@ extends RefCounted
 func present(root: VNMain, ending: EndingDef, stage: VNStageScreen, shared_resolver: AssetResolver) -> void:
 	var overlay: CardOverlay = root.get_card_overlay()
 	var opened: bool = false
+	var opened_movie: bool = false
 
 	if ending.ed_movie != "":
 		var movie_resolver: AssetResolver = _resolver_for(stage, shared_resolver)
 		var movie_path: String = movie_resolver.resolve("movie", ending.ed_movie) if movie_resolver != null else ""
 		if movie_path != "":
+			root.persistent_audio.stop_bgm()
 			overlay.open(CardOverlay.MODE_MOVIE, {"movie_path": movie_path, "movie_id": ending.ed_movie, "hold_on_close": true})
 			opened = true
+			opened_movie = true
 
 	if not opened and ending.cg != "":
 		var image_resolver: AssetResolver = _resolver_for(stage, shared_resolver)
@@ -23,10 +26,10 @@ func present(root: VNMain, ending: EndingDef, stage: VNStageScreen, shared_resol
 	if not opened:
 		overlay.open(CardOverlay.MODE_TITLE, {"title": tr(ending.title_key), "hold_on_close": true}, ending.card_duration)
 
-	if ending.bgm != "":
+	if not opened_movie and ending.bgm != "":
 		var bgm_path: String = shared_resolver.resolve("music", ending.bgm)
 		if bgm_path != "":
-			root.persistent_audio.play_bgm(bgm_path)
+			root.persistent_audio.play_bgm(bgm_path, true)
 
 	await overlay.finished
 

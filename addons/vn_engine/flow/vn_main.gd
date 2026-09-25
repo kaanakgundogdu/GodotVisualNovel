@@ -1,9 +1,6 @@
 class_name VNMain
 extends Node
 
-var persistent_audio: AudioSystem
-var dev_overlay: DevOverlay = null
-
 var screen_stack: ScreenStack
 var overlay_stack: OverlayStack
 
@@ -12,26 +9,20 @@ var overlay_stack: OverlayStack
 @onready var transition_layer: CanvasLayer = $TransitionLayer
 @onready var system_layer: CanvasLayer = $SystemLayer
 @onready var systems: Node = $Systems
+@onready var persistent_audio: AudioSystem = $Systems/PersistentAudio
+@onready var dev_overlay: DevOverlay = $SystemLayer/DevOverlay
 
 
 func _ready() -> void:
-	screen_stack = ScreenStack.new(screen_layer)
-	overlay_stack = OverlayStack.new(overlay_layer, screen_stack)
+	var ui: UiDef = VNGame.get_ui()
+	screen_stack = ScreenStack.new(screen_layer, ui.screens)
+	overlay_stack = OverlayStack.new(overlay_layer, screen_stack, ui.overlays)
 
-	var audio_scene: PackedScene = load("res://addons/vn_engine/systems/scenes/audio_system.tscn") as PackedScene
-	persistent_audio = audio_scene.instantiate() as AudioSystem
-	systems.add_child.call_deferred(persistent_audio)
+	if not OS.is_debug_build():
+		dev_overlay.queue_free()
+		dev_overlay = null
 
-	if OS.is_debug_build():
-		var dev_overlay_scene: PackedScene = load("res://addons/vn_engine/ui/scenes/dev_overlay.tscn") as PackedScene
-		dev_overlay = dev_overlay_scene.instantiate() as DevOverlay
-		dev_overlay.hide()
-		system_layer.add_child.call_deferred(dev_overlay)
-
-	var start_screen: StringName = &"title"
-	if VNGame.manifest != null and VNGame.manifest.has_boot_sequence():
-		start_screen = &"opening"
-	screen_stack.push_screen(start_screen)
+	screen_stack.push_screen(VNGame.start_screen())
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -61,7 +52,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if not event.is_action_pressed(&"vn_alt_click"):
+	if not event.is_action_pressed(VNInput.ALT_CLICK):
 		return
 
 	if not overlay_stack.is_empty():

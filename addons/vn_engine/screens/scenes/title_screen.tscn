@@ -33,10 +33,6 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 6
 
-[node name="TitleMusicPlayer" type="AudioStreamPlayer" parent="."]
-unique_name_in_owner = true
-bus = "Music"
-
 [node name="TitleLogoRect" type="TextureRect" parent="."]
 unique_name_in_owner = true
 visible = false

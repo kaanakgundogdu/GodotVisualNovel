@@ -16,3 +16,6 @@ Thumbs.db
 
 # Export çıktısı (oluşturulmuş binary dosyalar)
 build/
+
+# Claude calismalari (repoya gitmez)
+Claude outputs/

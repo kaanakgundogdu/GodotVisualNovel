@@ -12,8 +12,11 @@ the main scene runs.
 The main scene then, in order:
 
 1. Builds the screen stack and overlay stack.
-2. Loads the audio system as a persistent node, so music keeps playing
-   across screen and chapter transitions.
+2. Loads the audio system as a persistent node. This is the only audio
+   system in the engine. Chapter BGM, title and credits music, and the
+   `@music`, `@sfx`, `@voice` commands all play through it, so music keeps
+   playing across screen and chapter transitions and follows the volume
+   settings.
 3. Builds the debug overlay, in debug builds only.
 4. Picks the first screen: the boot sequence if the manifest has one,
    otherwise the title screen directly.
@@ -103,10 +106,19 @@ restored snapshot rather than replaying whatever produced it.
 - **New `@command`**: add `core/commands/cmd_<name>.gd` extending
   `VNCommand`, return `"<name>"` from `command_name()`, then add
   `"<name>"` to `CommandRegistry.NAMES`.
+- **Replacing a built-in screen or overlay** (for example your own title
+  screen): build the scene, then add it to `UiDef.screens` or
+  `UiDef.overlays` in `config/screens/ui.tres` under the same id
+  (`&"title"`, `&"settings"`, ...). No engine code changes. A screen
+  root must extend `VNScreen`.
 - **New screen**: build a scene and script extending `VNScreen`
   (`flow/vn_screen.gd`), override `screen_id()`/`enter()`/etc., and add
-  an entry to `ScreenStack.SCREEN_PATHS`.
-- **New overlay panel**: same idea, add an entry to
-  `OverlayStack.OVERLAY_PATHS` instead.
+  it to `UiDef.screens` under a new id. Open it with
+  `VNMain.instance().screen_stack.push_screen(&"<id>")`.
+- **New overlay panel**: same idea, add it to `UiDef.overlays` and open
+  it with `VNGame.open_overlay(&"<id>")`.
+- **Engine defaults** live in `ScreenStack.BUILTIN_SCREENS` and
+  `OverlayStack.BUILTIN_OVERLAYS`. Only edit these when changing the
+  engine itself.
 - **Changing what happens after a chapter ends**: that logic lives in
   `VNGame.on_story_ended()` in `flow/vn_game.gd`.

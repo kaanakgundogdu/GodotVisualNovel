@@ -133,37 +133,15 @@ func _collect_asset_paths(script: StoryScript, resolver: AssetResolver, chapter:
 
 
 func _resolve_show(args: String, resolver: AssetResolver, cast: Cast) -> String:
-	var tokens: PackedStringArray = args.strip_edges().split(" ", false)
-	if tokens.is_empty():
+	var parsed: Dictionary = CmdShow.parse_show_args(args)
+	if parsed.is_empty():
 		return ""
 
-	var id: String = tokens[0].to_lower()
-	var expression: String = ""
-	var outfit: String = ""
-	var pose: String = ""
-	var shot: String = ""
-
-	var i: int = 1
-	if i < tokens.size() and tokens[i] != "at" and tokens[i] != "with" and not tokens[i].contains("="):
-		expression = tokens[i]
-		i += 1
-
-	while i < tokens.size():
-		if tokens[i] == "at" and i + 1 < tokens.size():
-			i += 2
-		elif tokens[i] == "with" and i + 1 < tokens.size():
-			i += 2
-		elif tokens[i].begins_with("outfit="):
-			outfit = tokens[i].substr(7)
-			i += 1
-		elif tokens[i].begins_with("pose="):
-			pose = tokens[i].substr(5)
-			i += 1
-		elif tokens[i].begins_with("shot="):
-			shot = tokens[i].substr(5)
-			i += 1
-		else:
-			i += 1
+	var id: String = parsed["id"]
+	var expression: String = parsed["expression"]
+	var outfit: String = parsed["outfit"]
+	var pose: String = parsed["pose"]
+	var shot: String = parsed["shot"]
 
 	var entry: CastMember = cast.get_entry(id) if cast != null else null
 	if expression == "" and entry != null:

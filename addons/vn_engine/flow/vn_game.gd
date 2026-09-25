@@ -56,6 +56,16 @@ func get_manifest() -> GameManifest:
 	return manifest
 
 
+func get_ui() -> UiDef:
+	return manifest.get_ui() if manifest != null else UiDef.new()
+
+
+func start_screen() -> StringName:
+	if manifest != null and manifest.has_boot_sequence():
+		return &"opening"
+	return &"title"
+
+
 func get_flag_list() -> FlagList:
 	if manifest == null:
 		return null
@@ -95,8 +105,8 @@ func load_slot(slot_id: int) -> void:
 	var root: VNMain = _vn_main()
 	_set_state(AppState.CHAPTER)
 
-	var ui: UiDef = manifest.get_ui() if manifest != null else UiDef.new()
-	var stage_path: String = ScreenStack.SCREEN_PATHS.get(&"stage", "")
+	var ui: UiDef = get_ui()
+	var stage_path: String = root.screen_stack.scene_path(&"stage")
 
 	var slot_chapter: ChapterDef = _slot_chapter(slot_id)
 	if slot_chapter != null:
@@ -104,7 +114,7 @@ func load_slot(slot_id: int) -> void:
 		_chapter_cache.build_plan(slot_chapter.script_path, _shared_asset_resolver, get_flag_list(), slot_chapter)
 		_chapter_cache.request_all()
 
-	if ui.loading_mode == "never" or stage_path == "" or not ScreenStack.SCREEN_PATHS.has(&"loading"):
+	if ui.loading_mode == "never" or stage_path == "" or not root.screen_stack.has_screen(&"loading"):
 		root.screen_stack.replace_screen(&"stage", {})
 		return
 
@@ -164,11 +174,6 @@ func goto_chapter(chapter_id: String) -> void:
 		show_error("goto_chapter", "Chapter not found: '%s'" % chapter_id)
 		return
 
-	if chapter.bgm != "":
-		var bgm_path: String = _shared_asset_resolver.resolve("music", chapter.bgm)
-		if bgm_path != "":
-			_vn_main().persistent_audio.play_bgm(bgm_path)
-
 	var resume_state: Dictionary = {}
 	var stage: VNStageScreen = _current_stage_screen()
 	if stage != null:
@@ -179,7 +184,7 @@ func goto_chapter(chapter_id: String) -> void:
 	_set_state(AppState.CHAPTER)
 
 
-func return_to_title(_ask_confirm: bool = true) -> void:
+func return_to_title() -> void:
 	var root: VNMain = _vn_main()
 	root.screen_stack.replace_screen(&"title")
 	_set_state(AppState.TITLE)
@@ -200,7 +205,7 @@ func on_story_ended(reason: int, ending_id: String, state: StoryState) -> void:
 			finish_chapter(state)
 		StoryRunner.EndReason.RUNAWAY_GUARD:
 			VNLog.warn("VNGame", "Runaway guard triggered, no ending selected, returning to title")
-			return_to_title(false)
+			return_to_title()
 		_:
 			VNLog.error("VNGame", "on_story_ended(): unknown end_reason: %d" % reason)
 
@@ -208,7 +213,7 @@ func on_story_ended(reason: int, ending_id: String, state: StoryState) -> void:
 func finish_chapter(state: StoryState) -> void:
 	if manifest == null:
 		VNLog.warn("VNGame", "finish_chapter(): no manifest loaded")
-		return_to_title(false)
+		return_to_title()
 		return
 
 	var chapter: ChapterDef = manifest.find_chapter(state.chapter_id)
@@ -234,18 +239,18 @@ func finish_chapter(state: StoryState) -> void:
 func trigger_ending(ending_id: String) -> void:
 	if ending_id == "":
 		VNLog.warn("VNGame", "trigger_ending(): empty ending_id, no ending selected")
-		return_to_title(false)
+		return_to_title()
 		return
 
 	if manifest == null:
 		VNLog.warn("VNGame", "trigger_ending('%s'): no manifest loaded" % ending_id)
-		return_to_title(false)
+		return_to_title()
 		return
 
 	var ending: EndingDef = manifest.find_ending(ending_id)
 	if ending == null:
 		VNLog.warn("VNGame", "trigger_ending(): ending not found: '%s'" % ending_id)
-		return_to_title(false)
+		return_to_title()
 		return
 
 	_set_state(AppState.ENDING)
@@ -258,7 +263,7 @@ func trigger_ending(ending_id: String) -> void:
 	await _ending_player.present(root, ending, _current_stage_screen(), _shared_asset_resolver)
 
 	if ending.credits_variant == "none":
-		return_to_title(false)
+		return_to_title()
 	else:
 		play_credits(ending.credits_variant)
 
@@ -350,36 +355,37 @@ func _first_matching_ending(state: StoryState) -> EndingDef:
 	return null
 
 
-func _enter_chapter_deferred(chapter: ChapterDef, resume_state: Dictionary) -> void:
+func _enter_chapter_immediate(chapter: ChapterDef, resume_state: Dictionary) -> void:
 	var root: VNMain = _vn_main()
 	root.screen_stack.replace_screen(&"stage", {
 		"story_file": chapter.script_path,
 		"resume_state": resume_state,
 		"chapter_id": chapter.id,
+		"chapter_bgm": chapter.bgm,
 	})
 
 
 func _enter_chapter_via_loading(chapter: ChapterDef, resume_state: Dictionary) -> void:
-	var ui: UiDef = manifest.get_ui() if manifest != null else UiDef.new()
+	var ui: UiDef = get_ui()
 
 	_chapter_cache = ChapterPreloader.new()
 	_chapter_cache.build_plan(chapter.script_path, _shared_asset_resolver, get_flag_list(), chapter)
 	_chapter_cache.request_all()
 
-	if ui.loading_mode == "never" or not ScreenStack.SCREEN_PATHS.has(&"loading"):
-		_enter_chapter_deferred(chapter, resume_state)
+	var root: VNMain = _vn_main()
+	if ui.loading_mode == "never" or not root.screen_stack.has_screen(&"loading"):
+		_enter_chapter_immediate(chapter, resume_state)
 		return
 
-	var stage_path: String = ScreenStack.SCREEN_PATHS.get(&"stage", "")
+	var stage_path: String = root.screen_stack.scene_path(&"stage")
 	var preload_paths: PackedStringArray = PackedStringArray()
 	if stage_path != "":
 		preload_paths.append(stage_path)
 
 	if preload_paths.is_empty():
-		_enter_chapter_deferred(chapter, resume_state)
+		_enter_chapter_immediate(chapter, resume_state)
 		return
 
-	var root: VNMain = _vn_main()
 	var loading_params: Dictionary = {
 		"paths": preload_paths,
 		"next_screen": &"stage",
@@ -387,6 +393,7 @@ func _enter_chapter_via_loading(chapter: ChapterDef, resume_state: Dictionary) -
 			"story_file": chapter.script_path,
 			"resume_state": resume_state,
 			"chapter_id": chapter.id,
+			"chapter_bgm": chapter.bgm,
 		},
 		"mode": ui.loading_mode,
 		"preloader": _chapter_cache,

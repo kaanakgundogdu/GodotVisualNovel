@@ -1,13 +1,11 @@
-[gd_scene load_steps=10 format=3 uid="uid://crk3wahaeo62d"]
+[gd_scene load_steps=8 format=3 uid="uid://crk3wahaeo62d"]
 
 [ext_resource type="Script" uid="uid://bnhomoyhjnsjv" path="res://addons/vn_engine/flow/vn_main.gd" id="1"]
 [ext_resource type="Script" uid="uid://c2o5rgbkq17tp" path="res://addons/vn_engine/flow/transition_player.gd" id="2"]
-[ext_resource type="PackedScene" uid="uid://tb1q11j11abg" path="res://addons/vn_engine/ui/scenes/load_panel.tscn" id="2_qpxg4"]
 [ext_resource type="Shader" uid="uid://cc706xxrtm1x1" path="res://addons/vn_engine/shaders/transition.gdshader" id="3"]
-[ext_resource type="PackedScene" uid="uid://4n2h8vhn4qpw" path="res://addons/vn_engine/ui/scenes/settings_panel.tscn" id="3_rj2lt"]
-[ext_resource type="PackedScene" uid="uid://c4qenp6tt62yk" path="res://addons/vn_engine/ui/scenes/gallery_panel.tscn" id="4_k32rw"]
-[ext_resource type="PackedScene" uid="uid://dv7wu6vujor8j" path="res://addons/vn_engine/ui/scenes/log_ui.tscn" id="5_rj2lt"]
 [ext_resource type="PackedScene" path="res://addons/vn_engine/ui/scenes/card_overlay.tscn" id="6_cardov"]
+[ext_resource type="PackedScene" path="res://addons/vn_engine/ui/scenes/dev_overlay.tscn" id="7_devov"]
+[ext_resource type="PackedScene" uid="uid://dfp4gfwud3o4r" path="res://addons/vn_engine/systems/scenes/audio_system.tscn" id="8_paudio"]
 
 [sub_resource type="ShaderMaterial" id="1"]
 shader = ExtResource("3")
@@ -23,16 +21,6 @@ layer = 0
 
 [node name="OverlayLayer" type="CanvasLayer" parent="."]
 layer = 100
-
-[node name="LoadPanel" parent="OverlayLayer" instance=ExtResource("2_qpxg4")]
-
-[node name="SettingsPanel" parent="OverlayLayer" instance=ExtResource("3_rj2lt")]
-visible = false
-
-[node name="GalleryPanel" parent="OverlayLayer" instance=ExtResource("4_k32rw")]
-visible = false
-
-[node name="LogUI" parent="OverlayLayer" instance=ExtResource("5_rj2lt")]
 
 [node name="TransitionLayer" type="CanvasLayer" parent="."]
 layer = 200
@@ -54,4 +42,9 @@ layer = 300
 [node name="CardOverlay" parent="SystemLayer" instance=ExtResource("6_cardov")]
 layout_mode = 3
 
+[node name="DevOverlay" parent="SystemLayer" instance=ExtResource("7_devov")]
+visible = false
+
 [node name="Systems" type="Node" parent="."]
+
+[node name="PersistentAudio" parent="Systems" instance=ExtResource("8_paudio")]

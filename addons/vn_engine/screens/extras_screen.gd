@@ -145,7 +145,7 @@ func _populate_gallery_tab() -> void:
 	if _gallery_instance != null:
 		return
 
-	var gallery_scene: PackedScene = load("res://addons/vn_engine/ui/scenes/gallery_panel.tscn") as PackedScene
+	var gallery_scene: PackedScene = VNMain.instance().overlay_stack.scene_for(&"gallery")
 	var instance: GalleryPanel = gallery_scene.instantiate() as GalleryPanel
 	gallery_tab_root.add_child(instance)
 	_gallery_instance = instance

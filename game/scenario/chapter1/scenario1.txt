@@ -3,7 +3,7 @@
 @music bgm_calm
 @set_var teased_hana = false
 @set_var hana_affection = 0
-@movie op_main
+@movie op_sunflower
 Narrator: It was a peaceful afternoon. The sun was slowly setting over the hills.
 
 # id: 1

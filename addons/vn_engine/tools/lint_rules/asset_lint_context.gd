@@ -182,6 +182,7 @@ func _find_scenario_files_rec(path: String, out: Array[String]) -> void:
 func _collect_references(scanned_scripts: Array[StoryScript], cast_db: Cast) -> Dictionary:
 	var out: Dictionary = {
 		"background": [],
+		"cg": [],
 		"music": [],
 		"sfx": [],
 		"movie": [],
@@ -200,6 +201,18 @@ func _collect_references(scanned_scripts: Array[StoryScript], cast_db: Cast) -> 
 						var toks: PackedStringArray = cargs.strip_edges().split(" ", false)
 						if not toks.is_empty():
 							out["background"].append({"name": toks[0], "source": story.source_path, "line": line_no})
+					"cg":
+						var cg_toks: PackedStringArray = cargs.strip_edges().split(" ", false)
+						if not cg_toks.is_empty():
+							out["cg"].append({"name": cg_toks[0], "source": story.source_path, "line": line_no})
+					"eyecatch":
+						var ec_toks: PackedStringArray = cargs.strip_edges().split(" ", false)
+						if not ec_toks.is_empty():
+							var ec_id: String = ec_toks[0]
+							if resolver.exists("background", ec_id) and not resolver.exists("cg", ec_id):
+								out["background"].append({"name": ec_id, "source": story.source_path, "line": line_no})
+							else:
+								out["cg"].append({"name": ec_id, "source": story.source_path, "line": line_no})
 					"music":
 						var music_name: String = cargs.strip_edges()
 						if music_name != "" and music_name.to_lower() != "stop":

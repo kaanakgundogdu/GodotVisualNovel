@@ -39,7 +39,7 @@ func enter(params: Dictionary) -> void:
 
 func handle_back() -> bool:
 	if _exit_to_title:
-		VNGame.return_to_title(false)
+		VNGame.return_to_title()
 		return true
 	VNMain.instance().screen_stack.pop_screen()
 	return true

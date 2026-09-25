@@ -11,10 +11,11 @@ var _accum: float = 0.0
 
 func _ready() -> void:
 	mouse_filter = MOUSE_FILTER_IGNORE
-	_refresh()
 
 
 func _process(delta: float) -> void:
+	if not visible:
+		return
 	_accum += delta
 	if _accum < REFRESH_INTERVAL:
 		return

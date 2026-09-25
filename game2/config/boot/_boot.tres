@@ -1,6 +1,9 @@
-[gd_resource type="Resource" script_class="BootDef" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="BootDef" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://addons/vn_engine/defs/boot_def.gd" id="1_script"]
+[ext_resource type="Script" path="res://addons/vn_engine/defs/boot_screen_def.gd" id="2_splashscript"]
+[ext_resource type="Resource" path="res://game2/config/boot/01_icon.tres" id="3_icon"]
 
 [resource]
 script = ExtResource("1_script")
+boot_screens = Array[ExtResource("2_splashscript")]([ExtResource("3_icon")])

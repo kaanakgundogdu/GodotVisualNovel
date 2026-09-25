@@ -20,6 +20,7 @@ var _tween: Tween
 var _close_timer: Timer
 var _fade_duration: float = 0.4
 var _saved_focus: Control = null
+var _audio_paused: bool = false
 
 @onready var _background: ColorRect = %CardBackground
 @onready var _image_rect: TextureRect = %CardImageRect
@@ -68,6 +69,10 @@ func open(mode: String, params: Dictionary, duration: float = 2.0, fade_duration
 		MODE_DATECARD:
 			_apply_datecard(params)
 		MODE_MOVIE:
+			var audio: AudioSystem = _get_audio()
+			if audio != null and not _audio_paused:
+				audio.pause_for_video()
+				_audio_paused = true
 			if not _apply_movie(params):
 				_fail_and_finish()
 				return
@@ -104,7 +109,7 @@ func _input(event: InputEvent) -> void:
 		var mouse: InputEventMouseButton = event
 		if mouse.pressed and (mouse.button_index == MOUSE_BUTTON_LEFT or mouse.button_index == MOUSE_BUTTON_RIGHT):
 			_start_close()
-	elif event.is_action_pressed(&"vn_advance"):
+	elif event.is_action_pressed(VNInput.ADVANCE):
 		_start_close()
 
 
@@ -239,6 +244,22 @@ func _apply_datecard(params: Dictionary) -> void:
 	_line3_label.visible = line3 != ""
 
 
+func _release_audio() -> void:
+	if not _audio_paused:
+		return
+	_audio_paused = false
+	var audio: AudioSystem = _get_audio()
+	if audio != null:
+		audio.resume_after_video()
+
+
+func _get_audio() -> AudioSystem:
+	var root: VNMain = VNMain.instance()
+	if root == null:
+		return null
+	return root.persistent_audio
+
+
 func _show_only(node_to_show: Control) -> void:
 	_background.visible = true
 	_image_rect.visible = node_to_show == _image_rect
@@ -248,6 +269,7 @@ func _show_only(node_to_show: Control) -> void:
 
 
 func _fail_and_finish() -> void:
+	_release_audio()
 	finished.emit.call_deferred()
 
 
@@ -272,6 +294,7 @@ func _start_close() -> void:
 		_held = true
 		modulate.a = 1.0
 		_show_only(null)
+		_release_audio()
 		finished.emit()
 		return
 
@@ -293,4 +316,5 @@ func release(fade_duration: float = -1.0) -> void:
 
 func _on_close_finished() -> void:
 	hide()
+	_release_audio()
 	finished.emit()

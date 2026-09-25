@@ -144,11 +144,11 @@ func _on_story_ended() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("vn_hide_ui"):
+	if event.is_action_pressed(VNInput.HIDE_UI):
 		toggle_ui()
 		return
 
-	if event.is_action_pressed("vn_alt_click"):
+	if event.is_action_pressed(VNInput.ALT_CLICK):
 		if _is_overlay_open():
 			return
 		if _is_input_locked():
@@ -157,7 +157,7 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.is_action_released("vn_skip_hold"):
+	if event.is_action_released(VNInput.SKIP_HOLD):
 		if _skip_via_hold and runner != null:
 			runner.is_skip = false
 			runner.mode_changed.emit()
@@ -168,17 +168,17 @@ func _input(event: InputEvent) -> void:
 		return
 
 	var input_locked_by_video: bool = runner != null and runner.is_input_locked
-	if is_ui_hidden and not input_locked_by_video and (event.is_action_pressed("vn_advance") or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed)):
+	if is_ui_hidden and not input_locked_by_video and (event.is_action_pressed(VNInput.ADVANCE) or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed)):
 		toggle_ui()
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.is_action_pressed("vn_rollback"):
+	if event.is_action_pressed(VNInput.ROLLBACK):
 		if runner:
 			runner.rollback()
 		return
 
-	if event.is_action_pressed("vn_forward"):
+	if event.is_action_pressed(VNInput.FORWARD):
 		if runner:
 			if runner.history_stack.can_forward():
 				runner.forward()
@@ -186,17 +186,17 @@ func _input(event: InputEvent) -> void:
 				_advance_dialog()
 		return
 
-	if event.is_action_pressed("vn_quicksave"):
+	if event.is_action_pressed(VNInput.QUICKSAVE):
 		if runner:
 			VNSave.save_game(runner.state, VNSave.QUICKSAVE_SLOT)
 		return
 
-	if event.is_action_pressed("vn_quickload"):
+	if event.is_action_pressed(VNInput.QUICKLOAD):
 		if runner:
 			runner.execute_load_game(VNSave.QUICKSAVE_SLOT)
 		return
 
-	if event.is_action_pressed("vn_skip_hold"):
+	if event.is_action_pressed(VNInput.SKIP_HOLD):
 		if not _is_input_locked() and runner != null and not runner.is_skip:
 			runner.is_skip = true
 			runner.is_auto = false
@@ -204,7 +204,7 @@ func _input(event: InputEvent) -> void:
 			_skip_via_hold = true
 		return
 
-	if event.is_action_pressed("vn_auto_toggle"):
+	if event.is_action_pressed(VNInput.AUTO_TOGGLE):
 		if not _is_input_locked() and runner != null:
 			runner.is_auto = not runner.is_auto
 			if runner.is_auto:
@@ -212,12 +212,12 @@ func _input(event: InputEvent) -> void:
 			runner.mode_changed.emit()
 		return
 
-	if event.is_action_pressed("vn_open_log"):
+	if event.is_action_pressed(VNInput.OPEN_LOG):
 		if not _is_input_locked() and in_game_buttons != null:
 			in_game_buttons.log_requested.emit()
 		return
 
-	if event.is_action_pressed("vn_advance"):
+	if event.is_action_pressed(VNInput.ADVANCE):
 		_advance_dialog()
 
 

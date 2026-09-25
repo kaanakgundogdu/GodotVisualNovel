@@ -23,10 +23,6 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 6
 
-[node name="CreditsMusicPlayer" type="AudioStreamPlayer" parent="."]
-unique_name_in_owner = true
-bus = &"Music"
-
 [node name="CreditsScrollViewport" type="Control" parent="."]
 unique_name_in_owner = true
 clip_contents = true

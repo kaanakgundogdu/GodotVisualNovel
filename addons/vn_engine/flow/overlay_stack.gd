@@ -1,6 +1,6 @@
 class_name OverlayStack
 extends RefCounted
-const OVERLAY_PATHS: Dictionary = {
+const BUILTIN_OVERLAYS: Dictionary = {
 	&"settings": "res://addons/vn_engine/ui/scenes/settings_panel.tscn",
 	&"load": "res://addons/vn_engine/ui/scenes/load_panel.tscn",
 	&"gallery": "res://addons/vn_engine/ui/scenes/gallery_panel.tscn",
@@ -10,12 +10,23 @@ const OVERLAY_PATHS: Dictionary = {
 
 var _layer: CanvasLayer
 var _screen_stack: ScreenStack
+var _overrides: Dictionary = {}
 var _stack: Array[Control] = []
 
 
-func _init(layer: CanvasLayer, screen_stack: ScreenStack) -> void:
+func _init(layer: CanvasLayer, screen_stack: ScreenStack, overrides: Dictionary = {}) -> void:
 	_layer = layer
 	_screen_stack = screen_stack
+	_overrides = overrides
+
+
+func scene_for(id: StringName) -> PackedScene:
+	var custom: PackedScene = _overrides.get(id) as PackedScene
+	if custom != null:
+		return custom
+	if BUILTIN_OVERLAYS.has(id):
+		return load(BUILTIN_OVERLAYS[id]) as PackedScene
+	return null
 
 
 func is_empty() -> bool:
@@ -29,7 +40,8 @@ func top_overlay() -> Control:
 
 
 func open_overlay(id: StringName, params: Dictionary = {}) -> Control:
-	if not OVERLAY_PATHS.has(id):
+	var scene: PackedScene = scene_for(id)
+	if scene == null:
 		VNLog.warn("OverlayStack", "Unknown overlay id: '%s'" % id)
 		return null
 
@@ -42,8 +54,6 @@ func open_overlay(id: StringName, params: Dictionary = {}) -> Control:
 		below.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		below.hide()
 
-	var path: String = OVERLAY_PATHS[id]
-	var scene: PackedScene = load(path) as PackedScene
 	var overlay: Control = scene.instantiate() as Control
 
 	_layer.add_child(overlay)

@@ -7,6 +7,8 @@ extends VNScreen
 
 
 func _ready() -> void:
+	VNMain.instance().persistent_audio.attach_runner(story_runner)
+
 	in_game_buttons.save_menu_requested.connect(_on_save_menu_requested)
 	in_game_buttons.load_menu_requested.connect(_on_load_menu_requested)
 	in_game_buttons.settings_requested.connect(_on_settings_requested)
@@ -44,12 +46,18 @@ func enter(params: Dictionary) -> void:
 		if chapter_id_param != "":
 			story_runner.state.chapter_id = chapter_id_param
 
+		_apply_chapter_bgm(params.get("chapter_bgm", ""))
+
 		if chapter_id_param != "":
 			await _maybe_show_chapter_intro(chapter_id_param)
 
 		VNGame.seed_flags(story_runner.state)
 		story_runner.start_story(file)
 		_autosave_on_chapter_enter(chapter_id_param)
+
+
+func exit() -> void:
+	VNMain.instance().persistent_audio.detach_runner()
 
 
 func on_blur() -> void:
@@ -140,6 +148,14 @@ func _on_save_slot_requested(slot_id: int) -> void:
 
 	VNSave.save_game(story_runner.state, slot_id)
 	_open_load_panel(true)
+
+
+func _apply_chapter_bgm(bgm_id: String) -> void:
+	if bgm_id == "":
+		return
+	story_runner.state.audio["music"] = bgm_id
+	if story_runner.ctx.audio:
+		story_runner.ctx.audio.play_channel("music", bgm_id)
 
 
 func _autosave_on_chapter_enter(chapter_id: String) -> void:

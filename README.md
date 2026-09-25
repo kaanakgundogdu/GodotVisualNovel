@@ -49,7 +49,7 @@ https://kaanakgundogdu.github.io/blog/VisualNovelGodot/devlog2.html
 
 See [addons/vn_engine/README.md](addons/vn_engine/README.md) for the full feature guide and configuration options.
 
-The engine is at version 0.5, an early release, tested only by me so far. See
+The engine is at version 0.6, an early release, tested only by me so far. See
 [Current status and known limitations](addons/vn_engine/README.md#current-status-and-known-limitations)
 before relying on it for something big.
 

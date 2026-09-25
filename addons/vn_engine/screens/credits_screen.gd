@@ -8,7 +8,6 @@ var _using_movie: bool = false
 var _finished_called: bool = false
 
 @onready var background_rect: TextureRect = %CreditsBackgroundRect
-@onready var music_player: AudioStreamPlayer = %CreditsMusicPlayer
 @onready var scroll_viewport: Control = %CreditsScrollViewport
 @onready var content_box: VBoxContainer = %CreditsContent
 @onready var video_player: VideoStreamPlayer = %CreditsVideoPlayer
@@ -27,7 +26,7 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not _allow_skip:
 		return
-	if not event.is_action_pressed(&"vn_advance"):
+	if not event.is_action_pressed(VNInput.ADVANCE):
 		return
 
 	if _using_movie:
@@ -68,15 +67,12 @@ func enter(params: Dictionary) -> void:
 		if bg_path != "":
 			background_rect.texture = load(bg_path)
 
-	if def.bgm != "":
-		var music_path: String = resolver.resolve("music", def.bgm)
-		if music_path != "":
-			music_player.stream = load(music_path)
-			music_player.play()
+	var persistent_audio: AudioSystem = VNMain.instance().persistent_audio
 
 	if def.movie != "":
 		var movie_path: String = resolver.resolve("movie", def.movie)
 		if movie_path != "":
+			persistent_audio.stop_bgm()
 			_using_movie = true
 			scroll_viewport.hide()
 			video_player.show()
@@ -86,6 +82,15 @@ func enter(params: Dictionary) -> void:
 			return
 		else:
 			VNLog.warn("CreditsScreen", "Could not resolve movie '%s', falling back to scrolling credits" % def.movie)
+
+	if def.bgm != "":
+		var music_path: String = resolver.resolve("music", def.bgm)
+		if music_path != "":
+			persistent_audio.play_bgm(music_path, true)
+		else:
+			persistent_audio.stop_bgm()
+	else:
+		persistent_audio.stop_bgm()
 
 	_build_sections(def)
 	set_process(true)
@@ -130,9 +135,13 @@ func _build_sections(def: CreditsDef) -> void:
 	content_box.position.y = get_viewport_rect().size.y
 
 
+func exit() -> void:
+	VNMain.instance().persistent_audio.stop_bgm()
+
+
 func _finish() -> void:
 	if _finished_called:
 		return
 	_finished_called = true
 	set_process(false)
-	VNGame.return_to_title(false)
+	VNGame.return_to_title()

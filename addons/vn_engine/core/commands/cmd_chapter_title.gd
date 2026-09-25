@@ -8,7 +8,7 @@ func is_blocking() -> bool:
 	return true
 
 func apply(args: String, ctx: CommandContext) -> void:
-	var tokens: Array[String] = _parse_quoted_args(args)
+	var tokens: Array[String] = VNCommand.parse_quoted_args(args)
 
 	var title_text := ""
 	var subtitle_text := ""
@@ -73,29 +73,3 @@ func apply(args: String, ctx: CommandContext) -> void:
 
 	if ctx.bus:
 		ctx.bus.resolve_block()
-
-
-func _parse_quoted_args(args: String) -> Array[String]:
-	var result: Array[String] = []
-	var text := args.strip_edges()
-	var i := 0
-	var length := text.length()
-	while i < length:
-		while i < length and text[i] == " ":
-			i += 1
-		if i >= length:
-			break
-		if text[i] == "\"":
-			i += 1
-			var start := i
-			while i < length and text[i] != "\"":
-				i += 1
-			result.append(text.substr(start, i - start))
-			if i < length:
-				i += 1
-		else:
-			var start := i
-			while i < length and text[i] != " ":
-				i += 1
-			result.append(text.substr(start, i - start))
-	return result

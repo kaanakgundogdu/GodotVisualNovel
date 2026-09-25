@@ -14,5 +14,5 @@ cg = "cg_cottage_fire_01"
 bgm = ""
 card_duration = 3.0
 credits_variant = ""
-ed_movie = "ed_normal_end"
+ed_movie = "ed_sunflower"
 unlocks = PackedStringArray()

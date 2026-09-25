@@ -8,7 +8,6 @@ extends VNScreen
 @onready var quit_btn: Button = %QuitButton
 @onready var extras_btn: Button = %GalleryButton
 @onready var background_rect: TextureRect = %TitleBackgroundRect
-@onready var music_player: AudioStreamPlayer = %TitleMusicPlayer
 @onready var logo_rect: TextureRect = %TitleLogoRect
 @onready var menu_container: MarginContainer = $MainMenuMarginContainer
 @onready var menu_vbox: VBoxContainer = $MainMenuMarginContainer/VBoxContainer
@@ -79,11 +78,13 @@ func _apply_title_variant() -> void:
 		if bg_path != "":
 			background_rect.texture = load(bg_path)
 
+	var persistent_audio: AudioSystem = VNMain.instance().persistent_audio
 	if bgm_id != "":
 		var music_path: String = resolver.resolve("music", bgm_id)
 		if music_path != "":
-			music_player.stream = load(music_path)
-			music_player.play()
+			persistent_audio.play_bgm(music_path)
+	else:
+		persistent_audio.stop_bgm()
 
 
 func _apply_menu_alignment() -> void:

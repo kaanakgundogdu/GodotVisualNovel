@@ -1,22 +1,18 @@
 class_name AudioSystem
 extends Node
 
-@export var runner: StoryRunner
 @export var channels: Array[AudioChannel] = []
 @export var crossfade_duration: float = 1.0
+
+var runner: StoryRunner
 
 var _players: Dictionary = {}
 var _tweens: Dictionary = {}
 var _current_files: Dictionary = {}
+var _video_pause_count: int = 0
 
 
 func _ready() -> void:
-	add_to_group(&"vn_audio_system")
-
-	if runner:
-		runner.state_restored.connect(_on_state_restored)
-		runner.register_manager(self)
-
 	for channel: AudioChannel in channels:
 		var player: AudioStreamPlayer = AudioStreamPlayer.new()
 		player.name = channel.command_name.capitalize() + "Player"
@@ -29,10 +25,29 @@ func _ready() -> void:
 		}
 
 
+func attach_runner(new_runner: StoryRunner) -> void:
+	runner = new_runner
+	runner.state_restored.connect(_on_state_restored)
+	runner.register_manager(self)
+
+
+func detach_runner() -> void:
+	if runner != null and runner.state_restored.is_connected(_on_state_restored):
+		runner.state_restored.disconnect(_on_state_restored)
+	runner = null
+	_stop_audio("sfx")
+	_stop_audio("voice")
+	_video_pause_count = 0
+	if _players.has("music"):
+		(_players["music"]["node"] as AudioStreamPlayer).stream_paused = false
+
+
 func _on_state_restored(state: StoryState) -> void:
 	for key: String in _players.keys():
 		var target_file: String = state.audio.get(key, "")
-		if target_file == _current_files.get(key, ""):
+		var player: AudioStreamPlayer = _players[key]["node"]
+		var same_file: bool = target_file == _current_files.get(key, "")
+		if same_file and (player.playing or player.stream_paused):
 			continue
 
 		if target_file == "":
@@ -46,10 +61,10 @@ func play_channel(channel_name: String, file_name: String, speaker_id: String = 
 		_play_audio(channel_name, file_name, speaker_id)
 
 
-func play_bgm(resolved_path: String) -> void:
+func play_bgm(resolved_path: String, restart: bool = false) -> void:
 	if resolved_path == "" or not _players.has("music"):
 		return
-	_play_audio("music", resolved_path, "", resolved_path)
+	_play_audio("music", resolved_path, "", resolved_path, restart)
 
 
 func stop_bgm() -> void:
@@ -57,7 +72,30 @@ func stop_bgm() -> void:
 		_stop_audio("music")
 
 
-func _play_audio(channel_name: String, file_name: String, speaker_id: String = "", resolved_path: String = "") -> void:
+func pause_for_video() -> void:
+	_video_pause_count += 1
+	if _video_pause_count > 1:
+		return
+	if _players.has("music"):
+		var music_player: AudioStreamPlayer = _players["music"]["node"]
+		if music_player.playing:
+			music_player.stream_paused = true
+	_stop_audio("sfx")
+	_stop_audio("voice")
+
+
+func resume_after_video() -> void:
+	if _video_pause_count <= 0:
+		return
+	_video_pause_count -= 1
+	if _video_pause_count > 0:
+		return
+	if _players.has("music"):
+		var music_player: AudioStreamPlayer = _players["music"]["node"]
+		music_player.stream_paused = false
+
+
+func _play_audio(channel_name: String, file_name: String, speaker_id: String = "", resolved_path: String = "", force_restart: bool = false) -> void:
 	var data: Dictionary = _players[channel_name]
 	var config: AudioChannel = data["config"]
 	var player: AudioStreamPlayer = data["node"]
@@ -66,11 +104,9 @@ func _play_audio(channel_name: String, file_name: String, speaker_id: String = "
 		_stop_audio(channel_name)
 		return
 
-	if file_name == _current_files.get(channel_name, ""):
-		return
-
-	if channel_name == "music":
-		_silence_other_music_players()
+	if not force_restart and file_name == _current_files.get(channel_name, ""):
+		if player.playing or player.stream_paused:
+			return
 
 	var file_path: String = resolved_path
 	if file_path == "":
@@ -80,6 +116,8 @@ func _play_audio(channel_name: String, file_name: String, speaker_id: String = "
 		return
 
 	var new_stream: AudioStream = load(file_path) as AudioStream
+	if channel_name == "music" and new_stream != null:
+		_apply_music_loop(new_stream)
 	_current_files[channel_name] = file_name
 
 	var base_db: float = config.base_volume_db
@@ -113,6 +151,15 @@ func _play_audio(channel_name: String, file_name: String, speaker_id: String = "
 		player.play()
 
 
+func _apply_music_loop(stream: AudioStream) -> void:
+	if "loop" in stream:
+		stream.loop = true
+	elif stream is AudioStreamWAV:
+		var wav: AudioStreamWAV = stream
+		if wav.loop_mode == AudioStreamWAV.LOOP_DISABLED:
+			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+
+
 func _stop_audio(channel_name: String) -> void:
 	var data: Dictionary = _players[channel_name]
 	var config: AudioChannel = data["config"]
@@ -132,11 +179,3 @@ func _stop_audio(channel_name: String) -> void:
 		tween.tween_callback(player.stop)
 	else:
 		player.stop()
-
-
-func _silence_other_music_players() -> void:
-	for node: Node in get_tree().get_nodes_in_group(&"vn_audio_system"):
-		if node == self:
-			continue
-		if node is AudioSystem:
-			(node as AudioSystem).stop_bgm()

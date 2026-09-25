@@ -40,6 +40,10 @@ func play_movie(movie_name: String) -> void:
 
 	stream = load(path) as VideoStream
 
+	var audio: AudioSystem = _get_audio()
+	if audio != null:
+		audio.pause_for_video()
+
 	_reset_to_fullscreen()
 	if _letterbox != null and is_instance_valid(_letterbox):
 		_letterbox.hide()
@@ -77,14 +81,24 @@ func _on_video_finished() -> void:
 	if dialog_ui and dialog_ui.is_ui_hidden:
 		dialog_ui.toggle_ui()
 
+	var audio: AudioSystem = _get_audio()
+	if audio != null:
+		audio.resume_after_video()
+
 	if runner:
 		runner.bus.resolve_block()
 
 
 func _input(event: InputEvent) -> void:
-	if is_playing() and event.is_action_pressed("vn_advance"):
+	if is_playing() and event.is_action_pressed(VNInput.ADVANCE):
 		stop()
 		_on_video_finished()
+
+
+func _get_audio() -> AudioSystem:
+	if runner and runner.ctx:
+		return runner.ctx.audio
+	return null
 
 
 func _await_video_texture() -> void:

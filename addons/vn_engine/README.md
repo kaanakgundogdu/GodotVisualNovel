@@ -83,7 +83,7 @@ See [`docs/GLOBALS.md`](docs/GLOBALS.md) for the full reference.
 - Rollback and forward through dialogue history, plus a backlog panel
 - A gallery for CG art, music, movies and endings, with lockable entries
 - Credits screens, opening and ending sequences, video playback
-- Localization through a `dialog.csv` file, imported as a Translation
+- Localization through a `dialog.csv` file, imported as a Translation (experimental, see below)
 - Built in editor lint tools: asset linter, line id tool, locale CSV tool
 
 ## Documentation
@@ -113,9 +113,72 @@ variations, so a scene picks one with `theme_type_variation`:
 To make all text bigger or smaller, change these numbers in the theme,
 no scene needs to be edited.
 
+## Design decisions
+
+Some choices here are different from other VN engines, so here is why.
+
+**Why write an engine in Godot and not use Ren'Py?**
+Ren'Py is great and it is much bigger than this engine. I'm not trying to
+compete with it. I wanted a small engine with only the features I need,
+and I wanted to write it myself to learn how a VN engine works inside.
+Also I want to mix VN parts with other mechanics later, for example
+dialogues inside an RPG. In Godot I can use everything the engine already
+has for that.
+
+**Why `.tres` files for config and not JSON?**
+Godot already has a good editor for resources: the Inspector. With `.tres`
+files you can change the game data without writing code, and you get
+types, enums and dropdowns for free. Godot also keeps the references
+when you move a file. JSON would need its own editor and its own
+validation. Every chapter, ending, flag and character has its own small
+file, so things are easy to find and git diffs stay small.
+
+**Why plain text scenario files?**
+Writing dialogue is faster in a text editor than in a node graph, and
+text files work well with git. A visual dialogue editor can be made
+later, but it will be a separate project.
+
+**Why a custom condition language and not Godot's `Expression`?**
+Conditions (`if`, `disabled_if`, `@jump_if`) are handled by
+`ExpressionEvaluator`, a small language written for this engine. I want
+the control to stay on the engine side, and a small language fits this
+engine better:
+
+- It only knows flags, numbers, strings, `and`/`or`/`not` and comparisons.
+  A scenario file can't call any Godot method, so a bad line in a script
+  can't reach into the engine.
+- The grammar is small, so the linter can check every condition before
+  the game runs. Unknown flag names and broken expressions show up in the
+  editor, not in the middle of a playthrough.
+- Errors point to the scenario line, which is easier to read than a
+  Godot error.
+
+**Why one engine and many games?**
+The engine never reads a fixed game path. Everything goes through
+`vn_engine/content/root`, so `game/`, `game2/` and `sample/` run on the
+same engine code. If something only works for one game, it belongs in
+that game's data, not in the engine.
+
+## Experimental and future ideas
+
+Experimental, it works but it's not tested enough:
+
+- **Localization.** The line id tool, the locale CSV tool and the language
+  page in settings. I only tested with English, no real translation was
+  made yet.
+
+Not in the engine yet, can be implemented in the future:
+
+- Screen filters (grayscale, sepia, vignette) with a `@filter` command.
+- Voice lines per language. For now only text translation is supported,
+  voice files don't have a language folder.
+- Save file versioning. Until 1.0 the save format can change and old
+  saves may not load, so there is no migration code.
+- A visual dialogue editor, as a separate project.
+
 ## Current status and known limitations
 
-The engine is at version 0.5, an early release. Before I call it 1.0 I
+The engine is at version 0.6, an early release. Before I call it 1.0 I
 want to check the points below. None of them are known bugs, they are
 just things I haven't verified yet:
 

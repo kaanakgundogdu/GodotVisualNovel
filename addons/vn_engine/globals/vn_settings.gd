@@ -28,6 +28,7 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	VNInput.register_defaults()
 	_load_settings()
 	apply_all_settings()
 
@@ -67,6 +68,7 @@ static func default_data() -> Dictionary:
 			"language": "",
 		},
 		"autosave": true,
+		"input": {},
 	}
 
 
@@ -87,6 +89,7 @@ func apply_all_settings() -> void:
 	_apply_display()
 	_apply_audio()
 	_apply_language()
+	_apply_input()
 	settings_changed.emit()
 
 
@@ -153,6 +156,18 @@ func _apply_audio() -> void:
 		var idx: int = AudioServer.get_bus_index(bus_key.capitalize())
 		if idx != -1:
 			AudioServer.set_bus_volume_db(idx, linear_to_db(data["audio"][bus_key]))
+
+
+func _apply_input() -> void:
+	var overrides: Variant = data["input"]
+	if not overrides is Dictionary:
+		overrides = {}
+	VNInput.apply_overrides(overrides)
+
+
+func store_input_bindings() -> void:
+	data["input"] = VNInput.export_overrides()
+	save_settings()
 
 
 func _apply_language() -> void:

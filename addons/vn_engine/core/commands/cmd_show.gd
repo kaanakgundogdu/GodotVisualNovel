@@ -5,12 +5,49 @@ func command_name() -> String:
 	return "show"
 
 func apply(args: String, ctx: CommandContext) -> void:
-	var tokens := args.strip_edges().split(" ", false)
-	if tokens.is_empty():
+	var parsed: Dictionary = parse_show_args(args)
+	if parsed.is_empty():
 		VNLog.warn("CmdShow", "Missing argument: '@show' expects a character id")
 		return
 
-	var id := tokens[0].to_lower()
+	var id: String = parsed["id"]
+	var expression: String = parsed["expression"]
+	var outfit: String = parsed["outfit"]
+	var pose: String = parsed["pose"]
+	var shot: String = parsed["shot"]
+	var position: String = parsed["position"]
+	var transition: String = parsed["transition"]
+
+	var entry: CastMember = null
+	if ctx.characters and ctx.characters.cast:
+		entry = ctx.characters.cast.get_entry(id)
+
+	if expression == "" and entry:
+		expression = entry.default_expression
+	if outfit == "" and entry:
+		outfit = entry.default_outfit
+	if pose == "" and entry:
+		pose = entry.default_pose
+	if shot == "" and entry:
+		shot = entry.default_shot
+
+	if position == "":
+		position = "center"
+	if transition == "":
+		transition = "fade"
+
+	ctx.state.characters[id] = {"expression": expression, "position": position, "outfit": outfit, "pose": pose, "shot": shot}
+
+	if ctx.characters:
+		ctx.characters.show_character(id, outfit, pose, expression, shot, position, transition)
+
+
+static func parse_show_args(args: String) -> Dictionary:
+	var tokens: PackedStringArray = args.strip_edges().split(" ", false)
+	if tokens.is_empty():
+		return {}
+
+	var id: String = tokens[0].to_lower()
 	var expression := ""
 	var outfit := ""
 	var pose := ""
@@ -42,25 +79,4 @@ func apply(args: String, ctx: CommandContext) -> void:
 		else:
 			i += 1
 
-	var entry: CastMember = null
-	if ctx.characters and ctx.characters.cast:
-		entry = ctx.characters.cast.get_entry(id)
-
-	if expression == "" and entry:
-		expression = entry.default_expression
-	if outfit == "" and entry:
-		outfit = entry.default_outfit
-	if pose == "" and entry:
-		pose = entry.default_pose
-	if shot == "" and entry:
-		shot = entry.default_shot
-
-	if position == "":
-		position = "center"
-	if transition == "":
-		transition = "fade"
-
-	ctx.state.characters[id] = {"expression": expression, "position": position, "outfit": outfit, "pose": pose, "shot": shot}
-
-	if ctx.characters:
-		ctx.characters.show_character(id, outfit, pose, expression, shot, position, transition)
+	return {"id": id, "expression": expression, "outfit": outfit, "pose": pose, "shot": shot, "position": position, "transition": transition}

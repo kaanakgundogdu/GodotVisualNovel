@@ -219,7 +219,7 @@ File: `config/asset_map/<kind>.tres`.
 
 ### AudioChannel
 
-Not part of `config/`. Set on the `AudioManager` node inside
+Not part of `config/`. Set on the `AudioSystem` node inside
 `addons/vn_engine/systems/scenes/audio_system.tscn`, as its exported
 `channels: Array[AudioChannel]`. One entry per command name (`"music"`,
 `"sfx"`, ...).
@@ -316,4 +316,35 @@ defaults.
 | `loading_min_duration` | Loading screen | Minimum time the loading screen stays up. |
 | `loading_show_chapter_title` | Loading screen | Skipped for chapters with `intro_style != "none"`. |
 | `log_use_character_colors` | Log | Backlog speaker names use `CastMember.name_color`. |
+| `screens` | Custom scenes | Your own scene per screen id (`title`, `stage`, `opening`, `credits`, `extras`, `chapter_select`, `diagnostics`, `loading`). Root must extend `VNScreen`. Missing ids use the engine scene. |
+| `overlays` | Custom scenes | Your own scene per overlay id (`settings`, `load`, `gallery`, `log`, `confirm`). Keep the same methods and signals as the panel you replace. |
 
+
+## Input actions
+
+The engine registers its own input actions at startup, so the addon works in a new project without editing the Input Map.
+
+Which binding wins:
+
+1. The player's binding, saved in settings.
+2. An action with the same name in Project Settings > Input Map.
+3. The engine default below.
+
+To change a default for your game, add the action with the same name in the Input Map.
+
+| Action | Default | Label |
+|---|---|---|
+| vn_advance | Space, Enter, Keypad Enter | Advance |
+| vn_auto_toggle | A | Auto mode |
+| vn_skip_hold | Ctrl (hold) | Skip (hold) |
+| vn_hide_ui | H | Hide UI |
+| vn_open_log | L | Open log |
+| vn_rollback | Mouse wheel up | Rollback |
+| vn_forward | Mouse wheel down | Forward |
+| vn_quicksave | F5 | Quick save |
+| vn_quickload | F9 | Quick load |
+| vn_alt_click | Right click | Alt click |
+
+Left click always advances the dialog and cannot be rebound. Esc (ui_cancel) and F3 (debug overlay) are also fixed. Players change keys in Settings > Controls. Each action has two slots. A key that is already used by another action is refused.
+
+In code use the constants, e.g. `event.is_action_pressed(VNInput.ADVANCE)`. Main VNInput functions are `rebind(action, slot, event)`, `reset(action)`, `reset_all()`, `get_events(action)`, and `event_label(event)`.

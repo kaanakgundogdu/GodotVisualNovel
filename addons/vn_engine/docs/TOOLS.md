@@ -52,6 +52,9 @@ Add that folder to `.gitignore` if you don't want the report in git.
 
 ## Line ID Tool (`tools/line_id_tool.gd`)
 
+> **Experimental.** I only tested localization with English so far. The tool
+> should work, but it was not used for a real translation yet.
+
 Parses every scenario `.txt` file under the content root and writes
 `locale/line_ids.txt`, one line id per row, sorted.
 
@@ -62,6 +65,9 @@ a line id that existed before is gone now, which usually means a label got
 renamed and the old translation/voice line is now orphaned.
 
 ## Locale CSV Tool (`tools/locale_csv_tool.gd`)
+
+> **Experimental.** I only tested localization with English so far. The tool
+> should work, but it was not used for a real translation yet.
 
 Parses scenario files again and writes `locale/dialog.csv`: one row per
 line id plus one `char.<id>.name` row per non-narrator character.

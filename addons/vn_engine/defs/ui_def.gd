@@ -34,3 +34,13 @@ extends Resource
 @export_group("Log")
 ## If true, backlog speaker names use CastMember.name_color.
 @export var log_use_character_colors: bool = true
+
+@export_group("Custom scenes")
+## Replaces built-in screens with your own scenes. Keys: title, stage,
+## opening, credits, extras, chapter_select, diagnostics, loading. The
+## scene root must extend VNScreen. Missing keys use the engine scene.
+@export var screens: Dictionary[StringName, PackedScene] = {}
+## Replaces built-in overlays with your own scenes. Keys: settings, load,
+## gallery, log, confirm. Keep the same methods and signals as the
+## engine panel you replace.
+@export var overlays: Dictionary[StringName, PackedScene] = {}
