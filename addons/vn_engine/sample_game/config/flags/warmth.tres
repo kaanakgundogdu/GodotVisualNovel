@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="VNEngineFlagDef" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="VNEngineFlagDef" load_steps=2 format=3 uid="uid://dvcat37qo6ujg"]
 
 [ext_resource type="Script" uid="uid://d2dnko38v3qdu" path="res://addons/vn_engine/defs/flag_def.gd" id="1_script"]
 
@@ -10,4 +10,4 @@ default_value = "0"
 scope = "playthrough"
 min_value = -10
 max_value = 10
-debug_name = "Warmth toward Mira"
+debug_name = "Warmth toward Qaan"

@@ -1,7 +1,7 @@
-# Visual Novel Engine for Godot
+# Visual Novel Engine: Testing Ground
 
-This is my Visual Novel Project. This visual novel engine built in Godot 4.4 addon, with sample and example games. 
-It shows different content and gameplay mechanics.
+This is the testing ground for my visual novel engine, a Godot 4.4 addon. I use this project to try the engine with example games, demos and different gameplay mechanics.
+The addon itself will move to its own repository for the Godot Asset Library.
 
 
 ## Devlog
@@ -17,11 +17,11 @@ https://kaanakgundogdu.github.io/blog/VisualNovelGodot/devlog2.html
 
 ### First version v0.1.0
 
-![First version](/readme_files/videos_gifs/vnlearn.gif)
+![First version](/media/v0.1.0.gif)
 
 ### Second version v0.2.0
 
-![Second version](/readme_files/videos_gifs/vn_last_ver.gif)
+![Second version](/media/v0.2.0.gif)
 
 
 ## Repository layout
@@ -39,7 +39,7 @@ https://kaanakgundogdu.github.io/blog/VisualNovelGodot/devlog2.html
 - Title screen with customizable background, music, logo, and cleare variant
 - Chapter-based story flow with auto-save and auto-load save slots
 - Quicksave/quickload with dedicated hotkeys (F5/F9)
-- Multipage settings (display, audio, text, language) with custom page support via `SettingsPanel.register_page()`
+- Multipage settings (display, audio, text, language) with custom page support via `VNEngineSettingsPanel.register_page()`
 - Full extras system: CG gallery, music room, endings list, movie room with locked entry styles
 - Endings with optional ending movies and credits screen (scrolling or video)
 - Backlog (dialog history) with speaker colors and voice replay

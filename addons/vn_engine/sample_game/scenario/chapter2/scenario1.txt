@@ -6,14 +6,14 @@
 Narrator: Chapter two picks up right after chapter one. This part shows a timed choice and two different endings.
 
 # meet2
-Mira: One last thing before you go. Stay a while, or head home?
+Qaan: One last thing before you go. Stay a while, or head home?
 @choice_timer 6 1
 - Stay a while longer. -> stay
 - Head home now. -> leave
 
 # stay
 @flag warmth += 2
-Mira: Good, I like the company. Staying just raised "warmth" again.
+Qaan: Good, I like the company. Staying just raised "warmth" again. This gives plus 2.
 @jump ending_check
 
 # leave
@@ -25,9 +25,9 @@ Narrator: You wave goodbye and step outside. If the timer above had run out, thi
 @jump plain_route
 
 # good_route
-Mira: Thanks for sticking around, it made the tour better.
+Qaan: Thanks for sticking around, it made the tour better. Thank you for using this engine <3
 @end ending_warm
 
 # plain_route
-Mira: Take care out there.
+Qaan: Take care out there.
 @end ending_plain

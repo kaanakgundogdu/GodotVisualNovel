@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_script")
-id = "mira"
-display_name = "Mira"
+id = "qaan"
+display_name = "Qaan"
 name_color = Color(0.6, 0.85, 1, 1)
 is_narrator = false

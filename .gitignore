@@ -1,17 +1,32 @@
-# Godot 4+ specific ignores
+# Godot 4
 .godot/
-.vscode/
+/android/
 
-# Editor temp files
+# Godot 3 leftovers
+.import/
+
+# C# / .NET (if a project ever uses it)
+.mono/
+data_*/
+mono_crash.*.json
+
+# Editor and temp files
+.vscode/
 *.tmp
 *.tscn*.tmp
 
-# Local notes
-kaan_ignore/
+# Export output
+build/
+*.pck
+*.zip
+
+# Addon tool reports (vn_engine/tools/report_dir)
+vn_engine_reports/
 
 # OS
 Thumbs.db
 .DS_Store
+desktop.ini
 
-# Export output
-build/
+# Local notes
+kaan_ignore/
