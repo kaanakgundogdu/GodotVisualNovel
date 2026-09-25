@@ -1,12 +1,12 @@
-class_name DialogUI
+class_name VNEngineDialogUI
 extends Control
 
 const NAME_COLOR_FALLBACK: Color = Color.WHITE
 
-@export var runner: StoryRunner
+@export var runner: VNEngineStoryRunner
 @export var dialog_label: RichTextLabel
 @export var speaker_label: Label
-@export var in_game_buttons: InGameButtons
+@export var in_game_buttons: VNEngineInGameButtons
 @export var choice_ui_root: Control
 
 var is_ui_hidden: bool = false
@@ -68,7 +68,7 @@ func toggle_ui() -> void:
 			choice_ui_root.show()
 
 
-func _on_dialog_started(node: StoryNode) -> void:
+func _on_dialog_started(node: VNEngineStoryNode) -> void:
 	if is_ui_hidden:
 		toggle_ui()
 
@@ -83,7 +83,7 @@ func _on_dialog_started(node: StoryNode) -> void:
 
 	dialog_label.visible_characters = 0
 
-	dialog_label.text = VNText.line_text(node.line_id, node.text)
+	dialog_label.text = VNEngineText.line_text(node.line_id, node.text)
 
 	_maybe_play_auto_voice(node)
 
@@ -104,7 +104,7 @@ func _on_dialog_started(node: StoryNode) -> void:
 
 
 func _apply_speaker(speaker_id: String) -> void:
-	var speaker_text: String = "" if _is_narrator(speaker_id) else VNText.speaker_name(speaker_id)
+	var speaker_text: String = "" if _is_narrator(speaker_id) else VNEngineText.speaker_name(speaker_id)
 	if speaker_text == "":
 		speaker_label.text = ""
 		if name_row:
@@ -131,7 +131,7 @@ func _show_choice_prompt() -> void:
 		if text == "":
 			continue
 		_apply_speaker(String(entry.get("speaker", "")))
-		dialog_label.text = VNText.line_text(String(entry.get("line_id", "")), text)
+		dialog_label.text = VNEngineText.line_text(String(entry.get("line_id", "")), text)
 		break
 
 	dialog_label.visible_characters = -1
@@ -144,11 +144,11 @@ func _on_story_ended() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed(VNInput.HIDE_UI):
+	if event.is_action_pressed(VNEngineInput.HIDE_UI):
 		toggle_ui()
 		return
 
-	if event.is_action_pressed(VNInput.ALT_CLICK):
+	if event.is_action_pressed(VNEngineInput.ALT_CLICK):
 		if _is_overlay_open():
 			return
 		if _is_input_locked():
@@ -157,7 +157,7 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.is_action_released(VNInput.SKIP_HOLD):
+	if event.is_action_released(VNEngineInput.SKIP_HOLD):
 		if _skip_via_hold and runner != null:
 			runner.is_skip = false
 			runner.mode_changed.emit()
@@ -168,17 +168,17 @@ func _input(event: InputEvent) -> void:
 		return
 
 	var input_locked_by_video: bool = runner != null and runner.is_input_locked
-	if is_ui_hidden and not input_locked_by_video and (event.is_action_pressed(VNInput.ADVANCE) or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed)):
+	if is_ui_hidden and not input_locked_by_video and (event.is_action_pressed(VNEngineInput.ADVANCE) or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed)):
 		toggle_ui()
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.is_action_pressed(VNInput.ROLLBACK):
+	if event.is_action_pressed(VNEngineInput.ROLLBACK):
 		if runner:
 			runner.rollback()
 		return
 
-	if event.is_action_pressed(VNInput.FORWARD):
+	if event.is_action_pressed(VNEngineInput.FORWARD):
 		if runner:
 			if runner.history_stack.can_forward():
 				runner.forward()
@@ -186,17 +186,17 @@ func _input(event: InputEvent) -> void:
 				_advance_dialog()
 		return
 
-	if event.is_action_pressed(VNInput.QUICKSAVE):
+	if event.is_action_pressed(VNEngineInput.QUICKSAVE):
 		if runner:
 			VNSave.save_game(runner.state, VNSave.QUICKSAVE_SLOT)
 		return
 
-	if event.is_action_pressed(VNInput.QUICKLOAD):
+	if event.is_action_pressed(VNEngineInput.QUICKLOAD):
 		if runner:
 			runner.execute_load_game(VNSave.QUICKSAVE_SLOT)
 		return
 
-	if event.is_action_pressed(VNInput.SKIP_HOLD):
+	if event.is_action_pressed(VNEngineInput.SKIP_HOLD):
 		if not _is_input_locked() and runner != null and not runner.is_skip:
 			runner.is_skip = true
 			runner.is_auto = false
@@ -204,7 +204,7 @@ func _input(event: InputEvent) -> void:
 			_skip_via_hold = true
 		return
 
-	if event.is_action_pressed(VNInput.AUTO_TOGGLE):
+	if event.is_action_pressed(VNEngineInput.AUTO_TOGGLE):
 		if not _is_input_locked() and runner != null:
 			runner.is_auto = not runner.is_auto
 			if runner.is_auto:
@@ -212,12 +212,12 @@ func _input(event: InputEvent) -> void:
 			runner.mode_changed.emit()
 		return
 
-	if event.is_action_pressed(VNInput.OPEN_LOG):
+	if event.is_action_pressed(VNEngineInput.OPEN_LOG):
 		if not _is_input_locked() and in_game_buttons != null:
 			in_game_buttons.log_requested.emit()
 		return
 
-	if event.is_action_pressed(VNInput.ADVANCE):
+	if event.is_action_pressed(VNEngineInput.ADVANCE):
 		_advance_dialog()
 
 
@@ -227,7 +227,7 @@ func _gui_input(event: InputEvent) -> void:
 		accept_event()
 
 
-func _maybe_play_auto_voice(node: StoryNode) -> void:
+func _maybe_play_auto_voice(node: VNEngineStoryNode) -> void:
 	var has_manual_voice: bool = false
 	for cmd in node.commands:
 		if String(cmd.get("name", "")) == "voice":
@@ -258,7 +258,7 @@ func _maybe_play_auto_voice(node: StoryNode) -> void:
 func _is_narrator(speaker_id: String) -> bool:
 	if speaker_id == "" or runner == null or runner.ctx == null or runner.ctx.characters == null:
 		return false
-	var db: Cast = runner.ctx.characters.cast
+	var db: VNEngineCast = runner.ctx.characters.cast
 	return db != null and db.is_narrator(speaker_id)
 
 
@@ -267,24 +267,24 @@ func _speaker_name_color(speaker_id: String) -> Color:
 		return NAME_COLOR_FALLBACK
 	if runner == null or runner.ctx == null or runner.ctx.characters == null:
 		return NAME_COLOR_FALLBACK
-	var db: Cast = runner.ctx.characters.cast
+	var db: VNEngineCast = runner.ctx.characters.cast
 	if db == null:
 		return NAME_COLOR_FALLBACK
-	var entry: CastMember = db.get_entry(speaker_id)
+	var entry: VNEngineCastMember = db.get_entry(speaker_id)
 	if entry == null:
 		return NAME_COLOR_FALLBACK
 	return entry.name_color
 
 
 func _dialog_use_character_colors() -> bool:
-	var manifest: GameManifest = VNGame.get_manifest()
-	var ui_def: UiDef = manifest.get_ui() if manifest != null else UiDef.new()
+	var manifest: VNEngineGameManifest = VNGame.get_manifest()
+	var ui_def: VNEngineUiDef = manifest.get_ui() if manifest != null else VNEngineUiDef.new()
 	return ui_def.dialog_use_character_colors
 
 
 func _dialog_name_align() -> String:
-	var manifest: GameManifest = VNGame.get_manifest()
-	var ui_def: UiDef = manifest.get_ui() if manifest != null else UiDef.new()
+	var manifest: VNEngineGameManifest = VNGame.get_manifest()
+	var ui_def: VNEngineUiDef = manifest.get_ui() if manifest != null else VNEngineUiDef.new()
 	return ui_def.dialog_name_align
 
 
@@ -369,7 +369,7 @@ func _on_auto_timer_timeout() -> void:
 
 
 func _is_overlay_open() -> bool:
-	return not VNMain.instance().overlay_stack.is_empty()
+	return not VNEngineMain.instance().overlay_stack.is_empty()
 
 
 func _is_input_locked() -> bool:

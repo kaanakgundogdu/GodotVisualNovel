@@ -1,4 +1,4 @@
-class_name CardOverlay
+class_name VNEngineCardOverlay
 extends Control
 
 signal finished
@@ -69,7 +69,7 @@ func open(mode: String, params: Dictionary, duration: float = 2.0, fade_duration
 		MODE_DATECARD:
 			_apply_datecard(params)
 		MODE_MOVIE:
-			var audio: AudioSystem = _get_audio()
+			var audio: VNEngineAudioSystem = _get_audio()
 			if audio != null and not _audio_paused:
 				audio.pause_for_video()
 				_audio_paused = true
@@ -77,7 +77,7 @@ func open(mode: String, params: Dictionary, duration: float = 2.0, fade_duration
 				_fail_and_finish()
 				return
 		_:
-			VNLog.warn("CardOverlay", "Unknown mode: '%s'" % mode)
+			VNEngineLog.warn("CardOverlay", "Unknown mode: '%s'" % mode)
 			_fail_and_finish()
 			return
 
@@ -109,7 +109,7 @@ func _input(event: InputEvent) -> void:
 		var mouse: InputEventMouseButton = event
 		if mouse.pressed and (mouse.button_index == MOUSE_BUTTON_LEFT or mouse.button_index == MOUSE_BUTTON_RIGHT):
 			_start_close()
-	elif event.is_action_pressed(VNInput.ADVANCE):
+	elif event.is_action_pressed(VNEngineInput.ADVANCE):
 		_start_close()
 
 
@@ -152,7 +152,7 @@ func _apply_title(params: Dictionary) -> bool:
 func _apply_image(params: Dictionary) -> bool:
 	var image_path: String = params.get("image_path", "")
 	if image_path == "" or not ResourceLoader.exists(image_path):
-		VNLog.warn("CardOverlay", "Invalid image_path: '%s'" % image_path)
+		VNEngineLog.warn("CardOverlay", "Invalid image_path: '%s'" % image_path)
 		return false
 
 	var texture: Texture2D = load(image_path) as Texture2D
@@ -165,14 +165,14 @@ func _apply_image(params: Dictionary) -> bool:
 func _apply_movie(params: Dictionary) -> bool:
 	var movie_path: String = params.get("movie_path", "")
 	if movie_path == "" or not ResourceLoader.exists(movie_path):
-		VNLog.warn("CardOverlay", "Invalid movie_path: '%s'" % movie_path)
+		VNEngineLog.warn("CardOverlay", "Invalid movie_path: '%s'" % movie_path)
 		return false
 
 	_current_movie_id = params.get("movie_id", "")
 
 	var stream: VideoStream = load(movie_path) as VideoStream
 	if stream == null:
-		VNLog.warn("CardOverlay", "movie_path did not resolve to a VideoStream: '%s'" % movie_path)
+		VNEngineLog.warn("CardOverlay", "movie_path did not resolve to a VideoStream: '%s'" % movie_path)
 		return false
 
 	_reset_video_player_to_fullscreen()
@@ -248,13 +248,13 @@ func _release_audio() -> void:
 	if not _audio_paused:
 		return
 	_audio_paused = false
-	var audio: AudioSystem = _get_audio()
+	var audio: VNEngineAudioSystem = _get_audio()
 	if audio != null:
 		audio.resume_after_video()
 
 
-func _get_audio() -> AudioSystem:
-	var root: VNMain = VNMain.instance()
+func _get_audio() -> VNEngineAudioSystem:
+	var root: VNEngineMain = VNEngineMain.instance()
 	if root == null:
 		return null
 	return root.persistent_audio

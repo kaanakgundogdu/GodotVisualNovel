@@ -1,4 +1,4 @@
-class_name VNScreen
+class_name VNEngineScreen
 extends Control
 
 signal finished(result: Dictionary)

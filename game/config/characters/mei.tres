@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="CastMember" load_steps=2 format=3 uid="uid://clv3ekad4m4nf"]
+[gd_resource type="Resource" script_class="VNEngineCastMember" load_steps=2 format=3 uid="uid://clv3ekad4m4nf"]
 
 [ext_resource type="Script" uid="uid://ctewnvr5khiu6" path="res://addons/vn_engine/defs/cast_member.gd" id="1_script"]
 

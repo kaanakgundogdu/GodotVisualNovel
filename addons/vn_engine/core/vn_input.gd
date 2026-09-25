@@ -1,5 +1,5 @@
 @tool
-class_name VNInput
+class_name VNEngineInput
 extends RefCounted
 
 const ADVANCE := &"vn_advance"

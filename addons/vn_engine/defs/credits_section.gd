@@ -1,5 +1,5 @@
 @tool
-class_name CreditsSection
+class_name VNEngineCreditsSection
 extends Resource
 
 ## Translation key for this role's label, like "credits.role.director".

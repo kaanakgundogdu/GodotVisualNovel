@@ -1,10 +1,10 @@
-class_name CmdCgHide
-extends VNCommand
+class_name VNEngineCmdCgHide
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "cg_hide"
 
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var tokens := args.strip_edges().split(" ", false)
 	var transition := "fade"
 
@@ -17,7 +17,7 @@ func apply(args: String, ctx: CommandContext) -> void:
 			i += 1
 
 	if ctx.state.bg == "":
-		VNLog.warn("CmdCgHide", "No background to return to: '@bg' was never called")
+		VNEngineLog.warn("CmdCgHide", "No background to return to: '@bg' was never called")
 		return
 
 	if ctx.background:

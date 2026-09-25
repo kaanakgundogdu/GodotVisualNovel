@@ -1,5 +1,5 @@
 extends RefCounted
-class_name StoryState
+class_name VNEngineStoryState
 
 
 const MAX_HISTORY := 200

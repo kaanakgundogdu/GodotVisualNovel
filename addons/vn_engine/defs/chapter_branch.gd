@@ -1,5 +1,5 @@
 @tool
-class_name ChapterBranch
+class_name VNEngineChapterBranch
 extends Resource
 
 ## Boolean expression checked against flags, like "affection_hana >= 7

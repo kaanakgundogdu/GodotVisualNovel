@@ -1,5 +1,5 @@
-class_name CmdChapterTitle
-extends VNCommand
+class_name VNEngineCmdChapterTitle
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "chapter_title"
@@ -7,26 +7,26 @@ func command_name() -> String:
 func is_blocking() -> bool:
 	return true
 
-func apply(args: String, ctx: CommandContext) -> void:
-	var tokens: Array[String] = VNCommand.parse_quoted_args(args)
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
+	var tokens: Array[String] = VNEngineCommand.parse_quoted_args(args)
 
 	var title_text := ""
 	var subtitle_text := ""
 	var duration := 2.0
-	var mode: String = CardOverlay.MODE_TITLE
+	var mode: String = VNEngineCardOverlay.MODE_TITLE
 	var card_params: Dictionary = {}
 
 	if tokens.is_empty():
-		var manifest: GameManifest = VNGame.get_manifest()
+		var manifest: VNEngineGameManifest = VNGame.get_manifest()
 		if manifest == null:
-			VNLog.warn("CmdChapterTitle", "VNGame.get_manifest() is null, resolving block immediately")
+			VNEngineLog.warn("CmdChapterTitle", "VNGame.get_manifest() is null, resolving block immediately")
 			if ctx.bus:
 				ctx.bus.resolve_block()
 			return
 
-		var chapter: ChapterDef = manifest.find_chapter(ctx.state.chapter_id)
+		var chapter: VNEngineChapterDef = manifest.find_chapter(ctx.state.chapter_id)
 		if chapter == null:
-			VNLog.warn("CmdChapterTitle", "ChapterDef not found (chapter_id: '%s'), resolving block immediately" % ctx.state.chapter_id)
+			VNEngineLog.warn("CmdChapterTitle", "ChapterDef not found (chapter_id: '%s'), resolving block immediately" % ctx.state.chapter_id)
 			if ctx.bus:
 				ctx.bus.resolve_block()
 			return
@@ -47,10 +47,10 @@ func apply(args: String, ctx: CommandContext) -> void:
 					if image_path == "":
 						image_path = ctx.assets.resolve("background", chapter.intro_background)
 				if image_path != "":
-					mode = CardOverlay.MODE_IMAGE
+					mode = VNEngineCardOverlay.MODE_IMAGE
 					card_params = {"image_path": image_path}
 				else:
-					VNLog.warn("CmdChapterTitle", "intro_style='eyecatch' but intro_background ('%s') could not be resolved, falling back to title card" % chapter.intro_background)
+					VNEngineLog.warn("CmdChapterTitle", "intro_style='eyecatch' but intro_background ('%s') could not be resolved, falling back to title card" % chapter.intro_background)
 	else:
 		title_text = tokens[0]
 		if tokens.size() > 1:
@@ -58,10 +58,10 @@ func apply(args: String, ctx: CommandContext) -> void:
 		if tokens.size() > 2 and tokens[2].is_valid_float():
 			duration = tokens[2].to_float()
 
-	var vn_main: VNMain = VNMain.instance()
-	var overlay: CardOverlay = vn_main.get_card_overlay() if vn_main != null else null
+	var vn_main: VNEngineMain = VNEngineMain.instance()
+	var overlay: VNEngineCardOverlay = vn_main.get_card_overlay() if vn_main != null else null
 	if overlay == null:
-		VNLog.warn("CmdChapterTitle", "CardOverlay not found, resolving block immediately")
+		VNEngineLog.warn("CmdChapterTitle", "CardOverlay not found, resolving block immediately")
 		if ctx.bus:
 			ctx.bus.resolve_block()
 		return

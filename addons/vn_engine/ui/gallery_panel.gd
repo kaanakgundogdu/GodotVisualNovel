@@ -1,4 +1,4 @@
-class_name GalleryPanel
+class_name VNEngineGalleryPanel
 extends ColorRect
 
 signal closed
@@ -14,8 +14,8 @@ const CARD_BORDER: Color = Color(1.0, 1.0, 1.0, 0.1)
 const CARD_BORDER_HOVER: Color = Color(0.45, 0.8, 1.0, 0.5)
 const CARD_BG: Color = Color(0.08, 0.08, 0.12, 0.6)
 
-var _asset_resolver: AssetResolver
-var _extras_def: ExtrasDef = null
+var _asset_resolver: VNEngineAssetResolver
+var _extras_def: VNEngineExtrasDef = null
 var _locked_blur_shader: Shader = preload("res://addons/vn_engine/shaders/locked_blur.gdshader")
 
 var _warned_locked_image: bool = false
@@ -40,11 +40,11 @@ func _ready() -> void:
 	full_image_layer.hide()
 
 
-func set_asset_resolver(resolver: AssetResolver) -> void:
+func set_asset_resolver(resolver: VNEngineAssetResolver) -> void:
 	_asset_resolver = resolver
 
 
-func set_extras_def(def: ExtrasDef) -> void:
+func set_extras_def(def: VNEngineExtrasDef) -> void:
 	_extras_def = def
 
 
@@ -53,8 +53,8 @@ func open_panel() -> void:
 	close_btn.grab_focus()
 
 	if _extras_def == null:
-		var manifest: GameManifest = VNGame.get_manifest()
-		_extras_def = manifest.get_extras() if manifest != null else ExtrasDef.new()
+		var manifest: VNEngineGameManifest = VNGame.get_manifest()
+		_extras_def = manifest.get_extras() if manifest != null else VNEngineExtrasDef.new()
 
 	_populate_gallery()
 
@@ -78,12 +78,12 @@ func _on_full_image_gui_input(event: InputEvent) -> void:
 		_on_close_full_image_pressed()
 
 
-func _build_entries() -> Array[ExtrasItem]:
-	var result: Array[ExtrasItem] = []
-	var configured: Array[ExtrasItem] = _extras_def.gallery_items
+func _build_entries() -> Array[VNEngineExtrasItem]:
+	var result: Array[VNEngineExtrasItem] = []
+	var configured: Array[VNEngineExtrasItem] = _extras_def.gallery_items
 
 	if not configured.is_empty():
-		for item: ExtrasItem in configured:
+		for item: VNEngineExtrasItem in configured:
 			if item == null or item.id == "":
 				continue
 			if _asset_resolver.resolve("cg", item.id) == "":
@@ -92,7 +92,7 @@ func _build_entries() -> Array[ExtrasItem]:
 		return result
 
 	for id: String in _asset_resolver.list_all("cg"):
-		var default_item: ExtrasItem = ExtrasItem.new()
+		var default_item: VNEngineExtrasItem = VNEngineExtrasItem.new()
 		default_item.id = id
 		result.append(default_item)
 	return result
@@ -102,7 +102,7 @@ func _populate_gallery() -> void:
 	_clear_grid()
 
 	var unlocked_cgs: Dictionary = VNSave.global_data.get("unlocked_cgs", {})
-	var entries: Array[ExtrasItem] = _build_entries()
+	var entries: Array[VNEngineExtrasItem] = _build_entries()
 
 	if entries.is_empty():
 		_show_empty_state(true)
@@ -112,7 +112,7 @@ func _populate_gallery() -> void:
 	_show_empty_state(false)
 
 	var unlocked_count := 0
-	for item: ExtrasItem in entries:
+	for item: VNEngineExtrasItem in entries:
 		var is_unlocked: bool = unlocked_cgs.has(item.id)
 		if is_unlocked:
 			unlocked_count += 1
@@ -134,7 +134,7 @@ func _show_empty_state(is_empty: bool) -> void:
 	gallery_scroll.visible = not is_empty
 
 
-func _create_gallery_button(item: ExtrasItem, cg_path: String, is_unlocked: bool) -> void:
+func _create_gallery_button(item: VNEngineExtrasItem, cg_path: String, is_unlocked: bool) -> void:
 	var btn := Button.new()
 	btn.custom_minimum_size = CARD_SIZE
 	btn.clip_contents = true
@@ -162,7 +162,7 @@ func _create_gallery_button(item: ExtrasItem, cg_path: String, is_unlocked: bool
 	grid_container.add_child(btn)
 
 
-func _build_locked_card(btn: Button, item: ExtrasItem, cg_path: String, inset: MarginContainer) -> void:
+func _build_locked_card(btn: Button, item: VNEngineExtrasItem, cg_path: String, inset: MarginContainer) -> void:
 	var style: String = item.locked_style if item.locked_style != "default" else _extras_def.locked_style
 	match style:
 		"blur":
@@ -173,7 +173,7 @@ func _build_locked_card(btn: Button, item: ExtrasItem, cg_path: String, inset: M
 			_build_placeholder_lock_card(btn, item, inset)
 
 
-func _build_placeholder_lock_card(btn: Button, item: ExtrasItem, inset: MarginContainer) -> void:
+func _build_placeholder_lock_card(btn: Button, item: VNEngineExtrasItem, inset: MarginContainer) -> void:
 	btn.disabled = true
 
 	var lock_bg := ColorRect.new()
@@ -192,7 +192,7 @@ func _build_placeholder_lock_card(btn: Button, item: ExtrasItem, inset: MarginCo
 	inset.add_child(lock_label)
 
 
-func _build_blur_lock_card(btn: Button, item: ExtrasItem, cg_path: String, inset: MarginContainer) -> void:
+func _build_blur_lock_card(btn: Button, item: VNEngineExtrasItem, cg_path: String, inset: MarginContainer) -> void:
 	var source_path: String = item.thumbnail if item.thumbnail != "" else cg_path
 	var tex: Texture2D = load(source_path) as Texture2D
 	if tex == null:
@@ -232,7 +232,7 @@ func _build_blur_lock_card(btn: Button, item: ExtrasItem, cg_path: String, inset
 	inset.add_child(lock_badge)
 
 
-func _build_image_lock_card(btn: Button, item: ExtrasItem, inset: MarginContainer) -> void:
+func _build_image_lock_card(btn: Button, item: VNEngineExtrasItem, inset: MarginContainer) -> void:
 	var locked_image_path: String = _extras_def.locked_image
 	var tex: Texture2D = null
 	if locked_image_path != "" and ResourceLoader.exists(locked_image_path):
@@ -241,7 +241,7 @@ func _build_image_lock_card(btn: Button, item: ExtrasItem, inset: MarginContaine
 	if tex == null:
 		if locked_image_path != "" and not _warned_locked_image:
 			_warned_locked_image = true
-			VNLog.warn("GalleryPanel", "ExtrasDef.locked_image '%s' not found or failed to load, falling back to placeholder style" % locked_image_path)
+			VNEngineLog.warn("GalleryPanel", "ExtrasDef.locked_image '%s' not found or failed to load, falling back to placeholder style" % locked_image_path)
 		_build_placeholder_lock_card(btn, item, inset)
 		return
 

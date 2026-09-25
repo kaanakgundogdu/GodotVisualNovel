@@ -1,10 +1,10 @@
-class_name VideoSystem
+class_name VNEngineVideoSystem
 extends VideoStreamPlayer
 
 const TEXTURE_WAIT_FRAMES: int = 10
 
-@export var runner: StoryRunner
-@export var dialog_ui: DialogUI
+@export var runner: VNEngineStoryRunner
+@export var dialog_ui: VNEngineDialogUI
 
 var _letterbox: ColorRect = null
 
@@ -18,7 +18,7 @@ func _ready() -> void:
 	if AudioServer.get_bus_index("Music") != -1:
 		bus = "Music"
 	else:
-		VNLog.warn("VideoSystem", "'Music' audio bus not found, video audio stays on 'Master'")
+		VNEngineLog.warn("VideoSystem", "'Music' audio bus not found, video audio stays on 'Master'")
 
 	finished.connect(_on_video_finished)
 
@@ -31,7 +31,7 @@ func play_movie(movie_name: String) -> void:
 	if runner and runner.ctx and runner.ctx.assets:
 		path = runner.ctx.assets.resolve("movie", movie_name)
 	else:
-		VNLog.warn("VideoSystem", "AssetResolver unavailable (no runner/ctx/assets), skipping video: %s" % movie_name)
+		VNEngineLog.warn("VideoSystem", "AssetResolver unavailable (no runner/ctx/assets), skipping video: %s" % movie_name)
 
 	if path == "":
 		if runner:
@@ -40,7 +40,7 @@ func play_movie(movie_name: String) -> void:
 
 	stream = load(path) as VideoStream
 
-	var audio: AudioSystem = _get_audio()
+	var audio: VNEngineAudioSystem = _get_audio()
 	if audio != null:
 		audio.pause_for_video()
 
@@ -81,7 +81,7 @@ func _on_video_finished() -> void:
 	if dialog_ui and dialog_ui.is_ui_hidden:
 		dialog_ui.toggle_ui()
 
-	var audio: AudioSystem = _get_audio()
+	var audio: VNEngineAudioSystem = _get_audio()
 	if audio != null:
 		audio.resume_after_video()
 
@@ -90,12 +90,12 @@ func _on_video_finished() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if is_playing() and event.is_action_pressed(VNInput.ADVANCE):
+	if is_playing() and event.is_action_pressed(VNEngineInput.ADVANCE):
 		stop()
 		_on_video_finished()
 
 
-func _get_audio() -> AudioSystem:
+func _get_audio() -> VNEngineAudioSystem:
 	if runner and runner.ctx:
 		return runner.ctx.audio
 	return null

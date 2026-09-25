@@ -1,4 +1,4 @@
-class_name CastMember
+class_name VNEngineCastMember
 extends Resource
 
 @export_group("Identity")

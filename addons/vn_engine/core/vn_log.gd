@@ -1,5 +1,5 @@
 @tool
-class_name VNLog
+class_name VNEngineLog
 extends RefCounted
 
 const SETTING_VERBOSE := "vn_engine/debug/verbose_log"

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bxihj38thgmmg"]
+
+[ext_resource type="Script" uid="uid://ccuk6b3auubev" path="res://addons/vn_engine/sample_game/play_sample_game.gd" id="1_script"]
+
+[node name="PlaySampleGame" type="Node"]
+script = ExtResource("1_script")

@@ -1,13 +1,13 @@
 @tool
-class_name NamingConventionRule
-extends AssetLintRule
+class_name VNEngineNamingConventionRule
+extends VNEngineAssetLintRule
 
 
 func title() -> String:
 	return "1. Naming violations"
 
 
-func run(ctx: AssetLintContext) -> void:
+func run(ctx: VNEngineAssetLintContext) -> void:
 	var kind_regex: Dictionary = {
 		"background": ctx.rx_bg,
 		"cg": ctx.rx_cg,

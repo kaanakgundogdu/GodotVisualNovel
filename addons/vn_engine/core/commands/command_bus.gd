@@ -1,4 +1,4 @@
-class_name CommandBus
+class_name VNEngineCommandBus
 extends RefCounted
 
 signal blocked_finished
@@ -7,7 +7,7 @@ var _commands: Dictionary = {}
 var _pending_block: bool = false
 
 
-func register(cmd: VNCommand) -> void:
+func register(cmd: VNEngineCommand) -> void:
 	_commands[cmd.command_name()] = cmd
 
 
@@ -17,12 +17,12 @@ func known_commands() -> Array[String]:
 		out.append(cmd_name)
 	return out
 
-func apply(name: String, args: String, ctx: CommandContext) -> void:
+func apply(name: String, args: String, ctx: VNEngineCommandContext) -> void:
 	if not _commands.has(name):
-		VNLog.warn("CommandBus", "Unknown command, skipping: '@%s'" % name)
+		VNEngineLog.warn("CommandBus", "Unknown command, skipping: '@%s'" % name)
 		return
 
-	var cmd: VNCommand = _commands[name]
+	var cmd: VNEngineCommand = _commands[name]
 
 	if cmd.is_blocking():
 		_pending_block = true

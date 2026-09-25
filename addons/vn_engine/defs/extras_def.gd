@@ -1,5 +1,5 @@
 @tool
-class_name ExtrasDef
+class_name VNEngineExtrasDef
 extends Resource
 
 @export_group("Rooms")
@@ -29,8 +29,8 @@ extends Resource
 
 @export_group("Entries")
 ## CG gallery entries. Empty shows every "cg" id from the asset map.
-@export var gallery_items: Array[ExtrasItem] = []
+@export var gallery_items: Array[VNEngineExtrasItem] = []
 ## Music room entries. Empty shows every "music" id from the asset map.
-@export var music_items: Array[ExtrasItem] = []
+@export var music_items: Array[VNEngineExtrasItem] = []
 ## Movie room entries. Empty shows every "movie" id from the asset map.
-@export var movie_items: Array[ExtrasItem] = []
+@export var movie_items: Array[VNEngineExtrasItem] = []

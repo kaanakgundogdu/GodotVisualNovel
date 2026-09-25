@@ -1,5 +1,5 @@
 @tool
-class_name FlagDef
+class_name VNEngineFlagDef
 extends Resource
 
 ## Flag id, like "affection_hana". Should be lowercase, the linter

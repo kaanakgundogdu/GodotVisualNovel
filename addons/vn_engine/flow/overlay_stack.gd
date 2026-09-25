@@ -1,4 +1,4 @@
-class_name OverlayStack
+class_name VNEngineOverlayStack
 extends RefCounted
 const BUILTIN_OVERLAYS: Dictionary = {
 	&"settings": "res://addons/vn_engine/ui/scenes/settings_panel.tscn",
@@ -6,18 +6,21 @@ const BUILTIN_OVERLAYS: Dictionary = {
 	&"gallery": "res://addons/vn_engine/ui/scenes/gallery_panel.tscn",
 	&"log": "res://addons/vn_engine/ui/scenes/log_ui.tscn",
 	&"confirm": "res://addons/vn_engine/ui/scenes/confirm_dialog.tscn",
+	&"game_menu": "res://addons/vn_engine/ui/scenes/game_menu.tscn",
 }
 
 var _layer: CanvasLayer
-var _screen_stack: ScreenStack
+var _screen_stack: VNEngineScreenStack
 var _overrides: Dictionary = {}
+var _theme: Theme = null
 var _stack: Array[Control] = []
 
 
-func _init(layer: CanvasLayer, screen_stack: ScreenStack, overrides: Dictionary = {}) -> void:
+func _init(layer: CanvasLayer, screen_stack: VNEngineScreenStack, overrides: Dictionary = {}, theme: Theme = null) -> void:
 	_layer = layer
 	_screen_stack = screen_stack
 	_overrides = overrides
+	_theme = theme
 
 
 func scene_for(id: StringName) -> PackedScene:
@@ -42,11 +45,15 @@ func top_overlay() -> Control:
 func open_overlay(id: StringName, params: Dictionary = {}) -> Control:
 	var scene: PackedScene = scene_for(id)
 	if scene == null:
-		VNLog.warn("OverlayStack", "Unknown overlay id: '%s'" % id)
+		VNEngineLog.warn("OverlayStack", "Unknown overlay id: '%s'" % id)
+		return null
+
+	var current: VNEngineScreen = _screen_stack.current_screen()
+	if current != null and not current.allows_overlay(id):
+		VNEngineLog.warn("OverlayStack", "Overlay '%s' not allowed on screen '%s'" % [id, current.screen_id()])
 		return null
 
 	if _stack.is_empty():
-		var current: VNScreen = _screen_stack.current_screen()
 		if current != null:
 			current.on_blur()
 	else:
@@ -56,11 +63,14 @@ func open_overlay(id: StringName, params: Dictionary = {}) -> Control:
 
 	var overlay: Control = scene.instantiate() as Control
 
+	if _theme != null and overlay.theme == null:
+		overlay.theme = _theme
+
 	_layer.add_child(overlay)
 
 	if overlay is ColorRect:
-		var manifest: GameManifest = VNGame.get_manifest()
-		var ui_def: UiDef = manifest.get_ui() if manifest != null else UiDef.new()
+		var manifest: VNEngineGameManifest = VNGame.get_manifest()
+		var ui_def: VNEngineUiDef = manifest.get_ui() if manifest != null else VNEngineUiDef.new()
 		(overlay as ColorRect).color = ui_def.overlay_backdrop_color
 
 	if params.has("asset_resolver") and overlay.has_method("set_asset_resolver"):
@@ -86,6 +96,11 @@ func open_overlay(id: StringName, params: Dictionary = {}) -> Control:
 	return overlay
 
 
+func close_all() -> void:
+	while not _stack.is_empty():
+		close_overlay()
+
+
 func close_overlay() -> void:
 	if _stack.is_empty():
 		return
@@ -95,7 +110,7 @@ func close_overlay() -> void:
 	top.queue_free()
 
 	if _stack.is_empty():
-		var current: VNScreen = _screen_stack.current_screen()
+		var current: VNEngineScreen = _screen_stack.current_screen()
 		if current != null:
 			current.on_focus()
 	else:

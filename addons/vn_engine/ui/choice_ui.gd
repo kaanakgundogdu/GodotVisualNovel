@@ -1,11 +1,11 @@
-class_name ChoiceUI
+class_name VNEngineChoiceUI
 extends Control
 
-@export var runner: StoryRunner
+@export var runner: VNEngineStoryRunner
 @export var button_container: VBoxContainer
 
 var _choice_timer: Timer = null
-var _choice_timer_target: ChoiceOption = null
+var _choice_timer_target: VNEngineChoiceOption = null
 var _choice_timer_bar: ProgressBar = null
 var _choice_timer_label: Label = null
 
@@ -43,12 +43,12 @@ func _process(_delta: float) -> void:
 		_choice_timer_bar.value = remaining
 
 
-func _on_state_restored(_state: StoryState) -> void:
+func _on_state_restored(_state: VNEngineStoryState) -> void:
 	hide()
 	_clear_buttons()
 
 
-func _on_choices_requested(choices: Array[ChoiceOption]) -> void:
+func _on_choices_requested(choices: Array[VNEngineChoiceOption]) -> void:
 	var choice_timer_data: Dictionary = {}
 	if runner:
 		choice_timer_data = runner.pending_choice_timer
@@ -61,7 +61,7 @@ func _on_choices_requested(choices: Array[ChoiceOption]) -> void:
 		vars = runner.state.flags
 
 	var created_labels: Array[RichTextLabel] = []
-	var visible_choices: Array[ChoiceOption] = []
+	var visible_choices: Array[VNEngineChoiceOption] = []
 
 	var box_width: float = 1100.0
 	if button_container:
@@ -72,7 +72,7 @@ func _on_choices_requested(choices: Array[ChoiceOption]) -> void:
 		if choice.once and runner and runner.state and runner.state.seen_choices.has(_choice_key(choice)):
 			continue
 
-		if choice.condition != "" and not ExpressionEvaluator.evaluate(choice.condition, vars):
+		if choice.condition != "" and not VNEngineExpressionEvaluator.evaluate(choice.condition, vars):
 			continue
 
 		visible_choices.append(choice)
@@ -95,7 +95,7 @@ func _on_choices_requested(choices: Array[ChoiceOption]) -> void:
 		btn.add_child(label)
 		created_labels.append(label)
 
-		if choice.disabled_if != "" and ExpressionEvaluator.evaluate(choice.disabled_if, vars):
+		if choice.disabled_if != "" and VNEngineExpressionEvaluator.evaluate(choice.disabled_if, vars):
 			btn.disabled = true
 
 		btn.pressed.connect(_on_button_pressed.bind(choice))
@@ -105,7 +105,7 @@ func _on_choices_requested(choices: Array[ChoiceOption]) -> void:
 		var timer_seconds: float = float(choice_timer_data.get("seconds", 0.0))
 		var default_index: int = int(choice_timer_data.get("default_index", 0))
 		if default_index < 0 or default_index >= visible_choices.size():
-			VNLog.warn("ChoiceUI", "'@choice_timer' default_index (%d) is out of range, clamping to the last choice" % default_index)
+			VNEngineLog.warn("ChoiceUI", "'@choice_timer' default_index (%d) is out of range, clamping to the last choice" % default_index)
 			default_index = visible_choices.size() - 1
 
 		_choice_timer_target = visible_choices[default_index]
@@ -129,7 +129,7 @@ func _on_choices_requested(choices: Array[ChoiceOption]) -> void:
 	show.call_deferred()
 
 
-func _on_button_pressed(choice: ChoiceOption) -> void:
+func _on_button_pressed(choice: VNEngineChoiceOption) -> void:
 	hide()
 	_clear_buttons()
 
@@ -152,7 +152,7 @@ func _clear_buttons() -> void:
 		child.queue_free()
 
 
-func _choice_key(choice: ChoiceOption) -> String:
+func _choice_key(choice: VNEngineChoiceOption) -> String:
 	var file := ""
 	if runner and runner.state:
 		file = runner.state.current_file
@@ -162,6 +162,6 @@ func _choice_key(choice: ChoiceOption) -> String:
 func _on_choice_timer_timeout() -> void:
 	if _choice_timer_target == null:
 		return
-	var target: ChoiceOption = _choice_timer_target
+	var target: VNEngineChoiceOption = _choice_timer_target
 	_choice_timer_target = null
 	_on_button_pressed(target)

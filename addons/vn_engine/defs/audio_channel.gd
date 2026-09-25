@@ -1,4 +1,4 @@
-class_name AudioChannel
+class_name VNEngineAudioChannel
 extends Resource
 
 ## Command name used in the script, like "music" or "sfx".

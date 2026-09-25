@@ -1,5 +1,5 @@
-class_name CmdTransition
-extends VNCommand
+class_name VNEngineCmdTransition
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "transition"
@@ -7,10 +7,10 @@ func command_name() -> String:
 func is_blocking() -> bool:
 	return true
 
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var tokens := args.strip_edges().split(" ", false)
 	if tokens.is_empty():
-		VNLog.warn("CmdTransition", "Missing argument: '@transition' expects a transition kind")
+		VNEngineLog.warn("CmdTransition", "Missing argument: '@transition' expects a transition kind")
 		if ctx.bus:
 			ctx.bus.resolve_block()
 		return
@@ -20,16 +20,16 @@ func apply(args: String, ctx: CommandContext) -> void:
 	if tokens.size() > 1 and tokens[1].is_valid_float():
 		duration = tokens[1].to_float()
 
-	var vn_main: VNMain = VNMain.instance()
+	var vn_main: VNEngineMain = VNEngineMain.instance()
 	if vn_main == null:
-		VNLog.warn("CmdTransition", "VNMain not found, resolving block immediately")
+		VNEngineLog.warn("CmdTransition", "VNMain not found, resolving block immediately")
 		if ctx.bus:
 			ctx.bus.resolve_block()
 		return
 
-	var transition_player: TransitionPlayer = vn_main.get_node_or_null("TransitionLayer/TransitionOverlay") as TransitionPlayer
+	var transition_player: VNEngineTransitionPlayer = vn_main.get_node_or_null("TransitionLayer/TransitionOverlay") as VNEngineTransitionPlayer
 	if transition_player == null:
-		VNLog.warn("CmdTransition", "TransitionPlayer not found, resolving block immediately")
+		VNEngineLog.warn("CmdTransition", "TransitionPlayer not found, resolving block immediately")
 		if ctx.bus:
 			ctx.bus.resolve_block()
 		return

@@ -1,19 +1,19 @@
 @tool
-class_name UnmatchedVoiceRule
-extends AssetLintRule
+class_name VNEngineUnmatchedVoiceRule
+extends VNEngineAssetLintRule
 
 
 func title() -> String:
 	return "6. Unidentified voice lines"
 
 
-func run(ctx: AssetLintContext) -> void:
-	if not FileAccess.file_exists(VNPaths.line_ids()):
+func run(ctx: VNEngineAssetLintContext) -> void:
+	if not FileAccess.file_exists(VNEnginePaths.line_ids()):
 		ctx.info("line_ids.txt has not been generated yet (run line_id_tool) -- expected, 0 findings")
 		return
 
 	var line_ids: Dictionary = {}
-	var line_ids_file: FileAccess = FileAccess.open(VNPaths.line_ids(), FileAccess.READ)
+	var line_ids_file: FileAccess = FileAccess.open(VNEnginePaths.line_ids(), FileAccess.READ)
 	if line_ids_file:
 		while not line_ids_file.eof_reached():
 			var line: String = line_ids_file.get_line().strip_edges()
@@ -23,7 +23,7 @@ func run(ctx: AssetLintContext) -> void:
 
 	var voices_root: String = ""
 	if ctx.asset_map != null:
-		for entry: AssetMapEntry in ctx.asset_map.entries:
+		for entry: VNEngineAssetMapEntry in ctx.asset_map.entries:
 			if entry != null and entry.kind == "voice":
 				voices_root = entry.root
 	if voices_root == "":

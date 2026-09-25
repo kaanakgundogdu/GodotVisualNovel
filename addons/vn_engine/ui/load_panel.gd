@@ -1,4 +1,4 @@
-class_name LoadPanel
+class_name VNEngineLoadPanel
 extends ColorRect
 
 signal closed
@@ -176,8 +176,8 @@ func _on_slot_pressed(slot_id: int) -> void:
 
 func _handle_save_slot_pressed(slot_id: int) -> void:
 	var occupied: bool = VNSave.get_slot_status(slot_id) != VNSave.SlotStatus.EMPTY
-	var manifest: GameManifest = VNGame.get_manifest()
-	var ui_def: UiDef = manifest.get_ui() if manifest != null else UiDef.new()
+	var manifest: VNEngineGameManifest = VNGame.get_manifest()
+	var ui_def: VNEngineUiDef = manifest.get_ui() if manifest != null else VNEngineUiDef.new()
 
 	if not (occupied and ui_def.confirm_overwrite_save):
 		save_requested.emit(slot_id)
@@ -210,4 +210,11 @@ func _most_recent_quick_slot() -> int:
 
 
 func _slot_modified_time(slot_id: int) -> int:
-	return FileAccess.get_modified_time(VNSave.slot_path(slot_id))
+	var path: String = VNSave.slot_path(slot_id)
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if file != null:
+		var parsed: Variant = JSON.parse_string(file.get_as_text())
+		file.close()
+		if parsed is Dictionary and parsed.has("saved_at"):
+			return int(parsed["saved_at"])
+	return FileAccess.get_modified_time(path)

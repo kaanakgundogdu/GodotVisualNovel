@@ -1,5 +1,5 @@
 @tool
-class_name BootScreenDef
+class_name VNEngineBootScreenDef
 extends Resource
 
 ## Set to false to skip this step without deleting it.

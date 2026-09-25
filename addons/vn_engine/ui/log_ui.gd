@@ -1,4 +1,4 @@
-class_name LogUI
+class_name VNEngineLogUI
 extends ColorRect
 
 signal closed
@@ -7,7 +7,7 @@ const NARRATOR_DIM := 0.8
 const DEFAULT_ACCENT_COLOR := Color(0.85, 0.78, 1.0)
 const SEPARATOR_COLOR := Color(1.0, 1.0, 1.0, 0.12)
 
-@export var runner: StoryRunner
+@export var runner: VNEngineStoryRunner
 
 @onready var close_btn: Button = %CloseLogButton
 @onready var scroll_container: ScrollContainer = %ScrollContainer
@@ -22,7 +22,7 @@ func _ready() -> void:
 		runner.state_restored.connect(_on_state_restored)
 
 
-func set_runner(r: StoryRunner) -> void:
+func set_runner(r: VNEngineStoryRunner) -> void:
 	if runner == r:
 		return
 	runner = r
@@ -87,8 +87,8 @@ func _build_entry(entry: Dictionary) -> Control:
 	var text_raw: String = String(entry.get("text", ""))
 
 	var is_narrator: bool = true
-	var char_entry: CastMember = null
-	var db: Cast = _cast()
+	var char_entry: VNEngineCastMember = null
+	var db: VNEngineCast = _cast()
 	if speaker_id != "":
 		if db != null:
 			is_narrator = db.is_narrator(speaker_id)
@@ -109,7 +109,7 @@ func _build_entry(entry: Dictionary) -> Control:
 	text_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
-	var display_text: String = VNText.line_text(line_id, text_raw)
+	var display_text: String = VNEngineText.line_text(line_id, text_raw)
 	if is_narrator or speaker_id == "":
 		text_label.text = "[i]%s[/i]" % display_text
 		text_label.modulate = Color(1.0, 1.0, 1.0, NARRATOR_DIM)
@@ -120,12 +120,12 @@ func _build_entry(entry: Dictionary) -> Control:
 	return container
 
 
-func _build_name_row(speaker_id: String, line_id: String, char_entry: CastMember) -> Control:
+func _build_name_row(speaker_id: String, line_id: String, char_entry: VNEngineCastMember) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 
 	var name_label := Label.new()
-	name_label.text = VNText.speaker_name(speaker_id)
+	name_label.text = VNEngineText.speaker_name(speaker_id)
 	name_label.add_theme_constant_override("outline_size", 4)
 	name_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.55))
 	name_label.add_theme_color_override("font_color", _name_color(char_entry))
@@ -143,20 +143,20 @@ func _build_name_row(speaker_id: String, line_id: String, char_entry: CastMember
 	return row
 
 
-func _name_color(char_entry: CastMember) -> Color:
+func _name_color(char_entry: VNEngineCastMember) -> Color:
 	if char_entry != null and _log_use_character_colors():
 		return char_entry.name_color
 	return DEFAULT_ACCENT_COLOR
 
 
 func _log_use_character_colors() -> bool:
-	var manifest: GameManifest = VNGame.get_manifest()
+	var manifest: VNEngineGameManifest = VNGame.get_manifest()
 	if manifest == null:
 		return true
 	return manifest.get_ui().log_use_character_colors
 
 
-func _cast() -> Cast:
+func _cast() -> VNEngineCast:
 	if runner == null or runner.ctx == null or runner.ctx.characters == null:
 		return null
 	return runner.ctx.characters.cast
@@ -165,7 +165,7 @@ func _cast() -> Cast:
 func _resolve_voice_path(speaker_id: String, line_id: String) -> String:
 	if speaker_id == "" or line_id == "":
 		return ""
-	var db: Cast = _cast()
+	var db: VNEngineCast = _cast()
 	if db == null or db.is_narrator(speaker_id):
 		return ""
 	if runner.ctx.assets == null:
@@ -182,7 +182,7 @@ func _on_play_voice(speaker_id: String, line_id: String) -> void:
 	runner.ctx.audio.play_channel("voice", voice_file_name, speaker_id)
 
 
-func _on_state_restored(_state: StoryState) -> void:
+func _on_state_restored(_state: VNEngineStoryState) -> void:
 	if visible:
 		_rebuild()
 

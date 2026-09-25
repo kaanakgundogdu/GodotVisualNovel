@@ -1,5 +1,5 @@
 @tool
-class_name UiDef
+class_name VNEngineUiDef
 extends Resource
 
 @export_group("Overlays")
@@ -11,6 +11,8 @@ extends Resource
 @export var confirm_quit: bool = true
 ## If true, asks the player to confirm before overwriting an existing save.
 @export var confirm_overwrite_save: bool = true
+## If true, asks the player to confirm before going back to the title screen from the game menu.
+@export var confirm_return_to_title: bool = true
 
 @export_group("Dialog box")
 ## If true, the speaker name uses CastMember.name_color.
@@ -41,6 +43,6 @@ extends Resource
 ## scene root must extend VNScreen. Missing keys use the engine scene.
 @export var screens: Dictionary[StringName, PackedScene] = {}
 ## Replaces built-in overlays with your own scenes. Keys: settings, load,
-## gallery, log, confirm. Keep the same methods and signals as the
-## engine panel you replace.
+## gallery, log, confirm, game_menu. Keep the same methods and signals as
+## the engine panel you replace.
 @export var overlays: Dictionary[StringName, PackedScene] = {}

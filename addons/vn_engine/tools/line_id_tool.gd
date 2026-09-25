@@ -4,12 +4,12 @@ extends EditorScript
 
 func _run() -> void:
 	var txt_files: Array[String] = []
-	_collect_txt_files(VNPaths.scenario_root(), txt_files)
+	_collect_txt_files(VNEnginePaths.scenario_root(), txt_files)
 	txt_files.sort()
 
 	var current_ids: Array[String] = []
 	for path in txt_files:
-		var story: StoryScript = ScenarioParser.parse_file(path)
+		var story: VNEngineStoryScript = VNEngineScenarioParser.parse_file(path)
 		for node in story.nodes:
 			if node.line_id != "":
 				current_ids.append(node.line_id)
@@ -19,7 +19,7 @@ func _run() -> void:
 
 	current_ids.sort()
 
-	var previous_ids: Array[String] = _read_previous_ids(VNPaths.line_ids())
+	var previous_ids: Array[String] = _read_previous_ids(VNEnginePaths.line_ids())
 	var current_set: Dictionary = {}
 	for id in current_ids:
 		current_set[id] = true
@@ -27,12 +27,12 @@ func _run() -> void:
 	var warning_count := 0
 	for old_id in previous_ids:
 		if not current_set.has(old_id):
-			VNLog.warn("LineIdTool", "'%s' is no longer produced, did a label change?" % old_id)
+			VNEngineLog.warn("LineIdTool", "'%s' is no longer produced, did a label change?" % old_id)
 			warning_count += 1
 
-	_write_ids(VNPaths.line_ids(), current_ids)
+	_write_ids(VNEnginePaths.line_ids(), current_ids)
 
-	VNLog.info("LineIdTool", "%d file(s) scanned, %d id(s) generated, %d id(s) lost (warning)." % [txt_files.size(), current_ids.size(), warning_count])
+	VNEngineLog.info("LineIdTool", "%d file(s) scanned, %d id(s) generated, %d id(s) lost (warning)." % [txt_files.size(), current_ids.size(), warning_count])
 
 
 func _collect_txt_files(dir_path: String, out: Array[String]) -> void:
@@ -78,12 +78,12 @@ func _read_previous_ids(path: String) -> Array[String]:
 
 
 func _write_ids(path: String, ids: Array[String]) -> void:
-	if not DirAccess.dir_exists_absolute(VNPaths.locale_dir()):
-		DirAccess.make_dir_recursive_absolute(VNPaths.locale_dir())
+	if not DirAccess.dir_exists_absolute(VNEnginePaths.locale_dir()):
+		DirAccess.make_dir_recursive_absolute(VNEnginePaths.locale_dir())
 
 	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
-		VNLog.error("LineIdTool", "Could not write '%s' (error code %d)" % [path, FileAccess.get_open_error()])
+		VNEngineLog.error("LineIdTool", "Could not write '%s' (error code %d)" % [path, FileAccess.get_open_error()])
 		return
 
 	for id in ids:

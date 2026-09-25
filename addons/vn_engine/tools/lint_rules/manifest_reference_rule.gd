@@ -1,14 +1,14 @@
 @tool
-class_name ManifestReferenceRule
-extends AssetLintRule
+class_name VNEngineManifestReferenceRule
+extends VNEngineAssetLintRule
 
 
 func title() -> String:
 	return "9. Manifest references"
 
 
-func run(ctx: AssetLintContext) -> void:
-	var manifest: GameManifest = ctx.manifest
+func run(ctx: VNEngineAssetLintContext) -> void:
+	var manifest: VNEngineGameManifest = ctx.manifest
 	if manifest == null:
 		ctx.info("GameManifest could not be loaded, rule skipped")
 		return

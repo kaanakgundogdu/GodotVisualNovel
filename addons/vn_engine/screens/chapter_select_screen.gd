@@ -1,5 +1,5 @@
-class_name ChapterSelectScreen
-extends VNScreen
+class_name VNEngineChapterSelectScreen
+extends VNEngineScreen
 
 
 const LOCKED_TEXT: String = "🔒 ???"
@@ -45,7 +45,7 @@ func _on_back_pressed() -> void:
 func _populate_chapters() -> void:
 	_clear_list()
 
-	var manifest: GameManifest = VNGame.get_manifest()
+	var manifest: VNEngineGameManifest = VNGame.get_manifest()
 	if manifest == null:
 		empty_label.text = "Chapter list unavailable (manifest not found)."
 		empty_label.show()
@@ -71,15 +71,15 @@ func _clear_list() -> void:
 		child.queue_free()
 
 
-func _is_unlocked(chapter: ChapterDef, flags: Dictionary) -> bool:
+func _is_unlocked(chapter: VNEngineChapterDef, flags: Dictionary) -> bool:
 	if OS.is_debug_build():
 		return true
 	if chapter.unlock_condition == "":
 		return true
-	return ExpressionEvaluator.evaluate(chapter.unlock_condition, flags)
+	return VNEngineExpressionEvaluator.evaluate(chapter.unlock_condition, flags)
 
 
-func _display_name(chapter: ChapterDef) -> String:
+func _display_name(chapter: VNEngineChapterDef) -> String:
 	if chapter.title_key == "":
 		return chapter.id
 	return tr(chapter.title_key)
@@ -96,7 +96,7 @@ func _card_style(bg: Color, border: Color) -> StyleBoxFlat:
 	return sb
 
 
-func _create_chapter_button(chapter: ChapterDef, flags: Dictionary) -> void:
+func _create_chapter_button(chapter: VNEngineChapterDef, flags: Dictionary) -> void:
 	var unlocked: bool = _is_unlocked(chapter, flags)
 
 	var btn := Button.new()

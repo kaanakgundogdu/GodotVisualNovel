@@ -1,9 +1,0 @@
-[gd_resource type="Resource" script_class="FlagList" load_steps=4 format=3]
-
-[ext_resource type="Script" uid="uid://cmlb5h8kxa82" path="res://addons/vn_engine/defs/flag_list.gd" id="1_script"]
-[ext_resource type="Script" uid="uid://d2dnko38v3qdu" path="res://addons/vn_engine/defs/flag_def.gd" id="2_flagscript"]
-[ext_resource type="Resource" path="res://addons/vn_engine/sample/config/flags/took_tour.tres" id="3_took_tour"]
-
-[resource]
-script = ExtResource("1_script")
-flags = Array[ExtResource("2_flagscript")]([ExtResource("3_took_tour")])

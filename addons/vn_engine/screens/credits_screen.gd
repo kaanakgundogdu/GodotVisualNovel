@@ -1,5 +1,5 @@
-class_name CreditsScreen
-extends VNScreen
+class_name VNEngineCreditsScreen
+extends VNEngineScreen
 
 
 var _allow_skip: bool = true
@@ -26,7 +26,7 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not _allow_skip:
 		return
-	if not event.is_action_pressed(VNInput.ADVANCE):
+	if not event.is_action_pressed(VNEngineInput.ADVANCE):
 		return
 
 	if _using_movie:
@@ -46,28 +46,28 @@ func screen_id() -> StringName:
 func enter(params: Dictionary) -> void:
 	video_player.hide()
 
-	var def: CreditsDef = null
+	var def: VNEngineCreditsDef = null
 	if VNGame.manifest != null:
 		def = VNGame.manifest.credits
 	if def == null:
-		VNLog.warn("CreditsScreen", "GameManifest.credits is missing, skipping credits")
+		VNEngineLog.warn("CreditsScreen", "GameManifest.credits is missing, skipping credits")
 		_finish()
 		return
 
 	var requested_variant: String = String(params.get("variant", ""))
 	if requested_variant != "" and requested_variant != def.variant:
-		VNLog.warn("CreditsScreen", "credits_variant '%s' has no matching CreditsDef, using '%s'" % [requested_variant, def.variant])
+		VNEngineLog.warn("CreditsScreen", "credits_variant '%s' has no matching CreditsDef, using '%s'" % [requested_variant, def.variant])
 
 	_allow_skip = def.allow_skip
 	_scroll_speed = maxf(def.scroll_speed, 1.0)
 
-	var resolver: AssetResolver = VNGame.get_shared_asset_resolver()
+	var resolver: VNEngineAssetResolver = VNGame.get_shared_asset_resolver()
 	if def.background != "":
 		var bg_path: String = resolver.resolve("background", def.background)
 		if bg_path != "":
 			background_rect.texture = load(bg_path)
 
-	var persistent_audio: AudioSystem = VNMain.instance().persistent_audio
+	var persistent_audio: VNEngineAudioSystem = VNEngineMain.instance().persistent_audio
 
 	if def.movie != "":
 		var movie_path: String = resolver.resolve("movie", def.movie)
@@ -81,7 +81,7 @@ func enter(params: Dictionary) -> void:
 			video_player.play()
 			return
 		else:
-			VNLog.warn("CreditsScreen", "Could not resolve movie '%s', falling back to scrolling credits" % def.movie)
+			VNEngineLog.warn("CreditsScreen", "Could not resolve movie '%s', falling back to scrolling credits" % def.movie)
 
 	if def.bgm != "":
 		var music_path: String = resolver.resolve("music", def.bgm)
@@ -96,7 +96,7 @@ func enter(params: Dictionary) -> void:
 	set_process(true)
 
 
-func _build_sections(def: CreditsDef) -> void:
+func _build_sections(def: VNEngineCreditsDef) -> void:
 	for section in def.sections:
 		if section == null:
 			continue
@@ -122,7 +122,7 @@ func _build_sections(def: CreditsDef) -> void:
 		content_box.add_child(spacer)
 
 	if def.end_logo != "":
-		var logo_resolver: AssetResolver = VNGame.get_shared_asset_resolver()
+		var logo_resolver: VNEngineAssetResolver = VNGame.get_shared_asset_resolver()
 		var logo_path: String = logo_resolver.resolve("background", def.end_logo)
 		if logo_path != "":
 			var logo_rect := TextureRect.new()
@@ -136,7 +136,7 @@ func _build_sections(def: CreditsDef) -> void:
 
 
 func exit() -> void:
-	VNMain.instance().persistent_audio.stop_bgm()
+	VNEngineMain.instance().persistent_audio.stop_bgm()
 
 
 func _finish() -> void:

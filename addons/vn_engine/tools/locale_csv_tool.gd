@@ -7,13 +7,13 @@ const OLD_PREFIX := "#OLD#"
 
 func _run() -> void:
 	var txt_files: Array[String] = []
-	_collect_txt_files(VNPaths.scenario_root(), txt_files)
+	_collect_txt_files(VNEnginePaths.scenario_root(), txt_files)
 	txt_files.sort()
 
 	var generated: Dictionary = {}
 
 	for path in txt_files:
-		var story: StoryScript = ScenarioParser.parse_file(path)
+		var story: VNEngineStoryScript = VNEngineScenarioParser.parse_file(path)
 		for node in story.nodes:
 			if node.line_id != "" and String(node.text).strip_edges() != "":
 				generated[node.line_id] = node.text
@@ -21,7 +21,7 @@ func _run() -> void:
 				if choice.line_id != "" and String(choice.text).strip_edges() != "":
 					generated[choice.line_id] = choice.text
 
-	var cast: Cast = load(VNPaths.cast_file()) as Cast
+	var cast: VNEngineCast = load(VNEnginePaths.cast_file()) as VNEngineCast
 	if cast != null:
 		for entry in cast.characters:
 			if entry == null:
@@ -31,8 +31,8 @@ func _run() -> void:
 			var key := "char.%s.name" % entry.id
 			generated[key] = entry.display_name
 
-	var existing_rows: Dictionary = _read_existing_csv(VNPaths.dialog_csv())
-	var existing_header: PackedStringArray = _read_existing_header(VNPaths.dialog_csv())
+	var existing_rows: Dictionary = _read_existing_csv(VNEnginePaths.dialog_csv())
+	var existing_header: PackedStringArray = _read_existing_header(VNEnginePaths.dialog_csv())
 
 	var kept_count := 0
 	var new_count := 0
@@ -63,9 +63,9 @@ func _run() -> void:
 			old_marked_count += 1
 		out_rows.append(row)
 
-	_write_csv(VNPaths.dialog_csv(), out_rows, existing_header)
+	_write_csv(VNEnginePaths.dialog_csv(), out_rows, existing_header)
 
-	VNLog.info("LocaleCsvTool", "%d file(s) scanned, %d key(s) kept, %d new key(s), %d key(s) marked #OLD#." % [txt_files.size(), kept_count, new_count, old_marked_count])
+	VNEngineLog.info("LocaleCsvTool", "%d file(s) scanned, %d key(s) kept, %d new key(s), %d key(s) marked #OLD#." % [txt_files.size(), kept_count, new_count, old_marked_count])
 
 	var fs: EditorFileSystem = EditorInterface.get_resource_filesystem()
 	if fs:
@@ -142,12 +142,12 @@ func _read_existing_header(path: String) -> PackedStringArray:
 
 
 func _write_csv(path: String, rows: Array[PackedStringArray], header: PackedStringArray) -> void:
-	if not DirAccess.dir_exists_absolute(VNPaths.locale_dir()):
-		DirAccess.make_dir_recursive_absolute(VNPaths.locale_dir())
+	if not DirAccess.dir_exists_absolute(VNEnginePaths.locale_dir()):
+		DirAccess.make_dir_recursive_absolute(VNEnginePaths.locale_dir())
 
 	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
-		VNLog.error("LocaleCsvTool", "Could not write '%s' (error code %d)" % [path, FileAccess.get_open_error()])
+		VNEngineLog.error("LocaleCsvTool", "Could not write '%s' (error code %d)" % [path, FileAccess.get_open_error()])
 		return
 
 	file.store_csv_line(header)

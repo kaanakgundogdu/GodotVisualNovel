@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ChapterDef" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="VNEngineChapterDef" load_steps=2 format=3]
 
 [ext_resource type="Script" uid="uid://xeegou1bnug5" path="res://addons/vn_engine/defs/chapter_def.gd" id="1_script"]
 

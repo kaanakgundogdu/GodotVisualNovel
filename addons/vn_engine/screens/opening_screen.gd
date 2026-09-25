@@ -1,11 +1,11 @@
-class_name OpeningScreen
-extends VNScreen
+class_name VNEngineOpeningScreen
+extends VNEngineScreen
 
 
 var _finished_called: bool = false
 var _tween: Tween = null
 
-var _queue: Array[BootScreenDef] = []
+var _queue: Array[VNEngineBootScreenDef] = []
 var _step_index: int = -1
 var _current_step_token: int = 0
 var _current_skippable: bool = true
@@ -26,7 +26,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (_waiting_for_input or _current_skippable):
 		return
 
-	var is_advance: bool = event.is_action_pressed(VNInput.ADVANCE)
+	var is_advance: bool = event.is_action_pressed(VNEngineInput.ADVANCE)
 	var is_left_click: bool = event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT
 	if not (is_advance or is_left_click):
 		return
@@ -51,13 +51,13 @@ func enter(_params: Dictionary) -> void:
 	_start_next_step()
 
 
-func _build_queue() -> Array[BootScreenDef]:
-	var queue: Array[BootScreenDef] = []
+func _build_queue() -> Array[VNEngineBootScreenDef]:
+	var queue: Array[VNEngineBootScreenDef] = []
 	if VNGame.manifest == null:
 		return queue
 
-	var boot: BootDef = VNGame.manifest.get_boot()
-	for screen: BootScreenDef in boot.boot_screens:
+	var boot: VNEngineBootDef = VNGame.manifest.get_boot()
+	for screen: VNEngineBootScreenDef in boot.boot_screens:
 		if screen != null and screen.enabled:
 			queue.append(screen)
 
@@ -110,7 +110,7 @@ func _on_video_finished() -> void:
 	_advance_if_current(_current_step_token)
 
 
-func _start_screen(screen: BootScreenDef, token: int) -> void:
+func _start_screen(screen: VNEngineBootScreenDef, token: int) -> void:
 	_current_skippable = screen.skippable
 	boot_background.color = screen.background_color
 	boot_background.visible = true
@@ -118,27 +118,27 @@ func _start_screen(screen: BootScreenDef, token: int) -> void:
 	if screen.movie_path != "":
 		var stream: VideoStream = load(screen.movie_path) as VideoStream
 		if stream != null:
-			var root: VNMain = VNMain.instance()
+			var root: VNEngineMain = VNEngineMain.instance()
 			if root != null:
 				root.persistent_audio.stop_bgm()
 			video_player.stream = stream
 			video_player.visible = true
 			video_player.play()
 			return
-		VNLog.warn("OpeningScreen", "movie_path is not a VideoStream, trying image_path: '%s'" % screen.movie_path)
+		VNEngineLog.warn("OpeningScreen", "movie_path is not a VideoStream, trying image_path: '%s'" % screen.movie_path)
 
 	if screen.image_path != "":
 		var texture: Texture2D = load(screen.image_path) as Texture2D
 		if texture != null:
 			_play_screen_image(texture, screen, token)
 			return
-		VNLog.warn("OpeningScreen", "image_path is not a Texture2D: '%s'" % screen.image_path)
+		VNEngineLog.warn("OpeningScreen", "image_path is not a Texture2D: '%s'" % screen.image_path)
 
-	VNLog.warn("OpeningScreen", "Boot step has no usable movie or image, skipping")
+	VNEngineLog.warn("OpeningScreen", "Boot step has no usable movie or image, skipping")
 	call_deferred("_advance_if_current", token)
 
 
-func _play_screen_image(texture: Texture2D, screen: BootScreenDef, token: int) -> void:
+func _play_screen_image(texture: Texture2D, screen: VNEngineBootScreenDef, token: int) -> void:
 	boot_image.texture = texture
 	boot_image.modulate.a = 0.0
 	boot_image.visible = true

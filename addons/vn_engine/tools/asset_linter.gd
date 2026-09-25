@@ -8,23 +8,23 @@ const REPORT_FILENAME := "asset_lint_report.md"
 
 
 func _run() -> void:
-	var ctx := AssetLintContext.new()
+	var ctx := VNEngineAssetLintContext.new()
 	if not ctx.setup():
 		return
 
-	var rules: Array[AssetLintRule] = [
-		NamingConventionRule.new(),
-		OrphanAssetRule.new(),
-		MissingAssetRule.new(),
-		CgBackgroundMixupRule.new(),
-		SpriteMatrixGapRule.new(),
-		UnmatchedVoiceRule.new(),
-		DeadTranslationKeyRule.new(),
-		CgChapterFolderRule.new(),
-		ManifestReferenceRule.new(),
-		DuplicateIdRule.new(),
-		UnknownCommandRule.new(),
-		MissingSpriteRule.new(),
+	var rules: Array[VNEngineAssetLintRule] = [
+		VNEngineNamingConventionRule.new(),
+		VNEngineOrphanAssetRule.new(),
+		VNEngineMissingAssetRule.new(),
+		VNEngineCgBackgroundMixupRule.new(),
+		VNEngineSpriteMatrixGapRule.new(),
+		VNEngineUnmatchedVoiceRule.new(),
+		VNEngineDeadTranslationKeyRule.new(),
+		VNEngineCgChapterFolderRule.new(),
+		VNEngineManifestReferenceRule.new(),
+		VNEngineDuplicateIdRule.new(),
+		VNEngineUnknownCommandRule.new(),
+		VNEngineMissingSpriteRule.new(),
 	]
 
 	var sections: Array[String] = []
@@ -69,7 +69,7 @@ func _write_report(sections: Array[String], scenario_file_count: int) -> void:
 
 	var report_file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	if report_file == null:
-		VNLog.error("AssetLinter", "Could not write report: %s (error code %d)" % [path, FileAccess.get_open_error()])
+		VNEngineLog.error("AssetLinter", "Could not write report: %s (error code %d)" % [path, FileAccess.get_open_error()])
 		return
 	report_file.store_string(body)
 	report_file.close()
@@ -79,5 +79,5 @@ func _write_report(sections: Array[String], scenario_file_count: int) -> void:
 		if fs:
 			fs.scan()
 
-	VNLog.info("AssetLinter", "Report written: %s" % path)
-	VNLog.info("AssetLinter", "Summary: %d ERROR, %d WARNING" % [error_count, warning_count])
+	VNEngineLog.info("AssetLinter", "Report written: %s" % path)
+	VNEngineLog.info("AssetLinter", "Summary: %d ERROR, %d WARNING" % [error_count, warning_count])

@@ -1,16 +1,13 @@
-class_name CmdSetVar
-extends VNCommand
+class_name VNEngineCmdSetVar
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "set_var"
 
-func allows_multiple() -> bool:
-	return true
-
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var parts := args.split(" ", false)
 	if parts.size() < 3:
-		VNLog.warn("CmdSetVar", "Invalid set_var command format: %s" % args)
+		VNEngineLog.warn("CmdSetVar", "Invalid set_var command format: %s" % args)
 		return
 
 	var var_name := parts[0].strip_edges()

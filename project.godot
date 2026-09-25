@@ -108,5 +108,4 @@ locale/translations=PackedStringArray("res://game/locale/dialog.en.translation")
 [vn_engine]
 
 content/root="res://game"
-debug/verbose_log=false
 tools/report_dir="res://kaan_ignore/"

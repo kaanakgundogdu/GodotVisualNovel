@@ -1,4 +1,4 @@
-class_name DevOverlay
+class_name VNEngineDevOverlay
 extends Control
 
 const REFRESH_INTERVAL: float = 0.25
@@ -40,7 +40,7 @@ func _build_text() -> String:
 		app_version = VNGame.manifest.version
 	lines.append("VNGame: %s" % app_version)
 
-	var root: VNMain = VNMain.instance()
+	var root: VNEngineMain = VNEngineMain.instance()
 
 	var screen_id_text: String = "-"
 	var chapter_text: String = "-"
@@ -52,16 +52,16 @@ func _build_text() -> String:
 	if id != &"":
 		screen_id_text = String(id)
 
-	var screen: VNScreen = root.screen_stack.current_screen()
-	var stage: VNStageScreen = screen as VNStageScreen
+	var screen: VNEngineScreen = root.screen_stack.current_screen()
+	var stage: VNEngineStageScreen = screen as VNEngineStageScreen
 	if stage != null:
-		var runner: StoryRunner = stage.story_runner
+		var runner: VNEngineStoryRunner = stage.story_runner
 		if runner.state.chapter_id != "":
 			chapter_text = runner.state.chapter_id
 		if runner.state.current_node_id != "":
 			node_text = runner.state.current_node_id
 
-		var node: StoryNode = runner.get_current_node()
+		var node: VNEngineStoryNode = runner.get_current_node()
 		if node != null:
 			line_text = str(node.line)
 
@@ -71,7 +71,7 @@ func _build_text() -> String:
 	lines.append("Chapter: %s" % chapter_text)
 	lines.append("Node: %s" % node_text)
 	lines.append("Line: %s" % line_text)
-	lines.append("Content root: %s" % VNPaths.content_root())
+	lines.append("Content root: %s" % VNEnginePaths.content_root())
 	lines.append("Flags: %s" % flags_text)
 
 	return "\n".join(lines)
@@ -81,12 +81,12 @@ func _format_flags(flags: Dictionary) -> String:
 	if flags.is_empty():
 		return "(none)"
 
-	var flag_list: FlagList = VNGame.get_flag_list()
+	var flag_list: VNEngineFlagList = VNGame.get_flag_list()
 	var parts: PackedStringArray = PackedStringArray()
 	for key in flags.keys():
 		var label: String = str(key)
 		if flag_list != null:
-			var flag: FlagDef = flag_list.find(label)
+			var flag: VNEngineFlagDef = flag_list.find(label)
 			if flag != null and flag.debug_name != "":
 				label = flag.debug_name
 		parts.append("%s=%s" % [label, str(flags[key])])

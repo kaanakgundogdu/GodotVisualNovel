@@ -1,13 +1,13 @@
 @tool
-class_name OrphanAssetRule
-extends AssetLintRule
+class_name VNEngineOrphanAssetRule
+extends VNEngineAssetLintRule
 
 
 func title() -> String:
 	return "2. Orphan assets"
 
 
-func run(ctx: AssetLintContext) -> void:
+func run(ctx: VNEngineAssetLintContext) -> void:
 	var kinds: Array[String] = ["background", "cg", "character", "music", "sfx", "movie"]
 
 	var referenced: Dictionary = {}

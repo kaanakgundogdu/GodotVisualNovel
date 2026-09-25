@@ -1,5 +1,5 @@
 @tool
-class_name CreditsDef
+class_name VNEngineCreditsDef
 extends Resource
 
 @export_group("Content")
@@ -7,7 +7,7 @@ extends Resource
 ## right now, since the manifest holds a single CreditsDef.
 @export var variant: String = ""
 ## Add one CreditsSection per role row, in scroll order.
-@export var sections: Array[CreditsSection] = []
+@export var sections: Array[VNEngineCreditsSection] = []
 
 @export_group("Presentation")
 ## Scroll speed in pixels per second, used when movie is not set.

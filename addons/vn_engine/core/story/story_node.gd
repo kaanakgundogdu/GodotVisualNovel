@@ -1,5 +1,5 @@
 extends Resource
-class_name StoryNode
+class_name VNEngineStoryNode
 
 
 @export var id: String = ""
@@ -10,7 +10,7 @@ class_name StoryNode
 @export var animation: String = ""
 @export var text: String = ""
 @export var commands: Array[Dictionary] = []
-@export var choices: Array[ChoiceOption] = []
+@export var choices: Array[VNEngineChoiceOption] = []
 @export var next_index: int = -1
 @export var is_terminal: bool = false
 

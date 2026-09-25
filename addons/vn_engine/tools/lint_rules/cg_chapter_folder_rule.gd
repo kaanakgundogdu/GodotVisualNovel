@@ -1,20 +1,20 @@
 @tool
-class_name CgChapterFolderRule
-extends AssetLintRule
+class_name VNEngineCgChapterFolderRule
+extends VNEngineAssetLintRule
 
 
 func title() -> String:
 	return "8. CG chapter folder layout"
 
 
-func run(ctx: AssetLintContext) -> void:
+func run(ctx: VNEngineAssetLintContext) -> void:
 	var chapter_ids: Dictionary = {}
 	if ctx.manifest != null:
 		for chapter in ctx.manifest.chapters:
 			if chapter != null and chapter.id != "":
 				chapter_ids[chapter.id.to_lower()] = true
 	else:
-		ctx.info("GameManifest (%s) could not be loaded -- <chapter_id> match check skipped, only the 'no subfolder' check ran" % VNPaths.manifest())
+		ctx.info("GameManifest (%s) could not be loaded -- <chapter_id> match check skipped, only the 'no subfolder' check ran" % VNEnginePaths.manifest())
 
 	for entry in ctx.asset_map.entries:
 		if entry == null or entry.kind != "cg":

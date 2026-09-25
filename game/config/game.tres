@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="GameManifest" load_steps=13 format=3 uid="uid://ce6y80ef872hc"]
+[gd_resource type="Resource" script_class="VNEngineGameManifest" load_steps=13 format=3 uid="uid://ce6y80ef872hc"]
 
 [ext_resource type="Script" uid="uid://dukr7vcrg2qwd" path="res://addons/vn_engine/defs/game_manifest.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://xeegou1bnug5" path="res://addons/vn_engine/defs/chapter_def.gd" id="2_chapterscript"]

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="CreditsDef" load_steps=7 format=3 uid="uid://h4ht6ru76nxh"]
+[gd_resource type="Resource" script_class="VNEngineCreditsDef" load_steps=7 format=3 uid="uid://h4ht6ru76nxh"]
 
 [ext_resource type="Script" uid="uid://bmkcgkxabpsdk" path="res://addons/vn_engine/defs/credits_def.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://bp6ldo4ke0iy2" path="res://addons/vn_engine/defs/credits_section.gd" id="2_sectionscript"]

@@ -1,10 +1,10 @@
-class_name AudioSystem
+class_name VNEngineAudioSystem
 extends Node
 
-@export var channels: Array[AudioChannel] = []
+@export var channels: Array[VNEngineAudioChannel] = []
 @export var crossfade_duration: float = 1.0
 
-var runner: StoryRunner
+var runner: VNEngineStoryRunner
 
 var _players: Dictionary = {}
 var _tweens: Dictionary = {}
@@ -13,7 +13,7 @@ var _video_pause_count: int = 0
 
 
 func _ready() -> void:
-	for channel: AudioChannel in channels:
+	for channel: VNEngineAudioChannel in channels:
 		var player: AudioStreamPlayer = AudioStreamPlayer.new()
 		player.name = channel.command_name.capitalize() + "Player"
 		player.bus = channel.bus_name
@@ -25,7 +25,7 @@ func _ready() -> void:
 		}
 
 
-func attach_runner(new_runner: StoryRunner) -> void:
+func attach_runner(new_runner: VNEngineStoryRunner) -> void:
 	runner = new_runner
 	runner.state_restored.connect(_on_state_restored)
 	runner.register_manager(self)
@@ -42,7 +42,7 @@ func detach_runner() -> void:
 		(_players["music"]["node"] as AudioStreamPlayer).stream_paused = false
 
 
-func _on_state_restored(state: StoryState) -> void:
+func _on_state_restored(state: VNEngineStoryState) -> void:
 	for key: String in _players.keys():
 		var target_file: String = state.audio.get(key, "")
 		var player: AudioStreamPlayer = _players[key]["node"]
@@ -97,7 +97,7 @@ func resume_after_video() -> void:
 
 func _play_audio(channel_name: String, file_name: String, speaker_id: String = "", resolved_path: String = "", force_restart: bool = false) -> void:
 	var data: Dictionary = _players[channel_name]
-	var config: AudioChannel = data["config"]
+	var config: VNEngineAudioChannel = data["config"]
 	var player: AudioStreamPlayer = data["node"]
 
 	if file_name.to_lower() == "stop":
@@ -162,7 +162,7 @@ func _apply_music_loop(stream: AudioStream) -> void:
 
 func _stop_audio(channel_name: String) -> void:
 	var data: Dictionary = _players[channel_name]
-	var config: AudioChannel = data["config"]
+	var config: VNEngineAudioChannel = data["config"]
 	var player: AudioStreamPlayer = data["node"]
 
 	_current_files[channel_name] = ""

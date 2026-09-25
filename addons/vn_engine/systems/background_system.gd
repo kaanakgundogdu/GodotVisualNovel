@@ -1,7 +1,7 @@
-class_name BackgroundSystem
+class_name VNEngineBackgroundSystem
 extends Control
 
-@export var runner: StoryRunner
+@export var runner: VNEngineStoryRunner
 @export var fade_duration: float = 0.5
 
 @onready var current_layer: TextureRect = $LayerA
@@ -58,7 +58,7 @@ func change_to(bg_name: String, transition: String = "fade", duration: float = -
 	_bg_tween.tween_callback(_on_crossfade_finished)
 
 
-func _on_state_restored(state: StoryState) -> void:
+func _on_state_restored(state: VNEngineStoryState) -> void:
 	var kind: String = "background"
 	var id: String = state.bg
 

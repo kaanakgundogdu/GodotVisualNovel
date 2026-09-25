@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="EndingDef" load_steps=2 format=3 uid="uid://dm146ri146wn"]
+[gd_resource type="Resource" script_class="VNEngineEndingDef" load_steps=2 format=3 uid="uid://dm146ri146wn"]
 
 [ext_resource type="Script" uid="uid://eprguh125fru" path="res://addons/vn_engine/defs/ending_def.gd" id="1_script"]
 

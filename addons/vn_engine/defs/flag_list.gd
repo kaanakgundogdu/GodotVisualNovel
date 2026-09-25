@@ -1,10 +1,10 @@
 @tool
-class_name FlagList
+class_name VNEngineFlagList
 extends Resource
 
 ## All flag and counter definitions for this game. Add one FlagDef per
 ## flag.
-@export var flags: Array[FlagDef] = []
+@export var flags: Array[VNEngineFlagDef] = []
 
 var _index: Dictionary = {}
 var _index_built: bool = false
@@ -12,18 +12,18 @@ var _index_built: bool = false
 
 func rebuild_index() -> void:
 	_index.clear()
-	for flag: FlagDef in flags:
+	for flag: VNEngineFlagDef in flags:
 		if flag == null:
 			continue
 		_index[flag.id.to_lower()] = flag
 	_index_built = true
 
 
-func find(id: String) -> FlagDef:
+func find(id: String) -> VNEngineFlagDef:
 	_ensure_index()
 	var key: String = id.to_lower()
 	if _index.has(key):
-		var result: FlagDef = _index[key]
+		var result: VNEngineFlagDef = _index[key]
 		return result
 	return null
 
@@ -34,7 +34,7 @@ func has_flag(id: String) -> bool:
 
 func ids() -> PackedStringArray:
 	var result: PackedStringArray = []
-	for flag: FlagDef in flags:
+	for flag: VNEngineFlagDef in flags:
 		if flag == null:
 			continue
 		result.append(flag.id.to_lower())
@@ -43,7 +43,7 @@ func ids() -> PackedStringArray:
 
 func default_vars() -> Dictionary:
 	var result: Dictionary = {}
-	for flag: FlagDef in flags:
+	for flag: VNEngineFlagDef in flags:
 		if flag == null or flag.scope != "playthrough":
 			continue
 		result[flag.id.to_lower()] = coerce(flag.id, flag.default_value)
@@ -52,7 +52,7 @@ func default_vars() -> Dictionary:
 
 func global_defaults() -> Dictionary:
 	var result: Dictionary = {}
-	for flag: FlagDef in flags:
+	for flag: VNEngineFlagDef in flags:
 		if flag == null or flag.scope != "global":
 			continue
 		result[flag.id.to_lower()] = coerce(flag.id, flag.default_value)
@@ -60,7 +60,7 @@ func global_defaults() -> Dictionary:
 
 
 func coerce(id: String, value: Variant) -> Variant:
-	var flag: FlagDef = find(id)
+	var flag: VNEngineFlagDef = find(id)
 	if flag == null:
 		return value
 

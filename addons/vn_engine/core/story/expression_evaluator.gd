@@ -1,5 +1,5 @@
 extends RefCounted
-class_name ExpressionEvaluator
+class_name VNEngineExpressionEvaluator
 
 
 static func evaluate(expr: String, vars: Dictionary) -> bool:
@@ -95,7 +95,7 @@ static func collect_identifiers(expr: String) -> PackedStringArray:
 	return result
 
 
-static func validate(expr: String, flag_list: FlagList = null) -> PackedStringArray:
+static func validate(expr: String, flag_list: VNEngineFlagList = null) -> PackedStringArray:
 	var parser: _Parser = _Parser.new(expr)
 	var parsed: Dictionary = parser.parse()
 	var errors: PackedStringArray = parsed["errors"]
@@ -159,7 +159,7 @@ static func _eval_arith(node: Dictionary, vars: Dictionary) -> float:
 	return _to_float(_eval(node, vars))
 
 
-static func _validate_node(node: Variant, flag_list: FlagList) -> PackedStringArray:
+static func _validate_node(node: Variant, flag_list: VNEngineFlagList) -> PackedStringArray:
 	var result: PackedStringArray = []
 	if node == null:
 		return result
@@ -184,7 +184,7 @@ static func _validate_node(node: Variant, flag_list: FlagList) -> PackedStringAr
 	return result
 
 
-static func _validate_cmp(node: Dictionary, flag_list: FlagList) -> PackedStringArray:
+static func _validate_cmp(node: Dictionary, flag_list: VNEngineFlagList) -> PackedStringArray:
 	var result: PackedStringArray = []
 	var op: String = node["op"]
 	var is_ordering: bool = op == "<" or op == ">" or op == "<=" or op == ">="
@@ -205,12 +205,12 @@ static func _validate_cmp(node: Dictionary, flag_list: FlagList) -> PackedString
 
 	if left_kind == "ident":
 		var left_name: String = left["name"]
-		var left_flag: FlagDef = flag_list.find(left_name)
+		var left_flag: VNEngineFlagDef = flag_list.find(left_name)
 		if left_flag != null and left_flag.type == "bool":
 			result.append("ordering operator ('%s') cannot be used with boolean flag '%s'" % [op, left_name.to_lower()])
 	if right_kind == "ident":
 		var right_name: String = right["name"]
-		var right_flag: FlagDef = flag_list.find(right_name)
+		var right_flag: VNEngineFlagDef = flag_list.find(right_name)
 		if right_flag != null and right_flag.type == "bool":
 			result.append("ordering operator ('%s') cannot be used with boolean flag '%s'" % [op, right_name.to_lower()])
 

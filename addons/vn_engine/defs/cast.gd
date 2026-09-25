@@ -1,14 +1,14 @@
 @tool
-class_name Cast
+class_name VNEngineCast
 extends Resource
 
 ## One entry per character. Add one CastMember per character in the game.
-@export var characters: Array[CastMember] = []
+@export var characters: Array[VNEngineCastMember] = []
 
 
-func get_entry(id: String) -> CastMember:
+func get_entry(id: String) -> VNEngineCastMember:
 	var key: String = id.to_lower()
-	for entry: CastMember in characters:
+	for entry: VNEngineCastMember in characters:
 		if entry == null:
 			continue
 		if entry.id.to_lower() == key:
@@ -21,7 +21,7 @@ func is_narrator(id: String) -> bool:
 	if key == "narrator":
 		return true
 
-	var entry: CastMember = get_entry(key)
+	var entry: VNEngineCastMember = get_entry(key)
 	if entry == null:
 		return true
 

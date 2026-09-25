@@ -2,34 +2,78 @@ extends Node
 
 enum AppState { BOOT, TITLE, CHAPTER, ENDING, CREDITS }
 
-var manifest: GameManifest = null
+signal returned_to_title
+signal quit_requested
+
+var manifest: VNEngineGameManifest = null
 
 var _state: AppState = AppState.BOOT
 
-var _shared_asset_resolver: AssetResolver
+var _shared_asset_resolver: VNEngineAssetResolver
 
 var _diagnostics_reported: Dictionary = {}
 
 var _diagnostics_logged: Dictionary = {}
 
-var _ending_player: EndingPlayer
+var _ending_player: VNEngineEndingPlayer
 
-var _chapter_cache: ChapterPreloader = null
+var _chapter_cache: VNEngineChapterPreloader = null
+
+var _started: bool = false
 
 
 func _ready() -> void:
-	_shared_asset_resolver = AssetResolver.new()
-	_ending_player = EndingPlayer.new()
+	_ending_player = VNEngineEndingPlayer.new()
 
-	var asset_map_path: String = VNPaths.asset_map()
+
+## Runs the engine startup sequence once: input defaults, settings and
+## save subsystems, then the current content root's manifest. Safe to
+## call more than once, only the first call does anything. VNMain calls
+## this before it builds its screen stacks.
+func start_engine() -> void:
+	if _started:
+		return
+	_started = true
+	VNEngineInput.register_defaults()
+	VNSettings.start()
+	VNSave.start()
+	_apply_content_root(VNEnginePaths.content_root())
+
+
+## Points the game at a different content root for the rest of this run,
+## without touching Project Settings beyond the content root key. Starts
+## the engine first if it has not started yet.
+func use_content_root(path: String) -> void:
+	if not _started:
+		_started = true
+		VNEngineInput.register_defaults()
+		VNSettings.start()
+		VNSave.start()
+	_apply_content_root(path)
+
+
+func _apply_content_root(path: String) -> void:
+	var root: String = path.strip_edges()
+	if not root.ends_with("/"):
+		root += "/"
+	ProjectSettings.set_setting(VNEnginePaths.SETTING_KEY, root)
+
+	_shared_asset_resolver = VNEngineAssetResolver.new()
+	_chapter_cache = null
+	_diagnostics_reported.clear()
+	_diagnostics_logged.clear()
+	manifest = null
+
+	var asset_map_path: String = VNEnginePaths.asset_map()
 	if ResourceLoader.exists(asset_map_path):
-		var asset_map: AssetMap = load(asset_map_path) as AssetMap
+		var asset_map: VNEngineAssetMap = load(asset_map_path) as VNEngineAssetMap
 		if asset_map == null:
-			VNLog.warn("VNGame", "Asset map failed to load: '%s'" % asset_map_path)
+			VNEngineLog.warn("VNGame", "Asset map failed to load: '%s'" % asset_map_path)
 		else:
 			_shared_asset_resolver.load_map(asset_map)
 
 	_load_manifest()
+	VNSave.refresh_save_namespace()
 
 
 func should_report_diagnostics(source: String) -> bool:
@@ -48,16 +92,16 @@ func should_log_diagnostics(source: String) -> bool:
 	return true
 
 
-func get_shared_asset_resolver() -> AssetResolver:
+func get_shared_asset_resolver() -> VNEngineAssetResolver:
 	return _shared_asset_resolver
 
 
-func get_manifest() -> GameManifest:
+func get_manifest() -> VNEngineGameManifest:
 	return manifest
 
 
-func get_ui() -> UiDef:
-	return manifest.get_ui() if manifest != null else UiDef.new()
+func get_ui() -> VNEngineUiDef:
+	return manifest.get_ui() if manifest != null else VNEngineUiDef.new()
 
 
 func start_screen() -> StringName:
@@ -66,7 +110,7 @@ func start_screen() -> StringName:
 	return &"title"
 
 
-func get_flag_list() -> FlagList:
+func get_flag_list() -> VNEngineFlagList:
 	if manifest == null:
 		return null
 	return manifest.flags
@@ -76,7 +120,7 @@ func state() -> int:
 	return _state
 
 
-func take_preparsed_script(script_path: String) -> StoryScript:
+func take_preparsed_script(script_path: String) -> VNEngineStoryScript:
 	if _chapter_cache == null:
 		return null
 	if _chapter_cache.script_path != script_path:
@@ -84,12 +128,14 @@ func take_preparsed_script(script_path: String) -> StoryScript:
 	if _chapter_cache.parsed_script == null:
 		return null
 
-	var result: StoryScript = _chapter_cache.parsed_script
+	var result: VNEngineStoryScript = _chapter_cache.parsed_script
 	_chapter_cache.parsed_script = null
 	return result
 
 
 func start_new_game() -> void:
+	if not _has_main():
+		return
 	VNSave.slot_to_load = -1
 	if manifest == null:
 		show_error("start_new_game", "Game manifest not loaded (missing game.tres)")
@@ -101,16 +147,18 @@ func start_new_game() -> void:
 
 
 func load_slot(slot_id: int) -> void:
+	if not _has_main():
+		return
 	VNSave.slot_to_load = slot_id
-	var root: VNMain = _vn_main()
+	var root: VNEngineMain = _vn_main()
 	_set_state(AppState.CHAPTER)
 
-	var ui: UiDef = get_ui()
+	var ui: VNEngineUiDef = get_ui()
 	var stage_path: String = root.screen_stack.scene_path(&"stage")
 
-	var slot_chapter: ChapterDef = _slot_chapter(slot_id)
+	var slot_chapter: VNEngineChapterDef = _slot_chapter(slot_id)
 	if slot_chapter != null:
-		_chapter_cache = ChapterPreloader.new()
+		_chapter_cache = VNEngineChapterPreloader.new()
 		_chapter_cache.build_plan(slot_chapter.script_path, _shared_asset_resolver, get_flag_list(), slot_chapter)
 		_chapter_cache.request_all()
 
@@ -136,7 +184,7 @@ func load_slot(slot_id: int) -> void:
 	root.screen_stack.replace_screen(&"loading", loading_params)
 
 
-func _slot_chapter(slot_id: int) -> ChapterDef:
+func _slot_chapter(slot_id: int) -> VNEngineChapterDef:
 	if manifest == null:
 		return null
 	var path: String = VNSave.slot_path(slot_id)
@@ -158,24 +206,26 @@ func _slot_chapter(slot_id: int) -> ChapterDef:
 
 
 func _slot_chapter_title(slot_id: int) -> String:
-	var chapter: ChapterDef = _slot_chapter(slot_id)
+	var chapter: VNEngineChapterDef = _slot_chapter(slot_id)
 	if chapter == null:
 		return ""
 	return _chapter_title(chapter)
 
 
 func goto_chapter(chapter_id: String) -> void:
+	if not _has_main():
+		return
 	if manifest == null:
-		VNLog.warn("VNGame", "goto_chapter('%s'): manifest not loaded" % chapter_id)
+		VNEngineLog.warn("VNGame", "goto_chapter('%s'): manifest not loaded" % chapter_id)
 		return
 
-	var chapter: ChapterDef = manifest.find_chapter(chapter_id)
+	var chapter: VNEngineChapterDef = manifest.find_chapter(chapter_id)
 	if chapter == null:
 		show_error("goto_chapter", "Chapter not found: '%s'" % chapter_id)
 		return
 
 	var resume_state: Dictionary = {}
-	var stage: VNStageScreen = _current_stage_screen()
+	var stage: VNEngineStageScreen = _current_stage_screen()
 	if stage != null:
 		resume_state = stage.story_runner.state.to_dict(true)
 
@@ -185,47 +235,60 @@ func goto_chapter(chapter_id: String) -> void:
 
 
 func return_to_title() -> void:
-	var root: VNMain = _vn_main()
+	if not _has_main():
+		return
+	var root: VNEngineMain = _vn_main()
+	root.overlay_stack.close_all()
+	root.screen_stack.clear_stack()
 	root.screen_stack.replace_screen(&"title")
 	_set_state(AppState.TITLE)
+	returned_to_title.emit()
 
 
-func on_story_ended(reason: int, ending_id: String, state: StoryState) -> void:
+func quit_game() -> void:
+	if quit_requested.get_connections().is_empty():
+		get_tree().quit()
+	else:
+		quit_requested.emit()
+
+
+func on_story_ended(reason: int, ending_id: String, state: VNEngineStoryState) -> void:
 	match reason:
-		StoryRunner.EndReason.EXPLICIT_END:
+		VNEngineStoryRunner.EndReason.EXPLICIT_END:
 			if ending_id != "":
 				trigger_ending(ending_id)
 			else:
-				var chosen: EndingDef = _first_matching_ending(state)
+				var chosen: VNEngineEndingDef = _first_matching_ending(state)
 				if chosen != null:
 					trigger_ending(chosen.id)
 				else:
 					trigger_ending(manifest.default_ending if manifest != null else "")
-		StoryRunner.EndReason.SCRIPT_EXHAUSTED:
+		VNEngineStoryRunner.EndReason.SCRIPT_EXHAUSTED:
 			finish_chapter(state)
-		StoryRunner.EndReason.RUNAWAY_GUARD:
-			VNLog.warn("VNGame", "Runaway guard triggered, no ending selected, returning to title")
-			return_to_title()
+		VNEngineStoryRunner.EndReason.RUNAWAY_GUARD:
+			var msg: String = "Runaway guard triggered at node '%s' in '%s', possible infinite loop" % [state.current_node_id, state.current_file]
+			VNEngineLog.error("VNGame", msg)
+			show_error(state.current_file, msg)
 		_:
-			VNLog.error("VNGame", "on_story_ended(): unknown end_reason: %d" % reason)
+			VNEngineLog.error("VNGame", "on_story_ended(): unknown end_reason: %d" % reason)
 
 
-func finish_chapter(state: StoryState) -> void:
+func finish_chapter(state: VNEngineStoryState) -> void:
 	if manifest == null:
-		VNLog.warn("VNGame", "finish_chapter(): no manifest loaded")
+		VNEngineLog.warn("VNGame", "finish_chapter(): no manifest loaded")
 		return_to_title()
 		return
 
-	var chapter: ChapterDef = manifest.find_chapter(state.chapter_id)
+	var chapter: VNEngineChapterDef = manifest.find_chapter(state.chapter_id)
 	if chapter == null:
-		VNLog.warn("VNGame", "finish_chapter(): current chapter not found: '%s', falling back to default_ending" % state.chapter_id)
+		VNEngineLog.warn("VNGame", "finish_chapter(): current chapter not found: '%s', falling back to default_ending" % state.chapter_id)
 		trigger_ending(manifest.default_ending)
 		return
 
 	for branch in chapter.branches:
 		if branch == null:
 			continue
-		if ExpressionEvaluator.evaluate(branch.condition, state.flags):
+		if VNEngineExpressionEvaluator.evaluate(branch.condition, state.flags):
 			goto_chapter(branch.chapter_id)
 			return
 
@@ -237,19 +300,21 @@ func finish_chapter(state: StoryState) -> void:
 
 
 func trigger_ending(ending_id: String) -> void:
+	if not _has_main():
+		return
 	if ending_id == "":
-		VNLog.warn("VNGame", "trigger_ending(): empty ending_id, no ending selected")
+		VNEngineLog.warn("VNGame", "trigger_ending(): empty ending_id, no ending selected")
 		return_to_title()
 		return
 
 	if manifest == null:
-		VNLog.warn("VNGame", "trigger_ending('%s'): no manifest loaded" % ending_id)
+		VNEngineLog.warn("VNGame", "trigger_ending('%s'): no manifest loaded" % ending_id)
 		return_to_title()
 		return
 
-	var ending: EndingDef = manifest.find_ending(ending_id)
+	var ending: VNEngineEndingDef = manifest.find_ending(ending_id)
 	if ending == null:
-		VNLog.warn("VNGame", "trigger_ending(): ending not found: '%s'" % ending_id)
+		VNEngineLog.warn("VNGame", "trigger_ending(): ending not found: '%s'" % ending_id)
 		return_to_title()
 		return
 
@@ -259,7 +324,7 @@ func trigger_ending(ending_id: String) -> void:
 	for unlock_id in ending.unlocks:
 		VNSave.set_global_flag(unlock_id, true)
 
-	var root: VNMain = _vn_main()
+	var root: VNEngineMain = _vn_main()
 	await _ending_player.present(root, ending, _current_stage_screen(), _shared_asset_resolver)
 
 	if ending.credits_variant == "none":
@@ -271,12 +336,14 @@ func trigger_ending(ending_id: String) -> void:
 
 
 func play_credits(_variant: String = "") -> void:
-	var root: VNMain = _vn_main()
+	if not _has_main():
+		return
+	var root: VNEngineMain = _vn_main()
 	root.screen_stack.replace_screen(&"credits", {"variant": _variant})
 	_set_state(AppState.CREDITS)
 
 
-func seed_flags(state: StoryState) -> void:
+func seed_flags(state: VNEngineStoryState) -> void:
 	if manifest == null or manifest.flags == null:
 		return
 	var seed: Dictionary = manifest.flags.default_vars()
@@ -288,7 +355,7 @@ func seed_flags(state: StoryState) -> void:
 			state.flags[key] = seed[key]
 
 
-func backfill_chapter_id(state: StoryState) -> void:
+func backfill_chapter_id(state: VNEngineStoryState) -> void:
 	if state.chapter_id != "":
 		return
 	if manifest == null:
@@ -303,13 +370,17 @@ func backfill_chapter_id(state: StoryState) -> void:
 
 
 func show_error(source: String, message: String) -> void:
-	var diagnostic: ParseDiagnostic = ParseDiagnostic.new(ParseDiagnostic.ERROR, 0, message)
-	var root: VNMain = _vn_main()
+	if not _has_main():
+		return
+	var diagnostic: VNEngineParseDiagnostic = VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.ERROR, 0, message)
+	var root: VNEngineMain = _vn_main()
 	root.screen_stack.push_screen(&"diagnostics", {"source": source, "diagnostics": [diagnostic], "exit_to_title": true})
 
 
 func open_overlay(id: StringName, params: Dictionary = {}) -> Control:
-	var root: VNMain = _vn_main()
+	if not _has_main():
+		return null
+	var root: VNEngineMain = _vn_main()
 	var final_params: Dictionary = params.duplicate()
 	if id == &"gallery":
 		final_params["asset_resolver"] = _shared_asset_resolver
@@ -318,18 +389,20 @@ func open_overlay(id: StringName, params: Dictionary = {}) -> Control:
 
 
 func close_overlay() -> void:
+	if not _has_main():
+		return
 	_vn_main().overlay_stack.close_overlay()
 
 
 func _load_manifest() -> void:
-	var manifest_path: String = VNPaths.manifest()
+	var manifest_path: String = VNEnginePaths.manifest()
 	if not ResourceLoader.exists(manifest_path):
 		return
 
 	var manifest_res: Resource = load(manifest_path)
-	manifest = manifest_res as GameManifest
+	manifest = manifest_res as VNEngineGameManifest
 	if manifest == null:
-		VNLog.warn("VNGame", "Manifest failed to load or is not a GameManifest: '%s'" % manifest_path)
+		VNEngineLog.warn("VNGame", "Manifest failed to load or is not a GameManifest: '%s'" % manifest_path)
 		return
 
 	_state = AppState.BOOT if manifest.has_boot_sequence() else AppState.TITLE
@@ -339,10 +412,10 @@ func _load_manifest() -> void:
 			continue
 		var expected_id: String = chapter.script_path.get_base_dir().get_file()
 		if chapter.id != expected_id:
-			VNLog.warn("VNGame", "Chapter id '%s' does not match its folder name '%s'" % [chapter.id, expected_id])
+			VNEngineLog.warn("VNGame", "Chapter id '%s' does not match its folder name '%s'" % [chapter.id, expected_id])
 
 
-func _first_matching_ending(state: StoryState) -> EndingDef:
+func _first_matching_ending(state: VNEngineStoryState) -> VNEngineEndingDef:
 	if manifest == null:
 		return null
 	for ending in manifest.endings:
@@ -350,13 +423,13 @@ func _first_matching_ending(state: StoryState) -> EndingDef:
 			continue
 		if ending.condition == "":
 			continue
-		if ExpressionEvaluator.evaluate(ending.condition, state.flags):
+		if VNEngineExpressionEvaluator.evaluate(ending.condition, state.flags):
 			return ending
 	return null
 
 
-func _enter_chapter_immediate(chapter: ChapterDef, resume_state: Dictionary) -> void:
-	var root: VNMain = _vn_main()
+func _enter_chapter_immediate(chapter: VNEngineChapterDef, resume_state: Dictionary) -> void:
+	var root: VNEngineMain = _vn_main()
 	root.screen_stack.replace_screen(&"stage", {
 		"story_file": chapter.script_path,
 		"resume_state": resume_state,
@@ -365,14 +438,14 @@ func _enter_chapter_immediate(chapter: ChapterDef, resume_state: Dictionary) -> 
 	})
 
 
-func _enter_chapter_via_loading(chapter: ChapterDef, resume_state: Dictionary) -> void:
-	var ui: UiDef = get_ui()
+func _enter_chapter_via_loading(chapter: VNEngineChapterDef, resume_state: Dictionary) -> void:
+	var ui: VNEngineUiDef = get_ui()
 
-	_chapter_cache = ChapterPreloader.new()
+	_chapter_cache = VNEngineChapterPreloader.new()
 	_chapter_cache.build_plan(chapter.script_path, _shared_asset_resolver, get_flag_list(), chapter)
 	_chapter_cache.request_all()
 
-	var root: VNMain = _vn_main()
+	var root: VNEngineMain = _vn_main()
 	if ui.loading_mode == "never" or not root.screen_stack.has_screen(&"loading"):
 		_enter_chapter_immediate(chapter, resume_state)
 		return
@@ -409,7 +482,7 @@ func _enter_chapter_via_loading(chapter: ChapterDef, resume_state: Dictionary) -
 	root.screen_stack.replace_screen(&"loading", loading_params)
 
 
-func _chapter_title(chapter: ChapterDef) -> String:
+func _chapter_title(chapter: VNEngineChapterDef) -> String:
 	var title: String = _translated_or_empty(chapter.title_key)
 	return title if title != "" else chapter.id.capitalize()
 
@@ -425,12 +498,21 @@ func _set_state(new_state: AppState) -> void:
 	_state = new_state
 
 
-func _vn_main() -> VNMain:
-	return VNMain.instance()
+func _has_main() -> bool:
+	if _vn_main() != null:
+		return true
+	VNEngineLog.error("VNGame", "vn_main.tscn is not running. Change to it or add it to the scene tree first.")
+	return false
 
 
-func _current_stage_screen() -> VNStageScreen:
-	var screen: VNScreen = _vn_main().screen_stack.current_screen()
-	if screen is VNStageScreen:
-		return screen as VNStageScreen
+func _vn_main() -> VNEngineMain:
+	return VNEngineMain.instance()
+
+
+func _current_stage_screen() -> VNEngineStageScreen:
+	if _vn_main() == null:
+		return null
+	var screen: VNEngineScreen = _vn_main().screen_stack.current_screen()
+	if screen is VNEngineStageScreen:
+		return screen as VNEngineStageScreen
 	return null

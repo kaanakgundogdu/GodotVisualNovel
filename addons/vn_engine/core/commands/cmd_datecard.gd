@@ -1,5 +1,5 @@
-class_name CmdDatecard
-extends VNCommand
+class_name VNEngineCmdDatecard
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "datecard"
@@ -7,10 +7,10 @@ func command_name() -> String:
 func is_blocking() -> bool:
 	return true
 
-func apply(args: String, ctx: CommandContext) -> void:
-	var tokens: Array[String] = VNCommand.parse_quoted_args(args)
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
+	var tokens: Array[String] = VNEngineCommand.parse_quoted_args(args)
 	if tokens.is_empty():
-		VNLog.warn("CmdDatecard", "Missing argument: '@datecard' expects at least 1 line of text")
+		VNEngineLog.warn("CmdDatecard", "Missing argument: '@datecard' expects at least 1 line of text")
 		if ctx.bus:
 			ctx.bus.resolve_block()
 		return
@@ -19,15 +19,15 @@ func apply(args: String, ctx: CommandContext) -> void:
 	var line2: String = tokens[1] if tokens.size() > 1 else ""
 	var line3: String = tokens[2] if tokens.size() > 2 else ""
 
-	var vn_main: VNMain = VNMain.instance()
-	var overlay: CardOverlay = vn_main.get_card_overlay() if vn_main != null else null
+	var vn_main: VNEngineMain = VNEngineMain.instance()
+	var overlay: VNEngineCardOverlay = vn_main.get_card_overlay() if vn_main != null else null
 	if overlay == null:
-		VNLog.warn("CmdDatecard", "CardOverlay not found, resolving block immediately")
+		VNEngineLog.warn("CmdDatecard", "CardOverlay not found, resolving block immediately")
 		if ctx.bus:
 			ctx.bus.resolve_block()
 		return
 
-	overlay.open(CardOverlay.MODE_DATECARD, {"line1": line1, "line2": line2, "line3": line3})
+	overlay.open(VNEngineCardOverlay.MODE_DATECARD, {"line1": line1, "line2": line2, "line3": line3})
 	await overlay.finished
 
 	if ctx.bus:

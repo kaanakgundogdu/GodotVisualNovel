@@ -1,14 +1,14 @@
 @tool
-class_name AssetLintContext
+class_name VNEngineAssetLintContext
 extends RefCounted
 
 
-var asset_map: AssetMap
-var resolver: AssetResolver
-var cast: Cast
-var manifest: GameManifest
+var asset_map: VNEngineAssetMap
+var resolver: VNEngineAssetResolver
+var cast: VNEngineCast
+var manifest: VNEngineGameManifest
 var scenario_paths: Array[String] = []
-var scripts: Array[StoryScript] = []
+var scripts: Array[VNEngineStoryScript] = []
 var refs: Dictionary = {}
 
 var rx_bg: RegEx
@@ -26,27 +26,27 @@ var _note: String = ""
 func setup() -> bool:
 	_compile_patterns()
 
-	asset_map = load(VNPaths.asset_map()) as AssetMap
+	asset_map = load(VNEnginePaths.asset_map()) as VNEngineAssetMap
 	if asset_map == null:
-		VNLog.error("AssetLintContext", "Failed to load %s, cannot lint" % VNPaths.asset_map())
+		VNEngineLog.error("AssetLintContext", "Failed to load %s, cannot lint" % VNEnginePaths.asset_map())
 		return false
 
-	resolver = AssetResolver.new()
+	resolver = VNEngineAssetResolver.new()
 	resolver.silent = true
 	resolver.load_map(asset_map)
 
-	cast = load(VNPaths.cast_file()) as Cast
+	cast = load(VNEnginePaths.cast_file()) as VNEngineCast
 	if cast == null:
-		VNLog.warn("AssetLintContext", "Failed to load %s, character-based rules run with reduced data" % VNPaths.cast_file())
+		VNEngineLog.warn("AssetLintContext", "Failed to load %s, character-based rules run with reduced data" % VNEnginePaths.cast_file())
 
-	if ResourceLoader.exists(VNPaths.manifest()):
-		manifest = load(VNPaths.manifest()) as GameManifest
+	if ResourceLoader.exists(VNEnginePaths.manifest()):
+		manifest = load(VNEnginePaths.manifest()) as VNEngineGameManifest
 		if manifest == null:
-			VNLog.warn("AssetLintContext", "%s loaded but is not a GameManifest, manifest-based rules are skipped" % VNPaths.manifest())
+			VNEngineLog.warn("AssetLintContext", "%s loaded but is not a GameManifest, manifest-based rules are skipped" % VNEnginePaths.manifest())
 
-	scenario_paths = _find_scenario_files(VNPaths.scenario_root())
+	scenario_paths = _find_scenario_files(VNEnginePaths.scenario_root())
 	for path in scenario_paths:
-		scripts.append(ScenarioParser.parse_file(path))
+		scripts.append(VNEngineScenarioParser.parse_file(path))
 
 	refs = _collect_references(scripts, cast)
 	return true
@@ -179,7 +179,7 @@ func _find_scenario_files_rec(path: String, out: Array[String]) -> void:
 	dir.list_dir_end()
 
 
-func _collect_references(scanned_scripts: Array[StoryScript], cast_db: Cast) -> Dictionary:
+func _collect_references(scanned_scripts: Array[VNEngineStoryScript], cast_db: VNEngineCast) -> Dictionary:
 	var out: Dictionary = {
 		"background": [],
 		"cg": [],
@@ -235,7 +235,7 @@ func _collect_references(scanned_scripts: Array[StoryScript], cast_db: Cast) -> 
 	return out
 
 
-func _parse_show_args(args: String, cast_db: Cast) -> Dictionary:
+func _parse_show_args(args: String, cast_db: VNEngineCast) -> Dictionary:
 	var tokens: PackedStringArray = args.strip_edges().split(" ", false)
 	if tokens.is_empty():
 		return {}
@@ -268,7 +268,7 @@ func _parse_show_args(args: String, cast_db: Cast) -> Dictionary:
 		else:
 			i += 1
 
-	var entry: CastMember = null
+	var entry: VNEngineCastMember = null
 	if cast_db:
 		entry = cast_db.get_entry(char_id)
 

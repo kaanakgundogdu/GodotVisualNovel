@@ -1,13 +1,10 @@
-class_name VNCommand
+class_name VNEngineCommand
 extends RefCounted
 
 func command_name() -> String:
 	return ""
 
-func allows_multiple() -> bool:
-	return false
-
-func apply(_args: String, _ctx: CommandContext) -> void:
+func apply(_args: String, _ctx: VNEngineCommandContext) -> void:
 	pass
 
 func is_blocking() -> bool:

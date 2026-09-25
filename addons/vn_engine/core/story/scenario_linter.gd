@@ -1,25 +1,45 @@
 extends RefCounted
-class_name ScenarioLinter
+class_name VNEngineScenarioLinter
 
 
 const _SET_VAR_OPS := ["=", "+=", "-=", "*=", "/="]
+const _FLOW_STOP_COMMANDS := ["jump", "call", "return", "end", "goto_chapter"]
 
 
-static func lint(script: StoryScript) -> void:
+static func _is_zero_literal(value_str: String) -> bool:
+	var trimmed: String = value_str.strip_edges()
+	if not trimmed.is_valid_float():
+		return false
+	return trimmed.to_float() == 0.0
+
+
+static func _lint_after_flow_stop(node: VNEngineStoryNode, script: VNEngineStoryScript) -> void:
+	var stop_name: String = ""
+	for cmd in node.commands:
+		var cname: String = cmd.get("name", "")
+		if stop_name != "" and VNEngineStoryRunner.DEFERRED_COMMANDS.has(cname):
+			script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, cmd["line"], "'@%s' never runs, it comes after '@%s' in the same node" % [cname, stop_name]))
+		elif stop_name == "" and _FLOW_STOP_COMMANDS.has(cname):
+			stop_name = cname
+
+
+static func lint(script: VNEngineStoryScript) -> void:
 	var reachable: Dictionary = {}
 
 	for node in script.nodes:
 		for choice in node.choices:
 			choice.target_index = script.index_of(choice.target)
 			if choice.target_index == -1:
-				script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, choice.line, "Choice target not found: '%s'" % choice.target))
+				script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, choice.line, "Choice target not found: '%s'" % choice.target))
 			else:
 				reachable[choice.target_index] = true
 
 		if node.choices.size() > 0:
 			for cmd in node.commands:
 				if cmd.get("name", "") == "jump":
-					script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.WARNING, cmd["line"], "'@jump' is ignored when choices are present"))
+					script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, cmd["line"], "'@jump' is ignored when choices are present"))
+
+		_lint_after_flow_stop(node, script)
 
 		for cmd in node.commands:
 			_lint_command(cmd, script, reachable)
@@ -28,10 +48,10 @@ static func lint(script: StoryScript) -> void:
 
 	for i in range(1, script.nodes.size()):
 		if not reachable.has(i) and script.nodes[i - 1].is_terminal:
-			script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.WARNING, script.nodes[i].line, "This node is not targeted from anywhere and the previous node is terminal (unreachable)"))
+			script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, script.nodes[i].line, "This node is not targeted from anywhere and the previous node is terminal (unreachable)"))
 
 
-static func lint_expressions(script: StoryScript) -> void:
+static func lint_expressions(script: VNEngineStoryScript) -> void:
 	for node in script.nodes:
 		for cmd in node.commands:
 			if cmd.get("name", "") == "jump_if":
@@ -45,7 +65,7 @@ static func lint_expressions(script: StoryScript) -> void:
 				_validate_expression(choice.disabled_if, choice.line, script)
 
 
-static func lint_flags(script: StoryScript, flag_list: FlagList) -> void:
+static func lint_flags(script: VNEngineStoryScript, flag_list: VNEngineFlagList) -> void:
 	for node in script.nodes:
 		for cmd in node.commands:
 			var cname: String = cmd.get("name", "")
@@ -66,34 +86,34 @@ static func lint_flags(script: StoryScript, flag_list: FlagList) -> void:
 				_lint_expression_flags(choice.disabled_if, choice.line, script, flag_list)
 
 
-static func _lint_command(cmd: Dictionary, script: StoryScript, reachable: Dictionary) -> void:
+static func _lint_command(cmd: Dictionary, script: VNEngineStoryScript, reachable: Dictionary) -> void:
 	var name: String = cmd.get("name", "")
 	var args: String = cmd.get("args", "")
 	var line_no: int = cmd.get("line", 0)
 
-	if not CommandRegistry.is_known(name):
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.WARNING, line_no, "Unknown command: '@%s'" % name, _suggest(name)))
+	if not VNEngineCommandRegistry.is_known(name):
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, line_no, "Unknown command: '@%s'" % name, _suggest(name)))
 		return
 
 	match name:
 		"jump":
 			if args == "":
-				script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@jump' expects a target"))
+				script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@jump' expects a target"))
 			else:
 				var idx: int = script.index_of(args)
 				if idx == -1:
-					script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@jump' target not found: '%s'" % args))
+					script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@jump' target not found: '%s'" % args))
 				else:
 					reachable[idx] = true
 		"jump_if":
 			_lint_jump_if(args, line_no, script, reachable)
 		"call":
 			if args == "":
-				script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@call' expects a target"))
+				script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@call' expects a target"))
 			else:
 				var call_idx: int = script.index_of(args)
 				if call_idx == -1:
-					script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@call' target not found: '%s'" % args))
+					script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@call' target not found: '%s'" % args))
 				else:
 					reachable[call_idx] = true
 		"return":
@@ -108,36 +128,36 @@ static func _lint_command(cmd: Dictionary, script: StoryScript, reachable: Dicti
 			_lint_goto_chapter(args, line_no, script)
 		"show":
 			if args == "":
-				script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@show' expects a character id"))
+				script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@show' expects a character id"))
 		"hide", "leave":
 			if args == "":
-				script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@%s' expects a character id" % name))
+				script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@%s' expects a character id" % name))
 		"move":
 			if args == "":
-				script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@move' expects a character id"))
+				script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@move' expects a character id"))
 		"movie":
 			if args == "":
-				script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@movie' expects a file name"))
+				script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@movie' expects a file name"))
 		"music", "sfx", "voice":
 			if args == "":
-				script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@%s' expects an asset name" % name))
+				script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@%s' expects an asset name" % name))
 		"bg":
 			if args == "":
-				script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@bg' expects a background name"))
+				script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@bg' expects a background name"))
 		"wait":
 			if args == "" or not args.is_valid_float():
-				script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@wait' expects a valid number of seconds"))
+				script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@wait' expects a valid number of seconds"))
 		"choice_timer":
 			var ct_tokens: PackedStringArray = args.split(" ", false)
 			if ct_tokens.is_empty() or not ct_tokens[0].is_valid_float() or ct_tokens[0].to_float() <= 0.0:
-				script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@choice_timer' expects a valid number of seconds (>0)"))
+				script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@choice_timer' expects a valid number of seconds (>0)"))
 			elif ct_tokens.size() > 1 and (not ct_tokens[1].is_valid_int() or ct_tokens[1].to_int() < 0):
-				script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.WARNING, line_no, "'@choice_timer' default_index must be an integer >= 0: '%s'" % ct_tokens[1]))
+				script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, line_no, "'@choice_timer' default_index must be an integer >= 0: '%s'" % ct_tokens[1]))
 		"shake", "end":
 			pass
 
 
-static func _lint_jump_if(args: String, line_no: int, script: StoryScript, reachable: Dictionary) -> void:
+static func _lint_jump_if(args: String, line_no: int, script: VNEngineStoryScript, reachable: Dictionary) -> void:
 	var condition: String = ""
 	var target: String = ""
 
@@ -148,43 +168,43 @@ static func _lint_jump_if(args: String, line_no: int, script: StoryScript, reach
 	else:
 		var tokens: PackedStringArray = args.split(" ", false)
 		if tokens.size() < 4:
-			script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@jump_if' expects a target"))
+			script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@jump_if' expects a target"))
 			return
 		target = tokens[tokens.size() - 1]
 		condition = " ".join(tokens.slice(0, tokens.size() - 1))
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.WARNING, line_no, "Using the old positional '@jump_if' form", "suggested: '@jump_if %s -> %s'" % [condition, target]))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, line_no, "Using the old positional '@jump_if' form", "suggested: '@jump_if %s -> %s'" % [condition, target]))
 
 	if condition == "":
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@jump_if' has an empty expression"))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@jump_if' has an empty expression"))
 
 	if target == "":
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@jump_if' expects a target"))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@jump_if' expects a target"))
 		return
 
 	var idx: int = script.index_of(target)
 	if idx == -1:
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@jump_if' target not found: '%s'" % target))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@jump_if' target not found: '%s'" % target))
 	else:
 		reachable[idx] = true
 
 
-static func _lint_scene(args: String, line_no: int, script: StoryScript) -> void:
+static func _lint_scene(args: String, line_no: int, script: VNEngineStoryScript) -> void:
 	if args == "":
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@scene' expects a file path"))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@scene' expects a file path"))
 		return
 
-	script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.INFO, line_no, "'@scene' is parsed but not executed yet"))
+	script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.INFO, line_no, "'@scene' is parsed but not executed yet"))
 
 	var tokens: PackedStringArray = args.split(" ", false)
 	var file_arg: String = tokens[0]
 	if file_arg.begins_with("res://") and not FileAccess.file_exists(file_arg):
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.WARNING, line_no, "Scene file not found: '%s'" % file_arg))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, line_no, "Scene file not found: '%s'" % file_arg))
 
 
-static func _lint_set_var(args: String, line_no: int, script: StoryScript) -> void:
+static func _lint_set_var(args: String, line_no: int, script: VNEngineStoryScript) -> void:
 	var tokens: PackedStringArray = args.split(" ", false)
 	if tokens.size() < 3:
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@set_var' expects <name> <op> <value>"))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@set_var' expects <name> <op> <value>"))
 		return
 
 	var var_name: String = tokens[0]
@@ -192,18 +212,18 @@ static func _lint_set_var(args: String, line_no: int, script: StoryScript) -> vo
 	var value_str: String = " ".join(tokens.slice(2))
 
 	if not var_name.is_valid_identifier():
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.WARNING, line_no, "Invalid variable name: '%s'" % var_name))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, line_no, "Invalid variable name: '%s'" % var_name))
 
 	if not _SET_VAR_OPS.has(op):
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "Unknown operator: '%s'" % op))
-	elif op == "/=" and value_str.strip_edges() == "0":
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.WARNING, line_no, "Division by zero, the operation will not run"))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "Unknown operator: '%s'" % op))
+	elif op == "/=" and _is_zero_literal(value_str):
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, line_no, "Division by zero, the operation will not run"))
 
 
-static func _lint_flag(args: String, line_no: int, script: StoryScript) -> void:
+static func _lint_flag(args: String, line_no: int, script: VNEngineStoryScript) -> void:
 	var tokens: PackedStringArray = args.split(" ", false)
 	if tokens.size() < 3:
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@flag' expects <name> <op> <value>"))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@flag' expects <name> <op> <value>"))
 		return
 
 	var flag_name: String = tokens[0]
@@ -211,24 +231,24 @@ static func _lint_flag(args: String, line_no: int, script: StoryScript) -> void:
 	var value_str: String = " ".join(tokens.slice(2))
 
 	if not flag_name.is_valid_identifier():
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.WARNING, line_no, "Invalid flag name: '%s'" % flag_name))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, line_no, "Invalid flag name: '%s'" % flag_name))
 
 	if not _SET_VAR_OPS.has(op):
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "Unknown operator: '%s'" % op))
-	elif op == "/=" and value_str.strip_edges() == "0":
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.WARNING, line_no, "Division by zero, the operation will not run"))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "Unknown operator: '%s'" % op))
+	elif op == "/=" and _is_zero_literal(value_str):
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, line_no, "Division by zero, the operation will not run"))
 
 
-static func _lint_goto_chapter(args: String, line_no: int, script: StoryScript) -> void:
+static func _lint_goto_chapter(args: String, line_no: int, script: VNEngineStoryScript) -> void:
 	var trimmed: String = args.strip_edges()
 	if trimmed == "":
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, "'@goto_chapter' expects a chapter id"))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@goto_chapter' expects a chapter id"))
 		return
 	if trimmed.split(" ", false).size() > 1:
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.WARNING, line_no, "'@goto_chapter' expects a single chapter id: '%s'" % trimmed))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, line_no, "'@goto_chapter' expects a single chapter id: '%s'" % trimmed))
 
 
-static func _lint_show_before_speak(script: StoryScript) -> void:
+static func _lint_show_before_speak(script: VNEngineStoryScript) -> void:
 	var shown: Dictionary = {}
 	var warned: Dictionary = {}
 
@@ -246,12 +266,12 @@ static func _lint_show_before_speak(script: StoryScript) -> void:
 					shown.erase(hide_tokens[0].to_lower())
 
 		if node.speaker_id != "" and node.speaker_id != "narrator" and not shown.has(node.speaker_id) and not warned.has(node.speaker_id):
-			script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.INFO, node.line, "'%s' speaks with no sprite on screen" % node.speaker_id))
+			script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.INFO, node.line, "'%s' speaks with no sprite on screen" % node.speaker_id))
 			warned[node.speaker_id] = true
 
 
 static func _suggest(name: String) -> String:
-	for known in CommandRegistry.known_names():
+	for known in VNEngineCommandRegistry.known_names():
 		if name.begins_with(known) or known.begins_with(name):
 			return "suggestion: '@%s'" % known
 	return ""
@@ -267,30 +287,30 @@ static func _extract_jump_if_condition(args: String) -> String:
 	return " ".join(tokens.slice(0, tokens.size() - 1))
 
 
-static func _validate_expression(expr: String, line_no: int, script: StoryScript) -> void:
-	for msg in ExpressionEvaluator.validate(expr):
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, msg))
+static func _validate_expression(expr: String, line_no: int, script: VNEngineStoryScript) -> void:
+	for msg in VNEngineExpressionEvaluator.validate(expr):
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, msg))
 
 
-static func _check_flag_id(id: String, line_no: int, script: StoryScript, flag_list: FlagList) -> void:
+static func _check_flag_id(id: String, line_no: int, script: VNEngineStoryScript, flag_list: VNEngineFlagList) -> void:
 	if id == "":
 		return
 	if not flag_list.has_flag(id):
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.WARNING, line_no, "Undefined flag: '%s'" % id.to_lower(), _suggest_flag(id, flag_list)))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, line_no, "Undefined flag: '%s'" % id.to_lower(), _suggest_flag(id, flag_list)))
 
 
-static func _lint_expression_flags(expr: String, line_no: int, script: StoryScript, flag_list: FlagList) -> void:
-	for id in ExpressionEvaluator.collect_identifiers(expr):
+static func _lint_expression_flags(expr: String, line_no: int, script: VNEngineStoryScript, flag_list: VNEngineFlagList) -> void:
+	for id in VNEngineExpressionEvaluator.collect_identifiers(expr):
 		_check_flag_id(id, line_no, script, flag_list)
 
-	var base_errors: PackedStringArray = ExpressionEvaluator.validate(expr)
-	for msg in ExpressionEvaluator.validate(expr, flag_list):
+	var base_errors: PackedStringArray = VNEngineExpressionEvaluator.validate(expr)
+	for msg in VNEngineExpressionEvaluator.validate(expr, flag_list):
 		if base_errors.has(msg):
 			continue
-		script.diagnostics.append(ParseDiagnostic.new(ParseDiagnostic.Severity.ERROR, line_no, msg))
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, msg))
 
 
-static func _suggest_flag(id: String, flag_list: FlagList) -> String:
+static func _suggest_flag(id: String, flag_list: VNEngineFlagList) -> String:
 	var lowered: String = id.to_lower()
 	for known in flag_list.ids():
 		if lowered.begins_with(known) or known.begins_with(lowered):

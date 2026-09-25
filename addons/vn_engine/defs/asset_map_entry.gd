@@ -1,4 +1,4 @@
-class_name AssetMapEntry
+class_name VNEngineAssetMapEntry
 extends Resource
 
 ## Which asset type this rule is for.

@@ -26,8 +26,8 @@ https://kaanakgundogdu.github.io/blog/VisualNovelGodot/devlog2.html
 
 ## Repository layout
 
-- `addons/vn_engine/`: the engine itself. Start with [addons/vn_engine/README.md](addons/vn_engine/README.md), the guide for using the library.
-- `addons/vn_engine/sample/`: a tiny content pack that ships inside the engine, with no images or sound, the smallest thing that runs.
+- `addons/vn_engine/`: the engine itself.
+- `addons/vn_engine/sample_game/`: a tiny content pack that ships inside the engine, with no images or sound, the smallest thing that runs.
 - `game/`: example game (default content root)
 - `game2/`: second small example proving the engine is content-independent
 - `assets/`: shared art and audio used by the examples
@@ -47,18 +47,14 @@ https://kaanakgundogdu.github.io/blog/VisualNovelGodot/devlog2.html
 - Built-in diagnostics screen and F3 debug overlay (debug builds only)
 - Content agnostic: You can switch between games by changing `vn_engine/content/root` in Project Settings, same engine code, different game data
 
-See [addons/vn_engine/README.md](addons/vn_engine/README.md) for the full feature guide and configuration options.
-
-The engine is at version 0.6, an early release, tested only by me so far. See
-[Current status and known limitations](addons/vn_engine/README.md#current-status-and-known-limitations)
-before relying on it for something big.
+The engine is at version 0.6, an early release, tested only by me so far.
 
 ## Quick start
 
 1. Open the project in Godot 4.4
 2. Press Play to run the default example game
 3. To run the second example, set Project Settings → `vn_engine/content/root` to `res://game2/` (dont forget to enable Advanced Settings in)
-4. To see the engine's own minimal sample (no art, no audio), set the same setting to `res://addons/vn_engine/sample/`
+4. To see the engine's own minimal sample (no art, no audio), set the same setting to `res://addons/vn_engine/sample_game/`
 
 ## License
 

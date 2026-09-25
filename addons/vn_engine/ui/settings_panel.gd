@@ -1,4 +1,4 @@
-class_name SettingsPanel
+class_name VNEngineSettingsPanel
 extends ColorRect
 
 signal closed
@@ -40,7 +40,7 @@ var _preview_tween: Tween
 @onready var language_tab_root: Control = %Language
 @onready var language_option: OptionButton = %LanguageOption
 
-var controls_page: ControlsPage
+var controls_page: VNEngineControlsPage
 
 
 static func register_page(title: String, scene_path: String) -> void:
@@ -72,7 +72,7 @@ func _ready() -> void:
 
 	language_option.item_selected.connect(_on_language_selected)
 
-	controls_page = ControlsPage.new()
+	controls_page = VNEngineControlsPage.new()
 	controls_page.name = "Controls"
 	settings_tabs.add_child(controls_page)
 
@@ -155,7 +155,7 @@ func _refresh_window_size_option() -> void:
 
 
 func _refresh_language_tab() -> void:
-	var manifest: GameManifest = VNGame.get_manifest()
+	var manifest: VNEngineGameManifest = VNGame.get_manifest()
 	var locales: PackedStringArray = manifest.locales if manifest != null else PackedStringArray()
 	var hide_tab: bool = locales.size() < 2
 
@@ -205,12 +205,12 @@ func _add_extra_pages() -> void:
 		var scene_path: String = String(page["scene_path"])
 		var scene: PackedScene = load(scene_path) as PackedScene
 		if scene == null:
-			VNLog.warn("SettingsPanel", "Failed to load extra page: %s" % scene_path)
+			VNEngineLog.warn("SettingsPanel", "Failed to load extra page: %s" % scene_path)
 			continue
 
 		var page_root: Control = scene.instantiate() as Control
 		if page_root == null:
-			VNLog.warn("SettingsPanel", "Extra page root is not a Control: %s" % scene_path)
+			VNEngineLog.warn("SettingsPanel", "Extra page root is not a Control: %s" % scene_path)
 			continue
 
 		page_root.name = title

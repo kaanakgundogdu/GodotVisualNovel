@@ -1,5 +1,5 @@
 extends RefCounted
-class_name HistoryStack
+class_name VNEngineHistoryStack
 
 
 const MAX_DEPTH := 50

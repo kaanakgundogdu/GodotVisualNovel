@@ -1,23 +1,20 @@
-class_name CmdFlag
-extends VNCommand
+class_name VNEngineCmdFlag
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "flag"
 
-func allows_multiple() -> bool:
-	return true
-
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var tokens: PackedStringArray = args.split(" ", false)
 	if tokens.size() < 3:
-		VNLog.warn("CmdFlag", "Invalid '@flag' format: %s" % args)
+		VNEngineLog.warn("CmdFlag", "Invalid '@flag' format: %s" % args)
 		return
 
 	var flag_id: String = tokens[0].strip_edges()
 	var op: String = tokens[1].strip_edges()
 	var value_str: String = " ".join(tokens.slice(2))
 
-	var flag_list: FlagList = ctx.runner.flag_list
+	var flag_list: VNEngineFlagList = ctx.runner.flag_list
 
 	var new_value: Variant
 	if op == "=":
@@ -35,11 +32,11 @@ func apply(args: String, ctx: CommandContext) -> void:
 				new_value = current_f * delta_f
 			"/=":
 				if delta_f == 0.0:
-					VNLog.warn("CmdFlag", "Division by zero, no change made: %s" % args)
+					VNEngineLog.warn("CmdFlag", "Division by zero, no change made: %s" % args)
 					return
 				new_value = current_f / delta_f
 	else:
-		VNLog.warn("CmdFlag", "Unknown operator: '%s' (%s)" % [op, args])
+		VNEngineLog.warn("CmdFlag", "Unknown operator: '%s' (%s)" % [op, args])
 		return
 
 	if flag_list != null:
@@ -48,10 +45,9 @@ func apply(args: String, ctx: CommandContext) -> void:
 	ctx.state.set_flag(flag_id, new_value)
 
 	if flag_list != null:
-		var def: FlagDef = flag_list.find(flag_id)
+		var def: VNEngineFlagDef = flag_list.find(flag_id)
 		if def != null and def.scope == "global":
 			VNSave.set_global_flag(flag_id, new_value)
-
 
 func _literal(value_str: String) -> Variant:
 	var text: String = value_str.strip_edges()
@@ -62,7 +58,6 @@ func _literal(value_str: String) -> Variant:
 	if text.is_valid_float():
 		return text.to_float()
 	return text
-
 
 func _to_float(value: Variant) -> float:
 	if typeof(value) == TYPE_BOOL:

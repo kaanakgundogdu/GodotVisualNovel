@@ -1,5 +1,5 @@
 @tool
-class_name TitleScreenDef
+class_name VNEngineTitleScreenDef
 extends Resource
 
 @export_group("Normal")

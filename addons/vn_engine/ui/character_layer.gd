@@ -1,9 +1,9 @@
-class_name CharacterLayer
+class_name VNEngineCharacterLayer
 extends Control
 
-@export var runner: StoryRunner
+@export var runner: VNEngineStoryRunner
 @export var sprite_scene: PackedScene
-@export var cast: Cast
+@export var cast: VNEngineCast
 @export var positions: Dictionary = {
 	"far_left": 0.1,
 	"left": 0.25,
@@ -17,15 +17,15 @@ var active_sprites: Dictionary = {}
 
 func _ready() -> void:
 	if cast == null:
-		var db_path: String = VNPaths.cast_file()
+		var db_path: String = VNEnginePaths.cast_file()
 		if ResourceLoader.exists(db_path):
-			var db: Cast = load(db_path) as Cast
+			var db: VNEngineCast = load(db_path) as VNEngineCast
 			if db != null:
 				cast = db
 			else:
-				VNLog.warn("CharacterLayer", "'%s' is not a Cast resource" % db_path)
+				VNEngineLog.warn("CharacterLayer", "'%s' is not a Cast resource" % db_path)
 		else:
-			VNLog.warn("CharacterLayer", "Character database not found: '%s'" % db_path)
+			VNEngineLog.warn("CharacterLayer", "Character database not found: '%s'" % db_path)
 
 	if runner:
 		runner.register_manager(self)
@@ -48,7 +48,7 @@ func show_character(id: String, outfit: String, pose: String, expression: String
 		sh = entry.default_shot
 
 	if active_sprites.has(key):
-		var existing: CharacterSprite = active_sprites[key]
+		var existing: VNEngineCharacterSprite = active_sprites[key]
 		if expression != "":
 			var existing_path := runner.ctx.assets.resolve_character(key, out, ps, expression, sh)
 			existing.set_expression(existing_path)
@@ -61,7 +61,7 @@ func show_character(id: String, outfit: String, pose: String, expression: String
 		expr = entry.default_expression
 	var pos := position_str if position_str != "" else "center"
 
-	var sprite := sprite_scene.instantiate() as CharacterSprite
+	var sprite := sprite_scene.instantiate() as VNEngineCharacterSprite
 	add_child(sprite)
 	active_sprites[key] = sprite
 
@@ -84,7 +84,7 @@ func hide_character(id: String, transition: String) -> void:
 	var key := id.to_lower()
 	if not active_sprites.has(key):
 		return
-	var sprite: CharacterSprite = active_sprites[key]
+	var sprite: VNEngineCharacterSprite = active_sprites[key]
 	sprite.exit(transition)
 	active_sprites.erase(key)
 
@@ -101,17 +101,17 @@ func _resolve_position(pos_str: String) -> float:
 		return positions[pos_str]
 	if pos_str.is_valid_float():
 		return pos_str.to_float()
-	VNLog.warn("CharacterLayer", "Unknown position '%s', defaulting to 0.5 (center)" % pos_str)
+	VNEngineLog.warn("CharacterLayer", "Unknown position '%s', defaulting to 0.5 (center)" % pos_str)
 	return 0.5
 
 
-func _get_db_entry(id: String) -> CastMember:
+func _get_db_entry(id: String) -> VNEngineCastMember:
 	if cast == null:
 		return null
 	return cast.get_entry(id)
 
 
-func _on_dialog_started(node: StoryNode) -> void:
+func _on_dialog_started(node: VNEngineStoryNode) -> void:
 	var speaker := node.speaker_id.to_lower()
 	if speaker.is_empty():
 		return
@@ -125,7 +125,7 @@ func _on_dialog_started(node: StoryNode) -> void:
 			active_sprites[char_id].unfocus()
 
 
-func _on_state_restored(state: StoryState) -> void:
+func _on_state_restored(state: VNEngineStoryState) -> void:
 	for char_id in active_sprites.keys():
 		active_sprites[char_id].queue_free()
 	active_sprites.clear()

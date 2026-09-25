@@ -1,16 +1,16 @@
-class_name CommandContext
+class_name VNEngineCommandContext
 extends RefCounted
 
-var runner: StoryRunner
-var state: StoryState
-var script_res: StoryScript
-var bus: CommandBus
+var runner: VNEngineStoryRunner
+var state: VNEngineStoryState
+var script_res: VNEngineStoryScript
+var bus: VNEngineCommandBus
 
-var background: BackgroundSystem
-var characters: CharacterLayer
-var audio: AudioSystem
-var video: VideoSystem
-var camera: CameraSystem
-var dialog_ui: DialogUI
+var background: VNEngineBackgroundSystem
+var characters: VNEngineCharacterLayer
+var audio: VNEngineAudioSystem
+var video: VNEngineVideoSystem
+var camera: VNEngineCameraSystem
+var dialog_ui: VNEngineDialogUI
 
-var assets: AssetResolver
+var assets: VNEngineAssetResolver

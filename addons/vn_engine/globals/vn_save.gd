@@ -26,8 +26,15 @@ var _global_dirty: bool = false
 
 var _save_namespace: String = ""
 
+var _started: bool = false
 
-func _ready() -> void:
+
+## Startup work moved to VNGame.start_engine(), autoload stays passive
+## until the engine actually starts.
+func start() -> void:
+	if _started:
+		return
+	_started = true
 	_save_namespace = _resolve_save_namespace()
 	DirAccess.make_dir_recursive_absolute(get_save_dir())
 	_load_global_data()
@@ -39,19 +46,21 @@ func _ready() -> void:
 
 
 func _notification(what: int) -> void:
+	if not _started:
+		return
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_PREDELETE:
 		_flush_global_data()
 
 
 func _resolve_save_namespace() -> String:
-	var manifest_path: String = VNPaths.manifest()
+	var manifest_path: String = VNEnginePaths.manifest()
 	var ns: String = ""
 	if ResourceLoader.exists(manifest_path):
-		var manifest: GameManifest = ResourceLoader.load(manifest_path) as GameManifest
+		var manifest: VNEngineGameManifest = ResourceLoader.load(manifest_path) as VNEngineGameManifest
 		if manifest != null:
 			ns = manifest.game_id.strip_edges()
 	if ns == "":
-		var root: String = VNPaths.content_root().trim_suffix("/")
+		var root: String = VNEnginePaths.content_root().trim_suffix("/")
 		ns = root.get_file()
 	ns = ns.validate_filename()
 	if ns == "":
@@ -60,7 +69,16 @@ func _resolve_save_namespace() -> String:
 
 
 func get_save_dir() -> String:
-	return VNPaths.save_dir(_save_namespace)
+	return VNEnginePaths.save_dir(_save_namespace)
+
+
+## Re-resolves the save namespace against the current content root. Call
+## this after switching content root at runtime with VNGame.use_content_root.
+func refresh_save_namespace() -> void:
+	if not _started:
+		return
+	_save_namespace = _resolve_save_namespace()
+	DirAccess.make_dir_recursive_absolute(get_save_dir())
 
 
 func mark_line_seen(chapter_id: String, line_id: String) -> void:
@@ -80,7 +98,7 @@ func is_line_seen(chapter_id: String, line_id: String) -> bool:
 	return false
 
 
-func save_game(state: StoryState, slot_id: int) -> void:
+func save_game(state: VNEngineStoryState, slot_id: int) -> void:
 	_flush_global_data()
 	var save_path: String = slot_path(slot_id)
 	var image: Image = get_viewport().get_texture().get_image()
@@ -126,10 +144,10 @@ func load_game(slot_id: int) -> Variant:
 
 	match status:
 		SlotStatus.EMPTY:
-			VNLog.warn("VNSave", "Save slot is empty: %d" % slot_id)
+			VNEngineLog.warn("VNSave", "Save slot is empty: %d" % slot_id)
 			return null
 		SlotStatus.CORRUPT:
-			VNLog.warn("VNSave", "Save file could not be parsed: %s" % save_path)
+			VNEngineLog.warn("VNSave", "Save file could not be parsed: %s" % save_path)
 			return null
 
 	var raw: Variant = _read_json_dict(save_path)
@@ -275,7 +293,7 @@ func _load_global_data() -> void:
 		var dir: DirAccess = DirAccess.open("user://")
 		if dir != null:
 			dir.rename(path, corrupt_path)
-		VNLog.error("VNSave", "global_data.json could not be parsed, renamed to '%s', continuing with defaults" % corrupt_path)
+		VNEngineLog.error("VNSave", "global_data.json could not be parsed, renamed to '%s', continuing with defaults" % corrupt_path)
 		return
 
 	global_data = _fill_global_defaults(raw)
@@ -291,6 +309,6 @@ func _fill_global_defaults(raw: Dictionary) -> Dictionary:
 func _extract_state(raw: Dictionary) -> Variant:
 	var state_data: Dictionary = raw.get("state", {})
 	if state_data.is_empty():
-		VNLog.warn("VNSave", "Save file has no 'state' block")
+		VNEngineLog.warn("VNSave", "Save file has no 'state' block")
 		return null
 	return state_data

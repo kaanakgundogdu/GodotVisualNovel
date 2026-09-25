@@ -1,13 +1,13 @@
 @tool
-class_name MissingSpriteRule
-extends AssetLintRule
+class_name VNEngineMissingSpriteRule
+extends VNEngineAssetLintRule
 
 
 func title() -> String:
 	return "12. Missing sprites"
 
 
-func run(ctx: AssetLintContext) -> void:
+func run(ctx: VNEngineAssetLintContext) -> void:
 	for ref in ctx.refs.get("character", []):
 		var path: String = ctx.resolver.resolve_character(ref["char_id"], ref["outfit"], ref["pose"], ref["expression"], ref["shot"])
 		if path == "":

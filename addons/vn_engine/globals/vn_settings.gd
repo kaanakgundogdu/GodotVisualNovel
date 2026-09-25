@@ -18,22 +18,31 @@ const WINDOW_SIZES: Array[Vector2i] = [
 ]
 const FALLBACK_WINDOW_SIZE := Vector2i(1280, 720)
 
+const REQUIRED_BUSES: Array[String] = ["Music", "Sfx", "Voice"]
+
 var data: Dictionary = {}
 
 var _muted_by_focus_loss: bool = false
+
+var _started: bool = false
 
 
 func _init() -> void:
 	data = default_data()
 
 
-func _ready() -> void:
-	VNInput.register_defaults()
+## Startup work moved to VNGame.start_engine(), autoload stays passive
+## until the engine actually starts.
+func start() -> void:
+	_started = true
+	_ensure_audio_buses()
 	_load_settings()
 	apply_all_settings()
 
 
 func _notification(what: int) -> void:
+	if not _started:
+		return
 	match what:
 		NOTIFICATION_APPLICATION_FOCUS_OUT:
 			if bool(data["audio"]["mute_on_focus_loss"]):
@@ -73,7 +82,8 @@ static func default_data() -> Dictionary:
 
 
 func save_settings() -> void:
-	var file: FileAccess = FileAccess.open(VNPaths.settings_file(), FileAccess.WRITE)
+	DirAccess.make_dir_recursive_absolute(VNEnginePaths.settings_file().get_base_dir())
+	var file: FileAccess = FileAccess.open(VNEnginePaths.settings_file(), FileAccess.WRITE)
 	if file != null:
 		file.store_string(JSON.stringify(data, "\t"))
 		file.close()
@@ -147,6 +157,15 @@ func _apply_display() -> void:
 	DisplayServer.window_set_vsync_mode(vsync_mode)
 
 
+func _ensure_audio_buses() -> void:
+	for bus_name: String in REQUIRED_BUSES:
+		if AudioServer.get_bus_index(bus_name) == -1:
+			var idx: int = AudioServer.bus_count
+			AudioServer.add_bus(idx)
+			AudioServer.set_bus_name(idx, bus_name)
+			AudioServer.set_bus_send(idx, "Master")
+
+
 func _apply_audio() -> void:
 	var master_bus: int = AudioServer.get_bus_index("Master")
 	AudioServer.set_bus_volume_db(master_bus, linear_to_db(data["audio"]["master"]))
@@ -162,11 +181,11 @@ func _apply_input() -> void:
 	var overrides: Variant = data["input"]
 	if not overrides is Dictionary:
 		overrides = {}
-	VNInput.apply_overrides(overrides)
+	VNEngineInput.apply_overrides(overrides)
 
 
 func store_input_bindings() -> void:
-	data["input"] = VNInput.export_overrides()
+	data["input"] = VNEngineInput.export_overrides()
 	save_settings()
 
 
@@ -185,21 +204,21 @@ func _parse_size(text: String) -> Vector2i:
 
 
 func _load_settings() -> void:
-	if not FileAccess.file_exists(VNPaths.settings_file()):
+	if not FileAccess.file_exists(VNEnginePaths.settings_file()):
 		return
 
-	var file: FileAccess = FileAccess.open(VNPaths.settings_file(), FileAccess.READ)
+	var file: FileAccess = FileAccess.open(VNEnginePaths.settings_file(), FileAccess.READ)
 	var json_str: String = file.get_as_text()
 	file.close()
 
 	var json: JSON = JSON.new()
 	if json.parse(json_str) != OK:
-		VNLog.warn("VNSettings", "settings.json could not be parsed, using defaults")
+		VNEngineLog.warn("VNSettings", "settings.json could not be parsed, using defaults")
 		return
 
 	var loaded_data: Variant = json.get_data()
 	if not loaded_data is Dictionary:
-		VNLog.warn("VNSettings", "settings.json has an unexpected shape, using defaults")
+		VNEngineLog.warn("VNSettings", "settings.json has an unexpected shape, using defaults")
 		return
 	for category: Variant in loaded_data.keys():
 		if not data.has(category):

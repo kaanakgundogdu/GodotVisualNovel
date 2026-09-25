@@ -1,4 +1,4 @@
-class_name ControlsPage
+class_name VNEngineControlsPage
 extends ScrollContainer
 
 const _ROW_SEPARATION: int = 20
@@ -23,7 +23,7 @@ func _ready() -> void:
 	_rows_box.add_theme_constant_override("separation", _ROW_SEPARATION)
 	add_child(_rows_box)
 
-	for action: StringName in VNInput.ACTIONS:
+	for action: StringName in VNEngineInput.ACTIONS:
 		_rows_box.add_child(_build_action_row(action))
 
 	var footer := HBoxContainer.new()
@@ -61,25 +61,25 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		cancel_capture()
 		return
-	if not VNInput.is_bindable(event):
+	if not VNEngineInput.is_bindable(event):
 		return
 
 	_try_rebind(event)
 
 
 func refresh() -> void:
-	for action: StringName in VNInput.ACTIONS:
+	for action: StringName in VNEngineInput.ACTIONS:
 		var buttons: Array = _slot_buttons.get(action, [])
 		if buttons.is_empty():
 			continue
-		var events: Array[InputEvent] = VNInput.get_events(action)
+		var events: Array[InputEvent] = VNEngineInput.get_events(action)
 		for slot: int in 2:
 			var btn: Button = buttons[slot]
 			if _capturing and _capture_action == action and _capture_slot == slot:
 				btn.text = "..."
 				continue
 			if slot < events.size():
-				btn.text = VNInput.event_label(events[slot])
+				btn.text = VNEngineInput.event_label(events[slot])
 			else:
 				btn.text = "-"
 
@@ -105,7 +105,7 @@ func _build_action_row(action: StringName) -> HBoxContainer:
 
 	var label := Label.new()
 	label.custom_minimum_size = Vector2(_LABEL_MIN_WIDTH, 0)
-	label.text = String(VNInput.LABELS.get(action, action))
+	label.text = String(VNEngineInput.LABELS.get(action, action))
 	row.add_child(label)
 
 	var slot0 := Button.new()
@@ -129,9 +129,9 @@ func _build_action_row(action: StringName) -> HBoxContainer:
 
 
 func _try_rebind(event: InputEvent) -> void:
-	var conflict: StringName = VNInput.rebind(_capture_action, _capture_slot, event)
+	var conflict: StringName = VNEngineInput.rebind(_capture_action, _capture_slot, event)
 	if conflict != &"":
-		var conflict_label: String = String(VNInput.LABELS.get(conflict, conflict))
+		var conflict_label: String = String(VNEngineInput.LABELS.get(conflict, conflict))
 		_set_status("Already used by %s" % conflict_label)
 		return
 
@@ -159,7 +159,7 @@ func _on_slot_button_pressed(action: StringName, slot: int) -> void:
 func _on_reset_action_pressed(action: StringName) -> void:
 	if _capturing:
 		cancel_capture()
-	VNInput.reset(action)
+	VNEngineInput.reset(action)
 	VNSettings.store_input_bindings()
 	refresh()
 
@@ -167,7 +167,7 @@ func _on_reset_action_pressed(action: StringName) -> void:
 func _on_reset_all_pressed() -> void:
 	if _capturing:
 		cancel_capture()
-	VNInput.reset_all()
+	VNEngineInput.reset_all()
 	VNSettings.store_input_bindings()
 	refresh()
 

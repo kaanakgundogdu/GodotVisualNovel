@@ -1,13 +1,13 @@
-class_name CmdReturn
-extends VNCommand
+class_name VNEngineCmdReturn
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "return"
 
-func apply(_args: String, ctx: CommandContext) -> void:
+func apply(_args: String, ctx: VNEngineCommandContext) -> void:
 	if ctx.state.call_stack.is_empty():
-		VNLog.warn("CmdReturn", "call_stack is empty: '@return' used without a matching '@call'")
-		ctx.runner.end_story(StoryRunner.EndReason.SCRIPT_EXHAUSTED)
+		VNEngineLog.warn("CmdReturn", "call_stack is empty: '@return' used without a matching '@call'")
+		ctx.runner.end_story(VNEngineStoryRunner.EndReason.SCRIPT_EXHAUSTED)
 		ctx.runner._jumped = true
 		return
 
@@ -22,14 +22,14 @@ func apply(_args: String, ctx: CommandContext) -> void:
 
 	var caller_index := ctx.script_res.index_of(return_node_id)
 	if caller_index == -1:
-		VNLog.warn("CmdReturn", "Calling node not found: %s" % return_node_id)
+		VNEngineLog.warn("CmdReturn", "Calling node not found: %s" % return_node_id)
 		ctx.runner._jumped = true
 		return
 
-	var caller_node: StoryNode = ctx.script_res.nodes[caller_index]
+	var caller_node: VNEngineStoryNode = ctx.script_res.nodes[caller_index]
 
 	if caller_node.next_index == -1:
-		ctx.runner.end_story(StoryRunner.EndReason.SCRIPT_EXHAUSTED)
+		ctx.runner.end_story(VNEngineStoryRunner.EndReason.SCRIPT_EXHAUSTED)
 		ctx.runner._jumped = true
 		return
 

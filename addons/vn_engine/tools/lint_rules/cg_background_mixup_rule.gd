@@ -1,13 +1,13 @@
 @tool
-class_name CgBackgroundMixupRule
-extends AssetLintRule
+class_name VNEngineCgBackgroundMixupRule
+extends VNEngineAssetLintRule
 
 
 func title() -> String:
 	return "4. CG/BG mixup"
 
 
-func run(ctx: AssetLintContext) -> void:
+func run(ctx: VNEngineAssetLintContext) -> void:
 	for entry in ctx.asset_map.entries:
 		if entry == null:
 			continue

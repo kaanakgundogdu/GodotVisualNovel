@@ -1,7 +1,7 @@
-class_name ChapterPreloader
+class_name VNEngineChapterPreloader
 extends RefCounted
 
-var parsed_script: StoryScript = null
+var parsed_script: VNEngineStoryScript = null
 
 var script_path: String = ""
 
@@ -12,11 +12,11 @@ var _pending: PackedStringArray = PackedStringArray()
 var _loaded: Dictionary = {}
 
 
-func build_plan(script_path_in: String, resolver: AssetResolver, flag_list: FlagList, chapter: ChapterDef = null) -> void:
+func build_plan(script_path_in: String, resolver: VNEngineAssetResolver, flag_list: VNEngineFlagList, chapter: VNEngineChapterDef = null) -> void:
 	script_path = script_path_in
-	parsed_script = ScenarioParser.parse_file(script_path, flag_list)
+	parsed_script = VNEngineScenarioParser.parse_file(script_path, flag_list)
 
-	var cast: Cast = _load_cast()
+	var cast: VNEngineCast = _load_cast()
 	_asset_paths = _collect_asset_paths(parsed_script, resolver, chapter, cast)
 
 
@@ -30,7 +30,7 @@ func request_all() -> void:
 			continue
 		var err: Error = ResourceLoader.load_threaded_request(path, "", true)
 		if err != OK:
-			VNLog.warn("ChapterPreloader", "load_threaded_request failed (error %d): '%s'" % [err, path])
+			VNEngineLog.warn("ChapterPreloader", "load_threaded_request failed (error %d): '%s'" % [err, path])
 			continue
 		_pending.append(path)
 
@@ -59,13 +59,13 @@ func poll() -> float:
 				progress_sum += partial_progress
 				still_pending.append(path)
 			ResourceLoader.THREAD_LOAD_FAILED:
-				VNLog.warn("ChapterPreloader", "Load failed (FAILED), skipping: '%s'" % path)
+				VNEngineLog.warn("ChapterPreloader", "Load failed (FAILED), skipping: '%s'" % path)
 				progress_sum += 1.0
 			ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
-				VNLog.warn("ChapterPreloader", "Invalid resource (INVALID_RESOURCE), skipping: '%s'" % path)
+				VNEngineLog.warn("ChapterPreloader", "Invalid resource (INVALID_RESOURCE), skipping: '%s'" % path)
 				progress_sum += 1.0
 			_:
-				VNLog.warn("ChapterPreloader", "Unknown ResourceLoader status (%d), skipping: '%s'" % [status, path])
+				VNEngineLog.warn("ChapterPreloader", "Unknown ResourceLoader status (%d), skipping: '%s'" % [status, path])
 				progress_sum += 1.0
 
 	_pending = still_pending
@@ -88,7 +88,7 @@ func loaded_count() -> int:
 	return _asset_paths.size() - _pending.size()
 
 
-func _collect_asset_paths(script: StoryScript, resolver: AssetResolver, chapter: ChapterDef, cast: Cast) -> PackedStringArray:
+func _collect_asset_paths(script: VNEngineStoryScript, resolver: VNEngineAssetResolver, chapter: VNEngineChapterDef, cast: VNEngineCast) -> PackedStringArray:
 	var seen: Dictionary = {}
 	var result: Array[String] = []
 
@@ -98,7 +98,7 @@ func _collect_asset_paths(script: StoryScript, resolver: AssetResolver, chapter:
 		if chapter.bgm != "":
 			_add_path(result, seen, resolver.resolve("music", chapter.bgm))
 
-	for node: StoryNode in script.nodes:
+	for node: VNEngineStoryNode in script.nodes:
 		for cmd: Dictionary in node.commands:
 			var cname: String = cmd.get("name", "")
 			var args: String = cmd.get("args", "")
@@ -132,8 +132,8 @@ func _collect_asset_paths(script: StoryScript, resolver: AssetResolver, chapter:
 	return PackedStringArray(result)
 
 
-func _resolve_show(args: String, resolver: AssetResolver, cast: Cast) -> String:
-	var parsed: Dictionary = CmdShow.parse_show_args(args)
+func _resolve_show(args: String, resolver: VNEngineAssetResolver, cast: VNEngineCast) -> String:
+	var parsed: Dictionary = VNEngineCmdShow.parse_show_args(args)
 	if parsed.is_empty():
 		return ""
 
@@ -143,7 +143,7 @@ func _resolve_show(args: String, resolver: AssetResolver, cast: Cast) -> String:
 	var pose: String = parsed["pose"]
 	var shot: String = parsed["shot"]
 
-	var entry: CastMember = cast.get_entry(id) if cast != null else null
+	var entry: VNEngineCastMember = cast.get_entry(id) if cast != null else null
 	if expression == "" and entry != null:
 		expression = entry.default_expression
 	if outfit == "" and entry != null:
@@ -168,8 +168,8 @@ func _add_path(result: Array[String], seen: Dictionary, path: String) -> void:
 	result.append(path)
 
 
-func _load_cast() -> Cast:
-	var db_path: String = VNPaths.cast_file()
+func _load_cast() -> VNEngineCast:
+	var db_path: String = VNEnginePaths.cast_file()
 	if not ResourceLoader.exists(db_path):
 		return null
-	return load(db_path) as Cast
+	return load(db_path) as VNEngineCast

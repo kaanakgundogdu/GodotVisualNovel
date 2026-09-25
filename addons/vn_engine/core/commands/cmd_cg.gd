@@ -1,13 +1,13 @@
-class_name CmdCg
-extends VNCommand
+class_name VNEngineCmdCg
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "cg"
 
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var tokens := args.strip_edges().split(" ", false)
 	if tokens.is_empty():
-		VNLog.warn("CmdCg", "Missing argument: '@cg' expects a CG id")
+		VNEngineLog.warn("CmdCg", "Missing argument: '@cg' expects a CG id")
 		return
 
 	var cg_id := tokens[0]

@@ -1,13 +1,13 @@
-class_name CmdShow
-extends VNCommand
+class_name VNEngineCmdShow
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "show"
 
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var parsed: Dictionary = parse_show_args(args)
 	if parsed.is_empty():
-		VNLog.warn("CmdShow", "Missing argument: '@show' expects a character id")
+		VNEngineLog.warn("CmdShow", "Missing argument: '@show' expects a character id")
 		return
 
 	var id: String = parsed["id"]
@@ -18,7 +18,7 @@ func apply(args: String, ctx: CommandContext) -> void:
 	var position: String = parsed["position"]
 	var transition: String = parsed["transition"]
 
-	var entry: CastMember = null
+	var entry: VNEngineCastMember = null
 	if ctx.characters and ctx.characters.cast:
 		entry = ctx.characters.cast.get_entry(id)
 

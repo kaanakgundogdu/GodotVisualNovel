@@ -1,4 +1,4 @@
-class_name ConfirmDialog
+class_name VNEngineConfirmDialog
 extends ColorRect
 
 signal confirmed

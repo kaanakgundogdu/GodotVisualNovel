@@ -1,13 +1,13 @@
-class_name CmdHide
-extends VNCommand
+class_name VNEngineCmdHide
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "hide"
 
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var tokens := args.strip_edges().split(" ", false)
 	if tokens.is_empty():
-		VNLog.warn("CmdHide", "Missing argument: '@hide' expects a character id")
+		VNEngineLog.warn("CmdHide", "Missing argument: '@hide' expects a character id")
 		return
 
 	var id := tokens[0].to_lower()

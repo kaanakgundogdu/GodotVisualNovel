@@ -1,13 +1,13 @@
-class_name CmdScene
-extends VNCommand
+class_name VNEngineCmdScene
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "scene"
 
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var tokens := args.split(" ", false)
 	if tokens.is_empty():
-		VNLog.warn("CmdScene", "'@scene' expects a file path")
+		VNEngineLog.warn("CmdScene", "'@scene' expects a file path")
 		return
 
 	var file_path: String = tokens[0]
@@ -21,7 +21,7 @@ func apply(args: String, ctx: CommandContext) -> void:
 	if target != "":
 		idx = ctx.script_res.index_of(target)
 		if idx == -1:
-			VNLog.warn("CmdScene", "Target not found: '%s' (%s)" % [target, file_path])
+			VNEngineLog.warn("CmdScene", "Target not found: '%s' (%s)" % [target, file_path])
 			idx = 0
 
 	ctx.runner.play_node(idx)

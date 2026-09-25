@@ -1,10 +1,10 @@
-class_name CmdVoice
-extends VNCommand
+class_name VNEngineCmdVoice
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "voice"
 
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var value := args.strip_edges()
 
 	if value.to_lower() == "stop":

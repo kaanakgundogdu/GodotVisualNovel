@@ -1,4 +1,4 @@
-class_name CharacterSprite
+class_name VNEngineCharacterSprite
 extends Control
 
 @onready var sprite: TextureRect = $Sprite
@@ -18,7 +18,7 @@ func set_expression(image_path: String) -> void:
 	if ResourceLoader.exists(image_path):
 		sprite.texture = load(image_path) as Texture2D
 	else:
-		VNLog.warn("CharacterSprite", "Image not found: %s" % image_path)
+		VNEngineLog.warn("CharacterSprite", "Image not found: %s" % image_path)
 
 
 func move_to(x_ratio: float, duration: float) -> void:

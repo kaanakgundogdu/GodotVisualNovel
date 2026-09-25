@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="UiDef" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="VNEngineUiDef" load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://addons/vn_engine/defs/ui_def.gd" id="1_script"]
 

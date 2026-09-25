@@ -1,5 +1,5 @@
-class_name TitleScreen
-extends VNScreen
+class_name VNEngineTitleScreen
+extends VNEngineScreen
 
 
 @onready var new_game_btn: Button = %NewGameButton
@@ -62,7 +62,7 @@ func _init_menu_state() -> void:
 func _apply_title_variant() -> void:
 	if VNGame.manifest == null or VNGame.manifest.title == null:
 		return
-	var def: TitleScreenDef = VNGame.manifest.title
+	var def: VNEngineTitleScreenDef = VNGame.manifest.title
 	var cleared: bool = VNSave.global_data.get("cleared_count", 0) > 0
 
 	var bg_id: String = def.background
@@ -72,13 +72,13 @@ func _apply_title_variant() -> void:
 	if cleared and def.cleared_bgm != "":
 		bgm_id = def.cleared_bgm
 
-	var resolver: AssetResolver = VNGame.get_shared_asset_resolver()
+	var resolver: VNEngineAssetResolver = VNGame.get_shared_asset_resolver()
 	if bg_id != "":
 		var bg_path: String = resolver.resolve("background", bg_id)
 		if bg_path != "":
 			background_rect.texture = load(bg_path)
 
-	var persistent_audio: AudioSystem = VNMain.instance().persistent_audio
+	var persistent_audio: VNEngineAudioSystem = VNEngineMain.instance().persistent_audio
 	if bgm_id != "":
 		var music_path: String = resolver.resolve("music", bgm_id)
 		if music_path != "":
@@ -101,11 +101,11 @@ func _apply_menu_alignment() -> void:
 
 
 func _apply_menu_visibility() -> void:
-	var def: TitleScreenDef = null
+	var def: VNEngineTitleScreenDef = null
 	if VNGame.manifest != null:
 		def = VNGame.manifest.title
 	if def == null:
-		def = TitleScreenDef.new()
+		def = VNEngineTitleScreenDef.new()
 
 	extras_btn.visible = _visibility_for(def.show_extras_when)
 
@@ -126,7 +126,7 @@ func _visibility_for(when: String) -> bool:
 			return false
 		_:
 			var flags: Dictionary = VNSave.global_data.get("flags", {})
-			return ExpressionEvaluator.evaluate(when, flags)
+			return VNEngineExpressionEvaluator.evaluate(when, flags)
 
 
 func _apply_logo() -> void:
@@ -141,7 +141,7 @@ func _apply_logo() -> void:
 		if ResourceLoader.exists(logo_value):
 			texture = load(logo_value) as Texture2D
 	else:
-		var resolver: AssetResolver = VNGame.get_shared_asset_resolver()
+		var resolver: VNEngineAssetResolver = VNGame.get_shared_asset_resolver()
 		var resolved_path: String = resolver.resolve("background", logo_value)
 		if resolved_path == "":
 			resolved_path = resolver.resolve("cg", logo_value)
@@ -149,7 +149,7 @@ func _apply_logo() -> void:
 			texture = load(resolved_path) as Texture2D
 
 	if texture == null:
-		VNLog.warn("TitleScreen", "Could not resolve title logo: '%s'" % logo_value)
+		VNEngineLog.warn("TitleScreen", "Could not resolve title logo: '%s'" % logo_value)
 		return
 
 	logo_rect.texture = texture
@@ -175,18 +175,18 @@ func _on_settings_pressed() -> void:
 
 
 func _on_extras_pressed() -> void:
-	VNMain.instance().screen_stack.push_screen(&"extras")
+	VNEngineMain.instance().screen_stack.push_screen(&"extras")
 
 
 func _on_chapter_select_pressed() -> void:
-	VNMain.instance().screen_stack.push_screen(&"chapter_select")
+	VNEngineMain.instance().screen_stack.push_screen(&"chapter_select")
 
 
 func _on_quit_pressed() -> void:
-	var manifest: GameManifest = VNGame.get_manifest()
-	var ui_def: UiDef = manifest.get_ui() if manifest != null else UiDef.new()
+	var manifest: VNEngineGameManifest = VNGame.get_manifest()
+	var ui_def: VNEngineUiDef = manifest.get_ui() if manifest != null else VNEngineUiDef.new()
 	if not ui_def.confirm_quit:
-		get_tree().quit()
+		VNGame.quit_game()
 		return
 
 	VNGame.open_overlay(&"confirm", {
@@ -197,4 +197,4 @@ func _on_quit_pressed() -> void:
 
 
 func _on_quit_confirmed() -> void:
-	get_tree().quit()
+	VNGame.quit_game()

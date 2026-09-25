@@ -1,13 +1,13 @@
 @tool
-class_name SpriteMatrixGapRule
-extends AssetLintRule
+class_name VNEngineSpriteMatrixGapRule
+extends VNEngineAssetLintRule
 
 
 func title() -> String:
 	return "5. Sprite matrix gaps"
 
 
-func run(ctx: AssetLintContext) -> void:
+func run(ctx: VNEngineAssetLintContext) -> void:
 	if ctx.cast == null:
 		ctx.info("characters.tres could not be loaded, rule skipped")
 		return

@@ -1,7 +1,7 @@
-class_name CameraSystem
+class_name VNEngineCameraSystem
 extends Camera2D
 
-@export var runner: StoryRunner
+@export var runner: VNEngineStoryRunner
 
 var shake_intensity: float = 0.0
 var shake_duration: float = 0.0

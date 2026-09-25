@@ -1,4 +1,4 @@
-class_name VNText
+class_name VNEngineText
 extends RefCounted
 
 ## This class tries to find a translation. Otherwise, it falls back to the raw text.

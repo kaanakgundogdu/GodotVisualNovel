@@ -1,10 +1,10 @@
-class_name CmdSfx
-extends VNCommand
+class_name VNEngineCmdSfx
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "sfx"
 
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var value := args.strip_edges()
 
 	if value.to_lower() == "stop":

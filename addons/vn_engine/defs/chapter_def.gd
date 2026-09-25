@@ -1,5 +1,5 @@
 @tool
-class_name ChapterDef
+class_name VNEngineChapterDef
 extends Resource
 
 @export_group("Identity")
@@ -34,7 +34,7 @@ extends Resource
 @export var next_chapter: String = ""
 ## Conditional branches, checked in order before next_chapter. The first
 ## one whose condition is true is taken.
-@export var branches: Array[ChapterBranch] = []
+@export var branches: Array[VNEngineChapterBranch] = []
 ## Flag expression for the chapter-select screen. Empty means always
 ## unlocked.
 @export var unlock_condition: String = ""

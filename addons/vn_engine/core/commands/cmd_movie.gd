@@ -1,5 +1,5 @@
-class_name CmdMovie
-extends VNCommand
+class_name VNEngineCmdMovie
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "movie"
@@ -7,7 +7,7 @@ func command_name() -> String:
 func is_blocking() -> bool:
 	return true
 
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var movie_id := args.strip_edges()
 
 	if ctx.video:
@@ -16,6 +16,6 @@ func apply(args: String, ctx: CommandContext) -> void:
 			ctx.bus.blocked_finished.connect(func(): VNSave.unlock_movie(movie_id), CONNECT_ONE_SHOT)
 		ctx.video.play_movie(movie_id)
 	else:
-		VNLog.warn("CmdMovie", "No VideoSystem in scene, resolving block immediately: %s" % movie_id)
+		VNEngineLog.warn("CmdMovie", "No VideoSystem in scene, resolving block immediately: %s" % movie_id)
 		if ctx.bus:
 			ctx.bus.resolve_block()

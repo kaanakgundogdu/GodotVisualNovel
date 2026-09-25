@@ -1,5 +1,5 @@
-class_name DiagnosticsScreen
-extends VNScreen
+class_name VNEngineDiagnosticsScreen
+extends VNEngineScreen
 
 
 var _exit_to_title: bool = false
@@ -31,7 +31,7 @@ func enter(params: Dictionary) -> void:
 		return
 
 	for entry in diagnostics:
-		var diag: ParseDiagnostic = entry as ParseDiagnostic
+		var diag: VNEngineParseDiagnostic = entry as VNEngineParseDiagnostic
 		if diag == null:
 			continue
 		diagnostics_label.append_text(_format_line(diag, source) + "\n")
@@ -41,7 +41,7 @@ func handle_back() -> bool:
 	if _exit_to_title:
 		VNGame.return_to_title()
 		return true
-	VNMain.instance().screen_stack.pop_screen()
+	VNEngineMain.instance().screen_stack.pop_screen()
 	return true
 
 
@@ -49,11 +49,11 @@ func _on_back_pressed() -> void:
 	handle_back()
 
 
-func _format_line(diag: ParseDiagnostic, source: String) -> String:
+func _format_line(diag: VNEngineParseDiagnostic, source: String) -> String:
 	var color: String = "#aaaaaa"
-	if diag.severity == ParseDiagnostic.Severity.ERROR:
+	if diag.severity == VNEngineParseDiagnostic.Severity.ERROR:
 		color = "#ff5555"
-	elif diag.severity == ParseDiagnostic.Severity.WARNING:
+	elif diag.severity == VNEngineParseDiagnostic.Severity.WARNING:
 		color = "#ffcc44"
 
 	var file_part: String = source.get_file() if source != "" else "?"
@@ -66,9 +66,9 @@ func _format_line(diag: ParseDiagnostic, source: String) -> String:
 
 func _severity_label(severity: int) -> String:
 	match severity:
-		ParseDiagnostic.Severity.ERROR:
+		VNEngineParseDiagnostic.Severity.ERROR:
 			return "ERROR"
-		ParseDiagnostic.Severity.WARNING:
+		VNEngineParseDiagnostic.Severity.WARNING:
 			return "WARNING"
 		_:
 			return "INFO"

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="BootDef" load_steps=4 format=3 uid="uid://3nprlfhqlfnu"]
+[gd_resource type="Resource" script_class="VNEngineBootDef" load_steps=4 format=3 uid="uid://3nprlfhqlfnu"]
 
 [ext_resource type="Script" uid="uid://bw206ai1f0hq4" path="res://addons/vn_engine/defs/boot_def.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://jk36c7l1q1me" path="res://addons/vn_engine/defs/boot_screen_def.gd" id="2_splashscript"]

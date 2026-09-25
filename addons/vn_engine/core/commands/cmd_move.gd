@@ -1,13 +1,13 @@
-class_name CmdMove
-extends VNCommand
+class_name VNEngineCmdMove
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "move"
 
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var tokens := args.strip_edges().split(" ", false)
 	if tokens.is_empty():
-		VNLog.warn("CmdMove", "Missing argument: '@move' expects a character id")
+		VNEngineLog.warn("CmdMove", "Missing argument: '@move' expects a character id")
 		return
 
 	var id := tokens[0].to_lower()
@@ -26,7 +26,7 @@ func apply(args: String, ctx: CommandContext) -> void:
 			i += 1
 
 	if position == "":
-		VNLog.warn("CmdMove", "'@move %s' expects a 'to <position>'" % id)
+		VNEngineLog.warn("CmdMove", "'@move %s' expects a 'to <position>'" % id)
 		return
 
 	if ctx.state.characters.has(id):

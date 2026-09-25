@@ -1,5 +1,5 @@
 @tool
-class_name EndingDef
+class_name VNEngineEndingDef
 extends Resource
 
 @export_group("Identity")

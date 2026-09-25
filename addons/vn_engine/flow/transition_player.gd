@@ -1,4 +1,4 @@
-class_name TransitionPlayer
+class_name VNEngineTransitionPlayer
 extends ColorRect
 
 signal transition_started

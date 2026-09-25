@@ -1,8 +1,8 @@
-class_name CmdLeave
-extends VNCommand
+class_name VNEngineCmdLeave
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "leave"
 
-func apply(args: String, ctx: CommandContext) -> void:
-	CmdHide.new().apply(args, ctx)
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
+	VNEngineCmdHide.new().apply(args, ctx)

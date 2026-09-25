@@ -1,4 +1,4 @@
-class_name AssetResolver
+class_name VNEngineAssetResolver
 extends RefCounted
 
 var _entries: Dictionary = {}
@@ -8,14 +8,14 @@ var _warned: Dictionary = {}
 var silent: bool = false
 
 
-func load_map(map: AssetMap) -> void:
+func load_map(map: VNEngineAssetMap) -> void:
 	_entries.clear()
 	_cache.clear()
 
 	if map == null:
 		return
 
-	for entry: AssetMapEntry in map.entries:
+	for entry: VNEngineAssetMapEntry in map.entries:
 		if entry == null:
 			continue
 		_entries[entry.kind] = entry
@@ -26,7 +26,7 @@ func resolve(kind: String, name: String) -> String:
 	if _cache.has(cache_key):
 		return _cache[cache_key]
 
-	var entry: AssetMapEntry = _entries.get(kind, null)
+	var entry: VNEngineAssetMapEntry = _entries.get(kind, null)
 	if entry == null:
 		_warn_once(kind, name, "'%s' (kind=%s) not found: no entry for this kind in asset_map.tres" % [name, kind])
 		_cache[cache_key] = ""
@@ -50,7 +50,7 @@ func resolve_character(char_id: String, outfit: String, pose: String, expression
 	if _cache.has(cache_key):
 		return _cache[cache_key]
 
-	var entry: AssetMapEntry = _entries.get("character", null)
+	var entry: VNEngineAssetMapEntry = _entries.get("character", null)
 	if entry == null:
 		_warn_once("character", char_id, "'%s' (kind=character) not found: no 'character' entry in asset_map.tres" % char_id)
 		_cache[cache_key] = ""
@@ -80,7 +80,7 @@ func resolve_voice(char_id: String, line_id: String) -> String:
 	if _cache.has(cache_key):
 		return _cache[cache_key]
 
-	var entry: AssetMapEntry = _entries.get("voice", null)
+	var entry: VNEngineAssetMapEntry = _entries.get("voice", null)
 	if entry == null:
 		_cache[cache_key] = ""
 		return ""
@@ -98,7 +98,7 @@ func resolve_voice(char_id: String, line_id: String) -> String:
 func list_all(kind: String) -> Array[String]:
 	var result: Array[String] = []
 
-	var entry: AssetMapEntry = _entries.get(kind, null)
+	var entry: VNEngineAssetMapEntry = _entries.get(kind, null)
 	if entry == null:
 		_warn_once(kind, "", "list_all: no entry for kind '%s' in asset_map.tres" % kind)
 		return result
@@ -144,4 +144,4 @@ func _warn_once(kind: String, id: String, message: String) -> void:
 	if _warned.has(key):
 		return
 	_warned[key] = true
-	VNLog.warn("AssetResolver", message)
+	VNEngineLog.warn("AssetResolver", message)

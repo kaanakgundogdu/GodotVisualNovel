@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ExtrasDef" load_steps=3 format=3 uid="uid://cgp5gexr3c2kg"]
+[gd_resource type="Resource" script_class="VNEngineExtrasDef" load_steps=3 format=3 uid="uid://cgp5gexr3c2kg"]
 
 [ext_resource type="Script" uid="uid://bthvv7cvkgg84" path="res://addons/vn_engine/defs/extras_item.gd" id="1_pvrf1"]
 [ext_resource type="Script" uid="uid://bw52xfetpm6a3" path="res://addons/vn_engine/defs/extras_def.gd" id="1_script"]

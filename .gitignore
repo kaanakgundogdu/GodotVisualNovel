@@ -1,21 +1,17 @@
 # Godot 4+ specific ignores
 .godot/
 .vscode/
-.continue/
 
 # Editor temp files
 *.tmp
 *.tscn*.tmp
 
-# Planlama klasörü (repoya gitmez)
+# Local notes
 kaan_ignore/
 
 # OS
 Thumbs.db
 .DS_Store
 
-# Export çıktısı (oluşturulmuş binary dosyalar)
+# Export output
 build/
-
-# Claude calismalari (repoya gitmez)
-Claude outputs/

@@ -1,5 +1,5 @@
-class_name LoadingScreen
-extends VNScreen
+class_name VNEngineLoadingScreen
+extends VNEngineScreen
 
 
 const TIMEOUT_SECONDS: float = 10.0
@@ -7,7 +7,7 @@ const FADE_DURATION: float = 0.3
 
 var _all_paths: PackedStringArray = PackedStringArray()
 var _pending: PackedStringArray = PackedStringArray()
-var _preloader: ChapterPreloader = null
+var _preloader: VNEngineChapterPreloader = null
 var _next_screen: StringName = &""
 var _next_params: Dictionary = {}
 var _elapsed: float = 0.0
@@ -53,7 +53,7 @@ func _poll_pending() -> float:
 				progress_sum += progress
 				still_pending.append(path)
 			_:
-				VNLog.warn("LoadingScreen", "Failed to load '%s'" % path)
+				VNEngineLog.warn("LoadingScreen", "Failed to load '%s'" % path)
 				progress_sum += 1.0
 
 	_pending = still_pending
@@ -111,7 +111,7 @@ func _process_when_slow(delta: float) -> void:
 		return
 
 	if _elapsed >= TIMEOUT_SECONDS:
-		VNLog.warn("LoadingScreen", "Timed out (%.1fs), abandoning remaining preload work" % TIMEOUT_SECONDS)
+		VNEngineLog.warn("LoadingScreen", "Timed out (%.1fs), abandoning remaining preload work" % TIMEOUT_SECONDS)
 		_schedule_completion()
 
 
@@ -125,7 +125,7 @@ func _process_always(delta: float) -> void:
 		if not _still_loading():
 			_loading_finished = true
 		elif _elapsed >= TIMEOUT_SECONDS:
-			VNLog.warn("LoadingScreen", "Timed out (%.1fs), abandoning remaining preload work" % TIMEOUT_SECONDS)
+			VNEngineLog.warn("LoadingScreen", "Timed out (%.1fs), abandoning remaining preload work" % TIMEOUT_SECONDS)
 			_loading_finished = true
 			ratio = 1.0
 
@@ -148,7 +148,7 @@ func enter(params: Dictionary) -> void:
 	_next_params = params.get("next_params", {})
 	_all_paths = PackedStringArray()
 	_pending = PackedStringArray()
-	_preloader = params.get("preloader", null) as ChapterPreloader
+	_preloader = params.get("preloader", null) as VNEngineChapterPreloader
 	_mode = String(params.get("mode", "when_slow"))
 	_min_duration = float(params.get("min_duration", 0.0))
 
@@ -170,11 +170,11 @@ func enter(params: Dictionary) -> void:
 	var requested_paths: PackedStringArray = params.get("paths", PackedStringArray())
 	for path in requested_paths:
 		if not ResourceLoader.exists(path):
-			VNLog.warn("LoadingScreen", "Preload path not found: '%s'" % path)
+			VNEngineLog.warn("LoadingScreen", "Preload path not found: '%s'" % path)
 			continue
 		var err: Error = ResourceLoader.load_threaded_request(path)
 		if err != OK:
-			VNLog.warn("LoadingScreen", "Failed to start loading '%s'" % path)
+			VNEngineLog.warn("LoadingScreen", "Failed to start loading '%s'" % path)
 			continue
 		_all_paths.append(path)
 		_pending.append(path)
@@ -233,4 +233,4 @@ func _schedule_completion() -> void:
 
 
 func _complete() -> void:
-	VNMain.instance().screen_stack.replace_screen(_next_screen, _next_params)
+	VNEngineMain.instance().screen_stack.replace_screen(_next_screen, _next_params)

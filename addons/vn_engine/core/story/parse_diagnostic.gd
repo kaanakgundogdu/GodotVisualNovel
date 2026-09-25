@@ -1,5 +1,5 @@
 extends Resource
-class_name ParseDiagnostic
+class_name VNEngineParseDiagnostic
 
 
 enum Severity { ERROR, WARNING, INFO }

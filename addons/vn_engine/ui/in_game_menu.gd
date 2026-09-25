@@ -1,10 +1,11 @@
-class_name InGameButtons
+class_name VNEngineInGameButtons
 extends HBoxContainer
 
 signal log_requested
 signal save_menu_requested
 signal load_menu_requested
 signal settings_requested
+signal menu_requested
 
 const NORMAL_FONT_COLOR: Color = Color(0.8, 0.8, 0.85, 0.75)
 const AUTO_ACTIVE_COLOR: Color = Color(0.45, 0.8, 1.0)
@@ -12,7 +13,7 @@ const SKIP_ACTIVE_COLOR: Color = Color(1.0, 0.7, 0.3)
 const PULSE_ALPHA: float = 0.55
 const PULSE_DURATION: float = 1.2
 
-@export var runner: StoryRunner
+@export var runner: VNEngineStoryRunner
 
 @onready var auto_btn: Button = $AutoMargin/Button
 @onready var skip_btn: Button = $SkipMargin/Button
@@ -20,6 +21,7 @@ const PULSE_DURATION: float = 1.2
 @onready var log_btn: Button = $LogMargin/Button
 @onready var save_btn: Button = $SaveMargin/Button
 @onready var load_btn: Button = $LoadMargin/Button
+@onready var menu_btn: Button = $MenuMargin/Button
 
 var _auto_tween: Tween
 var _skip_tween: Tween
@@ -34,6 +36,7 @@ func _ready() -> void:
 	log_btn.pressed.connect(_on_log_pressed)
 	save_btn.pressed.connect(_on_save_pressed)
 	load_btn.pressed.connect(_on_load_pressed)
+	menu_btn.pressed.connect(_on_menu_pressed)
 
 	if runner:
 		runner.mode_changed.connect(_on_mode_changed)
@@ -72,6 +75,10 @@ func _on_load_pressed() -> void:
 	load_menu_requested.emit()
 
 
+func _on_menu_pressed() -> void:
+	menu_requested.emit()
+
+
 func _on_mode_changed() -> void:
 	if runner:
 		auto_btn.set_pressed_no_signal(runner.is_auto)
@@ -105,7 +112,7 @@ func _set_button_font_color(btn: Button, color: Color) -> void:
 	btn.add_theme_color_override("font_focus_color", color)
 
 
-func _on_dialog_started(_node: StoryNode) -> void:
+func _on_dialog_started(_node: VNEngineStoryNode) -> void:
 	show()
 
 

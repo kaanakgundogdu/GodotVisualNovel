@@ -1,5 +1,5 @@
 @tool
-class_name ExtrasItem
+class_name VNEngineExtrasItem
 extends Resource
 
 ## Asset id, like "cg_cottage_fire_01".

@@ -1,5 +1,5 @@
 extends Resource
-class_name ChoiceOption
+class_name VNEngineChoiceOption
 
 
 @export var text: String = ""

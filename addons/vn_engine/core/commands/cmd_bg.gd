@@ -1,13 +1,13 @@
-class_name CmdBg
-extends VNCommand
+class_name VNEngineCmdBg
+extends VNEngineCommand
 
 func command_name() -> String:
 	return "bg"
 
-func apply(args: String, ctx: CommandContext) -> void:
+func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var tokens := args.strip_edges().split(" ", false)
 	if tokens.is_empty():
-		VNLog.warn("CmdBg", "Missing argument: '@bg' expects a background name")
+		VNEngineLog.warn("CmdBg", "Missing argument: '@bg' expects a background name")
 		return
 
 	var bg_name := tokens[0]

@@ -1,11 +1,11 @@
 extends Node
-class_name StoryRunner
+class_name VNEngineStoryRunner
 
 
-signal dialog_started(node: StoryNode)
-signal choices_requested(choices: Array[ChoiceOption])
+signal dialog_started(node: VNEngineStoryNode)
+signal choices_requested(choices: Array[VNEngineChoiceOption])
 signal story_ended()
-signal state_restored(state: StoryState)
+signal state_restored(state: VNEngineStoryState)
 
 signal parse_diagnostics_ready(diagnostics: Array)
 
@@ -26,17 +26,17 @@ func end_story(reason: int = EndReason.SCRIPT_EXHAUSTED, ending_id: String = "")
 	end_ending_id = ending_id
 	story_ended.emit()
 
-var state: StoryState = StoryState.new()
+var state: VNEngineStoryState = VNEngineStoryState.new()
 
-var history_stack: HistoryStack = HistoryStack.new()
+var history_stack: VNEngineHistoryStack = VNEngineHistoryStack.new()
 
-var script_res: StoryScript
+var script_res: VNEngineStoryScript
 var current_index: int = -1
 
-var bus: CommandBus
-var ctx: CommandContext
+var bus: VNEngineCommandBus
+var ctx: VNEngineCommandContext
 
-var flag_list: FlagList = null
+var flag_list: VNEngineFlagList = null
 
 var _playtime_accum: float = 0.0
 
@@ -53,8 +53,8 @@ var pending_choice_timer: Dictionary = {}
 const DEFERRED_COMMANDS := ["jump", "jump_if", "call", "return", "scene", "end", "goto_chapter", "credits"]
 
 func _init() -> void:
-	ctx = CommandContext.new()
-	bus = CommandBus.new()
+	ctx = VNEngineCommandContext.new()
+	bus = VNEngineCommandBus.new()
 	ctx.runner = self
 	ctx.bus = bus
 	ctx.state = state
@@ -62,35 +62,35 @@ func _init() -> void:
 	_register_commands()
 
 func _init_assets() -> void:
-	ctx.assets = AssetResolver.new()
+	ctx.assets = VNEngineAssetResolver.new()
 
-	var asset_map_path: String = VNPaths.asset_map()
+	var asset_map_path: String = VNEnginePaths.asset_map()
 	if not ResourceLoader.exists(asset_map_path):
-		VNLog.warn("StoryRunner", "'%s' does not exist yet, AssetResolver will stay empty" % asset_map_path)
+		VNEngineLog.warn("StoryRunner", "'%s' does not exist yet, AssetResolver will stay empty" % asset_map_path)
 		return
 
-	var asset_map: AssetMap = load(asset_map_path) as AssetMap
+	var asset_map: VNEngineAssetMap = load(asset_map_path) as VNEngineAssetMap
 	if asset_map == null:
-		VNLog.warn("StoryRunner", "Failed to load '%s', AssetResolver will stay empty" % asset_map_path)
+		VNEngineLog.warn("StoryRunner", "Failed to load '%s', AssetResolver will stay empty" % asset_map_path)
 		return
 
 	ctx.assets.load_map(asset_map)
 
 func _register_commands() -> void:
-	CommandRegistry.register_all(bus)
+	VNEngineCommandRegistry.register_all(bus)
 
 func register_manager(manager: Node) -> void:
-	if manager is BackgroundSystem:
+	if manager is VNEngineBackgroundSystem:
 		ctx.background = manager
-	elif manager is CharacterLayer:
+	elif manager is VNEngineCharacterLayer:
 		ctx.characters = manager
-	elif manager is AudioSystem:
+	elif manager is VNEngineAudioSystem:
 		ctx.audio = manager
-	elif manager is VideoSystem:
+	elif manager is VNEngineVideoSystem:
 		ctx.video = manager
-	elif manager is CameraSystem:
+	elif manager is VNEngineCameraSystem:
 		ctx.camera = manager
-	elif manager is DialogUI:
+	elif manager is VNEngineDialogUI:
 		ctx.dialog_ui = manager
 
 func start_story(file_path: String, start_index: int = 0) -> void:
@@ -102,20 +102,20 @@ func start_story(file_path: String, start_index: int = 0) -> void:
 func _load_script(file_path: String) -> bool:
 	script_res = VNGame.take_preparsed_script(file_path)
 	if script_res == null:
-		script_res = ScenarioParser.parse_file(file_path, flag_list)
+		script_res = VNEngineScenarioParser.parse_file(file_path, flag_list)
 	ctx.script_res = script_res
 
 	if script_res.has_errors():
-		VNLog.warn("StoryRunner", "'%s' has parse errors:" % file_path)
+		VNEngineLog.warn("StoryRunner", "'%s' has parse errors:" % file_path)
 		for diag in script_res.diagnostics:
-			if diag.severity == ParseDiagnostic.Severity.ERROR:
-				VNLog.warn("StoryRunner", "  " + diag.format())
+			if diag.severity == VNEngineParseDiagnostic.Severity.ERROR:
+				VNEngineLog.warn("StoryRunner", "  " + diag.format())
 
 	if not script_res.diagnostics.is_empty():
 		parse_diagnostics_ready.emit.call_deferred(script_res.diagnostics)
 
 	if script_res.nodes.is_empty():
-		VNLog.error("StoryRunner", "Failed to start story: file is empty or unreadable -> %s" % file_path)
+		VNEngineLog.error("StoryRunner", "Failed to start story: file is empty or unreadable -> %s" % file_path)
 		return false
 
 	state.current_file = file_path
@@ -135,13 +135,13 @@ func _process(delta: float) -> void:
 func play_node(index: int) -> void:
 	if index < 0 or index >= script_res.nodes.size():
 		if index != current_index + 1:
-			VNLog.warn("StoryRunner", "Target not found: node %d does not exist (from node: %d)" % [index, current_index])
+			VNEngineLog.warn("StoryRunner", "Target not found: node %d does not exist (from node: %d)" % [index, current_index])
 		end_story(EndReason.SCRIPT_EXHAUSTED)
 		return
 
 	current_index = index
 	pending_choice_timer = {}
-	var node: StoryNode = script_res.nodes[index]
+	var node: VNEngineStoryNode = script_res.nodes[index]
 
 	state.current_node_id = node.id
 
@@ -165,7 +165,7 @@ func play_node(index: int) -> void:
 	if node.is_pure_logic():
 		_consecutive_logic_count += 1
 		if _consecutive_logic_count > 256:
-			VNLog.error("StoryRunner", "Runaway guard: 256 consecutive logic nodes, possible infinite loop")
+			VNEngineLog.error("StoryRunner", "Runaway guard: 256 consecutive logic nodes, possible infinite loop")
 			end_story(EndReason.RUNAWAY_GUARD)
 			return
 		next_node.call_deferred()
@@ -183,7 +183,7 @@ func play_node(index: int) -> void:
 		"text": node.text,
 		"line_id": node.line_id,
 	})
-	if state.history.size() > StoryState.MAX_HISTORY:
+	if state.history.size() > VNEngineStoryState.MAX_HISTORY:
 		state.history.pop_front()
 		history_stack.shift_history(-1)
 
@@ -198,7 +198,7 @@ func next_node() -> void:
 	if current_index < 0 or current_index >= script_res.nodes.size():
 		return
 
-	var current_node: StoryNode = script_res.nodes[current_index]
+	var current_node: VNEngineStoryNode = script_res.nodes[current_index]
 
 	if not current_node.choices.is_empty():
 		return
@@ -219,7 +219,7 @@ func next_node() -> void:
 func make_choice(target_index: int) -> void:
 	play_node(target_index)
 
-func get_current_node() -> StoryNode:
+func get_current_node() -> VNEngineStoryNode:
 	if script_res == null or current_index < 0 or current_index >= script_res.nodes.size():
 		return null
 	return script_res.nodes[current_index]
@@ -245,18 +245,18 @@ func execute_load_game(slot_id: int = 0) -> void:
 
 		var start_index: int = script_res.index_of(state.current_node_id)
 		if start_index == -1:
-			VNLog.warn("StoryRunner", "Saved node not found (id: %s), starting from the beginning -> %s" % [state.current_node_id, file_to_load])
+			VNEngineLog.warn("StoryRunner", "Saved node not found (id: %s), starting from the beginning -> %s" % [state.current_node_id, file_to_load])
 			start_index = 0
 
 		current_index = start_index
-		var node: StoryNode = script_res.nodes[current_index]
+		var node: VNEngineStoryNode = script_res.nodes[current_index]
 		VNSave.mark_line_seen(script_res.chapter_id, node.line_id)
 
 		dialog_started.emit(node)
 		if not node.choices.is_empty():
 			choices_requested.emit(node.choices)
 	else:
-		VNLog.warn("StoryRunner", "No valid save file found in slot: %d" % slot_id)
+		VNEngineLog.warn("StoryRunner", "No valid save file found in slot: %d" % slot_id)
 
 func rollback() -> void:
 	if is_input_locked or bus.has_pending_block() or not history_stack.can_rollback():
@@ -289,10 +289,10 @@ func _apply_history_entry(entry: Dictionary) -> void:
 
 	current_index = script_res.index_of(state.current_node_id)
 	if current_index == -1:
-		VNLog.warn("StoryRunner", "HistoryStack entry not found (id: %s) -> %s" % [state.current_node_id, state.current_file])
+		VNEngineLog.warn("StoryRunner", "HistoryStack entry not found (id: %s) -> %s" % [state.current_node_id, state.current_file])
 		return
 
-	var node: StoryNode = script_res.nodes[current_index]
+	var node: VNEngineStoryNode = script_res.nodes[current_index]
 
 	if target_history_len > state.history.size():
 		state.history.append({

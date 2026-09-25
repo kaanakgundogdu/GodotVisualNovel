@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="TitleScreenDef" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="VNEngineTitleScreenDef" load_steps=2 format=3]
 
 [ext_resource type="Script" uid="uid://bcaqj1hj3hp64" path="res://addons/vn_engine/defs/title_screen_def.gd" id="1_script"]
 
