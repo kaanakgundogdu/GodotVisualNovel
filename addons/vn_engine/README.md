@@ -15,7 +15,8 @@ settings, no main scene change. If you don't use it, it does nothing.
 
 ## Try the demo
 
-1. Copy the `addons/vn_engine/` folder into your project.
+1. Copy the `addons/vn_engine/` folder into your project. Keep the same path
+   (`res://addons/vn_engine/`), the engine files use it.
 2. Open `addons/vn_engine/sample_game/play_sample_game.tscn`.
 3. Run that scene.
 
@@ -34,8 +35,10 @@ res://my_game/
 ```
 
 The easiest start is to copy `sample_game/` and change it.
+There is no guide for the scenario syntax yet. Read
+`sample_game/scenario/chapter1/scenario1.txt`, it shows the basics.
 
-The engine runs inside one scene: `res://addons/vn_engine/flow/scenes/vn_main.tscn`.
+The engine runs inside one scene: `res://addons/vn_engine/src/flow/scenes/vn_main.tscn`.
 When this scene is in the tree, the engine works. When it is removed,
 the engine is gone.  Root of the scene or the root node has these settings in the Inspector:
 
@@ -52,8 +55,7 @@ the engine is gone.  Root of the scene or the root node has these settings in th
 own saves and settings, and the engine never writes over your own save
 files.
 
-The configuration part is little bit tricky but I made it that way to make it easier to use.
-Explore already existing configs and you can copy from your project to make changes.
+See [Config files](#config-files) for what each file does.
 
 Pick one of these ways to start it.
 
@@ -68,7 +70,7 @@ scene `play_sample_game.tscn` is made this way.
 Set the values before you add the node to the tree:
 
 ```gdscript
-const VN_SCENE := preload("res://addons/vn_engine/flow/scenes/vn_main.tscn")
+const VN_SCENE := preload("res://addons/vn_engine/src/flow/scenes/vn_main.tscn")
 
 func start_vn() -> void:
 	var vn: VNEngineMain = VN_SCENE.instantiate()
@@ -77,12 +79,56 @@ func start_vn() -> void:
 ```
 
 
+## Config files
+
+
+A `.tres` file is a Godot resource saved as text. It keeps data, not code.
+Double click it in the folder and edit it in the inspector.
+Each config file uses one engine class from `src/defs/`. A file that starts
+with `_` is a list: it only collects the other files in its folder.
+
+Note: Maybe making these config files was terrible solution but for now it looks ok.
+
+```
+config/
+  game.tres
+  chapters/      chapter1.tres, chapter2.tres ...
+  characters/    _characters.tres, qaan.tres, ely.tres ...
+  flags/         _flags.tres, warmth.tres ...
+  endings/       ending_warm.tres, ending_plain.tres ...
+  credits/       _credits.tres, 01_story.tres ...
+  asset_map/     _asset_map.tres, background.tres ...
+  screens/       title.tres
+                 extras.tres, ui.tres   (optional)
+  boot/          _boot.tres, 01_logo.tres ...   (optional)
+```
+
+| File | Class | What it does |
+|---|---|---|
+| `game.tres` | `VNEngineGameManifest` | The main file. Game id, first chapter and links to all the lists. |
+| `boot/_boot.tres` | `VNEngineBootDef` | Optional. List of splash screens before the title. |
+| `boot/01_logo.tres` | `VNEngineBootScreenDef` | One splash screen: an image or a video, how long it stays, fade time. |
+| `chapters/chapter1.tres` | `VNEngineChapterDef` | One chapter: title, scenario file, intro, music, next chapter or branches. |
+| `characters/_characters.tres` | `VNEngineCast` | List of all characters. |
+| `characters/qaan.tres` | `VNEngineCastMember` | One character: id for scenarios, shown name, name color, default sprite. |
+| `flags/_flags.tres` | `VNEngineFlagList` | List of all flags (story variables). |
+| `flags/warmth.tres` | `VNEngineFlagDef` | One flag: type, start value, scope (one save or global), min and max. |
+| `endings/ending_warm.tres` | `VNEngineEndingDef` | One ending: how to reach it, CG, music, credits and what it unlocks. |
+| `credits/_credits.tres` | `VNEngineCreditsDef` | Credits screen: scrolling or video, speed, music and its sections. |
+| `credits/01_story.tres` | `VNEngineCreditsSection` | One credits block: a role and its names. |
+| `asset_map/_asset_map.tres` | `VNEngineAssetMap` | List of asset folders. |
+| `asset_map/background.tres` | `VNEngineAssetMapEntry` | Folder and file types for one asset kind, so scenarios can use short names. |
+| `screens/title.tres` | `VNEngineTitleScreenDef` | Title screen: background, music, logo, menu place, when to show Extras and Chapter Select. |
+| `screens/extras.tres` | `VNEngineExtrasDef` | Optional. Extras menu: which pages to show and how locked items look. |
+| `screens/ui.tres` | `VNEngineUiDef` | Optional. Small UI options: confirm dialogs, backdrop color, name colors in the log. |
+
+`sample_game/config/` is the simplest working set. It has no `boot`, `extras`
+or `ui` files, so these are not needed to start.
+
+
 ## Resolution
 
-The engine UI is made for 1920x1080 (16:9). You don't need to change
-Project Settings for it. While `vn_main` is running it scales the window
-to fit that size (`canvas_items`, `keep`) and puts your old values back
-when it is removed.
+The engine UI is made for 1920x1080 (16:9).
 
 
 ## Using the engine from code

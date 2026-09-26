@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="VNEngineGameManifest" load_steps=13 format=3 uid="uid://ce6y80ef872hc"]
 
-[ext_resource type="Script" uid="uid://dukr7vcrg2qwd" path="res://addons/vn_engine/defs/game_manifest.gd" id="1_script"]
-[ext_resource type="Script" uid="uid://xeegou1bnug5" path="res://addons/vn_engine/defs/chapter_def.gd" id="2_chapterscript"]
+[ext_resource type="Script" uid="uid://dukr7vcrg2qwd" path="res://addons/vn_engine/src/defs/game_manifest.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://xeegou1bnug5" path="res://addons/vn_engine/src/defs/chapter_def.gd" id="2_chapterscript"]
 [ext_resource type="Resource" path="res://game/config/chapters/chapter1.tres" id="3_chapter1"]
-[ext_resource type="Script" uid="uid://eprguh125fru" path="res://addons/vn_engine/defs/ending_def.gd" id="4_endingscript"]
+[ext_resource type="Script" uid="uid://eprguh125fru" path="res://addons/vn_engine/src/defs/ending_def.gd" id="4_endingscript"]
 [ext_resource type="Resource" path="res://game/config/endings/normal_end.tres" id="5_normal_end"]
 [ext_resource type="Resource" path="res://game/config/flags/_flags.tres" id="6_flags"]
 [ext_resource type="Resource" path="res://game/config/credits/_credits.tres" id="7_credits"]

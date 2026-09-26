@@ -37,7 +37,7 @@ import/blender/enabled=false
 
 [gui]
 
-theme/custom="res://addons/vn_engine/themes/vn_default.tres"
+theme/custom="res://addons/vn_engine/src/themes/vn_default.tres"
 
 [input]
 

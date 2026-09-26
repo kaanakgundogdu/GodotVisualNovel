@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="VNEngineChapterDef" load_steps=3 format=3 uid="uid://b135lb5i1ejpc"]
 
-[ext_resource type="Script" uid="uid://xeegou1bnug5" path="res://addons/vn_engine/defs/chapter_def.gd" id="1_script"]
-[ext_resource type="Script" uid="uid://bh8h1xmntybgg" path="res://addons/vn_engine/defs/chapter_branch.gd" id="2_branchscript"]
+[ext_resource type="Script" uid="uid://xeegou1bnug5" path="res://addons/vn_engine/src/defs/chapter_def.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bh8h1xmntybgg" path="res://addons/vn_engine/src/defs/chapter_branch.gd" id="2_branchscript"]
 
 [resource]
 script = ExtResource("1_script")

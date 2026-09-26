@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="VNEngineCreditsDef" load_steps=7 format=3 uid="uid://h4ht6ru76nxh"]
 
-[ext_resource type="Script" uid="uid://bmkcgkxabpsdk" path="res://addons/vn_engine/defs/credits_def.gd" id="1_script"]
-[ext_resource type="Script" uid="uid://bp6ldo4ke0iy2" path="res://addons/vn_engine/defs/credits_section.gd" id="2_sectionscript"]
+[ext_resource type="Script" uid="uid://bmkcgkxabpsdk" path="res://addons/vn_engine/src/defs/credits_def.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bp6ldo4ke0iy2" path="res://addons/vn_engine/src/defs/credits_section.gd" id="2_sectionscript"]
 [ext_resource type="Resource" uid="uid://l5rridewfii2" path="res://game/config/credits/01_director.tres" id="3_director"]
 [ext_resource type="Resource" uid="uid://dh5axh3ttfm7a" path="res://game/config/credits/02_programming.tres" id="4_programming"]
 [ext_resource type="Resource" uid="uid://d2kkypac87hwr" path="res://game/config/credits/03_special_thanks.tres" id="5_special_thanks"]

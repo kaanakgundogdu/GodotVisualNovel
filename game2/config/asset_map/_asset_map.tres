@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="VNEngineAssetMap" load_steps=10 format=3]
 
-[ext_resource type="Script" path="res://addons/vn_engine/defs/asset_map.gd" id="1_script"]
-[ext_resource type="Script" path="res://addons/vn_engine/defs/asset_map_entry.gd" id="2_entryscript"]
+[ext_resource type="Script" path="res://addons/vn_engine/src/defs/asset_map.gd" id="1_script"]
+[ext_resource type="Script" path="res://addons/vn_engine/src/defs/asset_map_entry.gd" id="2_entryscript"]
 [ext_resource type="Resource" path="res://game2/config/asset_map/background.tres" id="3_background"]
 [ext_resource type="Resource" path="res://game2/config/asset_map/character.tres" id="4_character"]
 [ext_resource type="Resource" path="res://game2/config/asset_map/music.tres" id="5_music"]

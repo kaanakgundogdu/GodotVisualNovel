@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="VNEngineTitleScreenDef" load_steps=2 format=3 uid="uid://c64eg8s5kubyv"]
 
-[ext_resource type="Script" uid="uid://bcaqj1hj3hp64" path="res://addons/vn_engine/defs/title_screen_def.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bcaqj1hj3hp64" path="res://addons/vn_engine/src/defs/title_screen_def.gd" id="1_script"]
 
 [resource]
 script = ExtResource("1_script")
