@@ -11,5 +11,5 @@ func apply(args: String, ctx: VNEngineCommandContext) -> void:
 		ctx.runner._jumped = true
 		return
 
-	VNGame.goto_chapter(chapter_id)
+	VNEngineMain.game().goto_chapter(chapter_id)
 	ctx.runner._jumped = true

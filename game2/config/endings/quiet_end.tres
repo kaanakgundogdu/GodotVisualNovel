@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_script")
 id = "quiet_end"
-title_key = "Quiet Ending"
+title = "Quiet Ending"
 rank = "normal"
 number = 1
 condition = ""

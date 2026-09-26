@@ -4,8 +4,6 @@ extends Resource
 
 ## Set to false to skip this step without deleting it.
 @export var enabled: bool = true
-## Free note for you, like "epilepsy warning". Never shown in game.
-@export var note: String = ""
 ## Image shown for this step. Ignored when movie_path is also set.
 @export_file("*.png", "*.jpg", "*.jpeg", "*.webp", "*.svg") var image_path: String = ""
 

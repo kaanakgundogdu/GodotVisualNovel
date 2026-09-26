@@ -44,10 +44,11 @@ https://kaanakgundogdu.github.io/blog/VisualNovelGodot/devlog2.html
 - Endings with optional ending movies and credits screen (scrolling or video)
 - Backlog (dialog history) with speaker colors and voice replay
 - Auto-read, skip, and rollback/forward through history
+- Runs at a 1920x1080 design resolution and scales itself to any window, no Project Settings needed
 - Built-in diagnostics screen and F3 debug overlay (debug builds only)
 - Content agnostic: You can switch between games by changing `vn_engine/content/root` in Project Settings, same engine code, different game data
 
-The engine is at version 0.6, an early release, tested only by me so far.
+The engine is at version 0.6, an early release, tested only by me so far and only in the Godot editor (exported builds not tested yet).
 
 ## Quick start
 

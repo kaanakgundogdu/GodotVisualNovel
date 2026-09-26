@@ -4,7 +4,7 @@ extends VNEngineAssetLintRule
 
 
 func title() -> String:
-	return "12. Missing sprites"
+	return "11. Missing sprites"
 
 
 func run(ctx: VNEngineAssetLintContext) -> void:

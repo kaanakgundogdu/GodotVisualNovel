@@ -36,9 +36,10 @@ func _build_text() -> String:
 	lines.append("Godot: %s" % str(version_info.get("string", "?")))
 
 	var app_version: String = "-"
-	if VNGame.manifest != null:
-		app_version = VNGame.manifest.version
-	lines.append("VNGame: %s" % app_version)
+	var game: VNEngineGame = VNEngineMain.game()
+	if game.manifest != null:
+		app_version = game.manifest.version
+	lines.append("Game: %s" % app_version)
 
 	var root: VNEngineMain = VNEngineMain.instance()
 
@@ -81,7 +82,7 @@ func _format_flags(flags: Dictionary) -> String:
 	if flags.is_empty():
 		return "(none)"
 
-	var flag_list: VNEngineFlagList = VNGame.get_flag_list()
+	var flag_list: VNEngineFlagList = VNEngineMain.game().get_flag_list()
 	var parts: PackedStringArray = PackedStringArray()
 	for key in flags.keys():
 		var label: String = str(key)

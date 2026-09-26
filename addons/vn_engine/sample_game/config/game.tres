@@ -14,7 +14,6 @@
 [resource]
 script = ExtResource("1_script")
 game_id = "vn_engine_sample"
-title_key = ""
 version = "0.2.0"
 first_chapter = "chapter1"
 default_ending = "ending_plain"
@@ -23,4 +22,3 @@ endings = Array[ExtResource("5_endingscript")]([ExtResource("6_ending_plain"), E
 flags = ExtResource("8_flags")
 credits = ExtResource("9_credits")
 title = ExtResource("10_title")
-locales = PackedStringArray("en")

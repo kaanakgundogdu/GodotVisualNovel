@@ -21,7 +21,6 @@ const DEFAULT_COLOR_BY_KIND: Dictionary = {
 	Kind.FLASH: Color.WHITE,
 }
 
-var _force_instant: bool = false
 var _tween: Tween
 
 
@@ -38,22 +37,10 @@ func play(kind: StringName, params: Dictionary = {}) -> void:
 	await _run(kind, duration, 1.0, 0.0, params_color)
 
 
-func cover(kind: StringName, duration: float = 0.5) -> void:
-	await _run(kind, duration, 0.0, 1.0, null)
-
-
-func reveal(kind: StringName, duration: float = 0.5) -> void:
-	await _run(kind, duration, 1.0, 0.0, null)
-
-
-func set_skip_mode(active: bool) -> void:
-	_force_instant = active
-
-
 func _run(kind: StringName, duration: float, from_progress: float, to_progress: float, override_color: Variant) -> void:
 	var mat: ShaderMaterial = material as ShaderMaterial
 	var kind_int: int = KIND_MAP.get(kind, Kind.FADE)
-	var effective_duration: float = 0.0 if (_force_instant or kind_int == Kind.INSTANT) else duration
+	var effective_duration: float = 0.0 if kind_int == Kind.INSTANT else duration
 
 	var col: Color = override_color if (override_color is Color) else DEFAULT_COLOR_BY_KIND.get(kind_int, Color.BLACK)
 	mat.set_shader_parameter("kind", kind_int)

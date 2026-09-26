@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_script")
-role_key = "Cast"
+role = "Cast"
 names = PackedStringArray("Qaan", "Ely")

@@ -53,7 +53,7 @@ func open_panel() -> void:
 	close_btn.grab_focus()
 
 	if _extras_def == null:
-		var manifest: VNEngineGameManifest = VNGame.get_manifest()
+		var manifest: VNEngineGameManifest = VNEngineMain.game().get_manifest()
 		_extras_def = manifest.get_extras() if manifest != null else VNEngineExtrasDef.new()
 
 	_populate_gallery()
@@ -101,7 +101,7 @@ func _build_entries() -> Array[VNEngineExtrasItem]:
 func _populate_gallery() -> void:
 	_clear_grid()
 
-	var unlocked_cgs: Dictionary = VNSave.global_data.get("unlocked_cgs", {})
+	var unlocked_cgs: Dictionary = VNEngineMain.save_data().global_data.get("unlocked_cgs", {})
 	var entries: Array[VNEngineExtrasItem] = _build_entries()
 
 	if entries.is_empty():

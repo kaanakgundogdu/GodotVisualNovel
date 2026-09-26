@@ -100,7 +100,7 @@ func start_story(file_path: String, start_index: int = 0) -> void:
 	play_node(start_index)
 
 func _load_script(file_path: String) -> bool:
-	script_res = VNGame.take_preparsed_script(file_path)
+	script_res = VNEngineMain.game().take_preparsed_script(file_path)
 	if script_res == null:
 		script_res = VNEngineScenarioParser.parse_file(file_path, flag_list)
 	ctx.script_res = script_res
@@ -145,13 +145,13 @@ func play_node(index: int) -> void:
 
 	state.current_node_id = node.id
 
-	var is_seen: bool = VNSave.is_line_seen(script_res.chapter_id, node.line_id)
+	var is_seen: bool = VNEngineMain.save_data().is_line_seen(script_res.chapter_id, node.line_id)
 
-	if is_skip and not is_seen and not bool(VNSettings.data["text"].get("skip_unread", false)):
+	if is_skip and not is_seen and not VNEngineMain.settings().skip_unread:
 		is_skip = false
 		mode_changed.emit()
 
-	VNSave.mark_line_seen(script_res.chapter_id, node.line_id)
+	VNEngineMain.save_data().mark_line_seen(script_res.chapter_id, node.line_id)
 
 	for entry in node.commands:
 		var cname: String = entry.get("name", "")
@@ -225,7 +225,7 @@ func get_current_node() -> VNEngineStoryNode:
 	return script_res.nodes[current_index]
 
 func execute_load_game(slot_id: int = 0) -> void:
-	var loaded_data: Variant = VNSave.load_game(slot_id)
+	var loaded_data: Variant = VNEngineMain.saves().load_game(slot_id)
 
 	if loaded_data != null:
 		state.from_dict(loaded_data)
@@ -250,7 +250,7 @@ func execute_load_game(slot_id: int = 0) -> void:
 
 		current_index = start_index
 		var node: VNEngineStoryNode = script_res.nodes[current_index]
-		VNSave.mark_line_seen(script_res.chapter_id, node.line_id)
+		VNEngineMain.save_data().mark_line_seen(script_res.chapter_id, node.line_id)
 
 		dialog_started.emit(node)
 		if not node.choices.is_empty():

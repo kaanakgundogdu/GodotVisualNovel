@@ -38,7 +38,7 @@ func _ready() -> void:
 		auto_timer.timeout.connect(_on_auto_timer_timeout)
 
 	if auto_timer:
-		auto_timer.wait_time = VNSettings.data["text"]["auto_speed"]
+		auto_timer.wait_time = VNEngineMain.settings().auto_speed
 
 	if name_plate:
 		var base_style: StyleBox = name_plate.get_theme_stylebox("panel")
@@ -49,7 +49,7 @@ func _ready() -> void:
 	if name_row:
 		name_row.alignment = BoxContainer.ALIGNMENT_CENTER if _dialog_name_align() == "center" else BoxContainer.ALIGNMENT_BEGIN
 
-	VNSettings.settings_changed.connect(_on_settings_changed)
+	VNEngineMain.settings().changed.connect(_on_settings_changed)
 	_apply_window_opacity()
 
 	var vn_main: VNEngineMain = VNEngineMain.instance()
@@ -88,7 +88,7 @@ func _on_dialog_started(node: VNEngineStoryNode) -> void:
 
 	dialog_label.visible_characters = 0
 
-	dialog_label.text = VNEngineText.line_text(node.line_id, node.text)
+	dialog_label.text = node.text
 
 	_maybe_play_auto_voice(node)
 
@@ -98,7 +98,7 @@ func _on_dialog_started(node: VNEngineStoryNode) -> void:
 	_text_tween = create_tween()
 	var total_chars: int = dialog_label.get_parsed_text().length()
 
-	var current_speed: float = VNSettings.data["text"]["speed"]
+	var current_speed: float = VNEngineMain.settings().text_speed
 	var duration: float = maxf(total_chars * current_speed, 0.01)
 
 	if runner.is_skip:
@@ -109,7 +109,7 @@ func _on_dialog_started(node: VNEngineStoryNode) -> void:
 
 
 func _apply_speaker(speaker_id: String) -> void:
-	var speaker_text: String = "" if _is_narrator(speaker_id) else VNEngineText.speaker_name(speaker_id)
+	var speaker_text: String = "" if _is_narrator(speaker_id) else _speaker_name(speaker_id)
 	if speaker_text == "":
 		speaker_label.text = ""
 		if name_row:
@@ -147,7 +147,7 @@ func _show_choice_prompt() -> void:
 		if text == "":
 			continue
 		_apply_speaker(String(entry.get("speaker", "")))
-		dialog_label.text = VNEngineText.line_text(String(entry.get("line_id", "")), text)
+		dialog_label.text = text
 		break
 
 	dialog_label.visible_characters = -1
@@ -204,12 +204,12 @@ func _input(event: InputEvent) -> void:
 
 	if event.is_action_pressed(VNEngineInput.QUICKSAVE):
 		if runner:
-			VNSave.save_game(runner.state, VNSave.QUICKSAVE_SLOT)
+			VNEngineMain.saves().save_game(runner.state, VNEngineSaveData.QUICKSAVE_SLOT)
 		return
 
 	if event.is_action_pressed(VNEngineInput.QUICKLOAD):
 		if runner:
-			runner.execute_load_game(VNSave.QUICKSAVE_SLOT)
+			runner.execute_load_game(VNEngineSaveData.QUICKSAVE_SLOT)
 		return
 
 	if event.is_action_pressed(VNEngineInput.SKIP_HOLD):
@@ -278,6 +278,17 @@ func _is_narrator(speaker_id: String) -> bool:
 	return db != null and db.is_narrator(speaker_id)
 
 
+func _speaker_name(speaker_id: String) -> String:
+	if speaker_id == "":
+		return ""
+	if runner == null or runner.ctx == null or runner.ctx.characters == null:
+		return speaker_id.capitalize().to_upper()
+	var db: VNEngineCast = runner.ctx.characters.cast
+	if db == null:
+		return speaker_id.capitalize().to_upper()
+	return db.display_name_of(speaker_id)
+
+
 func _speaker_name_color(speaker_id: String) -> Color:
 	if not _dialog_use_character_colors():
 		return NAME_COLOR_FALLBACK
@@ -293,13 +304,13 @@ func _speaker_name_color(speaker_id: String) -> Color:
 
 
 func _dialog_use_character_colors() -> bool:
-	var manifest: VNEngineGameManifest = VNGame.get_manifest()
+	var manifest: VNEngineGameManifest = VNEngineMain.game().get_manifest()
 	var ui_def: VNEngineUiDef = manifest.get_ui() if manifest != null else VNEngineUiDef.new()
 	return ui_def.dialog_use_character_colors
 
 
 func _dialog_name_align() -> String:
-	var manifest: VNEngineGameManifest = VNGame.get_manifest()
+	var manifest: VNEngineGameManifest = VNEngineMain.game().get_manifest()
 	var ui_def: VNEngineUiDef = manifest.get_ui() if manifest != null else VNEngineUiDef.new()
 	return ui_def.dialog_name_align
 
@@ -326,7 +337,7 @@ func _on_text_finished() -> void:
 				runner.next_node()
 		)
 	elif runner.is_auto:
-		auto_timer.wait_time = VNSettings.data["text"]["auto_speed"]
+		auto_timer.wait_time = VNEngineMain.settings().auto_speed
 		auto_timer.start()
 
 
@@ -396,13 +407,13 @@ func _on_settings_changed() -> void:
 	_apply_window_opacity()
 	_restart_text_tween()
 	if auto_timer:
-		auto_timer.wait_time = VNSettings.data["text"]["auto_speed"]
+		auto_timer.wait_time = VNEngineMain.settings().auto_speed
 
 
 func _apply_window_opacity() -> void:
 	if background_box == null:
 		return
-	var opacity: float = clampf(float(VNSettings.data["text"]["window_opacity"]), 0.0, 1.0)
+	var opacity: float = clampf(VNEngineMain.settings().window_opacity, 0.0, 1.0)
 	background_box.self_modulate = Color(1.0, 1.0, 1.0, opacity)
 
 
@@ -417,7 +428,7 @@ func _restart_text_tween() -> void:
 
 	_text_tween.kill()
 
-	var current_speed: float = VNSettings.data["text"]["speed"]
+	var current_speed: float = VNEngineMain.settings().text_speed
 	var remaining_chars: int = total_chars - current_visible
 	var duration: float = maxf(remaining_chars * current_speed, 0.01)
 	if runner != null and runner.is_skip:

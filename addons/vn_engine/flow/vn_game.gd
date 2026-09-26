@@ -1,4 +1,5 @@
 extends Node
+class_name VNEngineGame
 
 enum AppState { BOOT, TITLE, CHAPTER, ENDING, CREDITS }
 
@@ -19,44 +20,23 @@ var _ending_player: VNEngineEndingPlayer
 
 var _chapter_cache: VNEngineChapterPreloader = null
 
-var _started: bool = false
+var pending_load_slot: int = -1
 
 
 func _ready() -> void:
 	_ending_player = VNEngineEndingPlayer.new()
 
 
-## Runs the engine startup sequence once: input defaults, settings and
-## save subsystems, then the current content root's manifest. Safe to
-## call more than once, only the first call does anything. VNMain calls
-## this before it builds its screen stacks.
 func start_engine() -> void:
-	if _started:
-		return
-	_started = true
 	VNEngineInput.register_defaults()
-	VNSettings.start()
-	VNSave.start()
 	_apply_content_root(VNEnginePaths.content_root())
-
-
-## Points the game at a different content root for the rest of this run,
-## without touching Project Settings beyond the content root key. Starts
-## the engine first if it has not started yet.
-func use_content_root(path: String) -> void:
-	if not _started:
-		_started = true
-		VNEngineInput.register_defaults()
-		VNSettings.start()
-		VNSave.start()
-	_apply_content_root(path)
 
 
 func _apply_content_root(path: String) -> void:
 	var root: String = path.strip_edges()
 	if not root.ends_with("/"):
 		root += "/"
-	ProjectSettings.set_setting(VNEnginePaths.SETTING_KEY, root)
+	VNEnginePaths.set_content_root(root)
 
 	_shared_asset_resolver = VNEngineAssetResolver.new()
 	_chapter_cache = null
@@ -68,12 +48,11 @@ func _apply_content_root(path: String) -> void:
 	if ResourceLoader.exists(asset_map_path):
 		var asset_map: VNEngineAssetMap = load(asset_map_path) as VNEngineAssetMap
 		if asset_map == null:
-			VNEngineLog.warn("VNGame", "Asset map failed to load: '%s'" % asset_map_path)
+			VNEngineLog.warn("Game", "Asset map failed to load: '%s'" % asset_map_path)
 		else:
 			_shared_asset_resolver.load_map(asset_map)
 
 	_load_manifest()
-	VNSave.refresh_save_namespace()
 
 
 func should_report_diagnostics(source: String) -> bool:
@@ -136,7 +115,7 @@ func take_preparsed_script(script_path: String) -> VNEngineStoryScript:
 func start_new_game() -> void:
 	if not _has_main():
 		return
-	VNSave.slot_to_load = -1
+	pending_load_slot = -1
 	if manifest == null:
 		show_error("start_new_game", "Game manifest not loaded (missing game.tres)")
 		return
@@ -149,7 +128,7 @@ func start_new_game() -> void:
 func load_slot(slot_id: int) -> void:
 	if not _has_main():
 		return
-	VNSave.slot_to_load = slot_id
+	pending_load_slot = slot_id
 	var root: VNEngineMain = _vn_main()
 	_set_state(AppState.CHAPTER)
 
@@ -187,7 +166,7 @@ func load_slot(slot_id: int) -> void:
 func _slot_chapter(slot_id: int) -> VNEngineChapterDef:
 	if manifest == null:
 		return null
-	var path: String = VNSave.slot_path(slot_id)
+	var path: String = VNEngineMain.save_data().slot_path(slot_id)
 	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return null
@@ -216,7 +195,7 @@ func goto_chapter(chapter_id: String) -> void:
 	if not _has_main():
 		return
 	if manifest == null:
-		VNEngineLog.warn("VNGame", "goto_chapter('%s'): manifest not loaded" % chapter_id)
+		VNEngineLog.warn("Game", "goto_chapter('%s'): manifest not loaded" % chapter_id)
 		return
 
 	var chapter: VNEngineChapterDef = manifest.find_chapter(chapter_id)
@@ -229,7 +208,7 @@ func goto_chapter(chapter_id: String) -> void:
 	if stage != null:
 		resume_state = stage.story_runner.state.to_dict(true)
 
-	VNSave.slot_to_load = -1
+	pending_load_slot = -1
 	call_deferred("_enter_chapter_via_loading", chapter, resume_state)
 	_set_state(AppState.CHAPTER)
 
@@ -237,6 +216,7 @@ func goto_chapter(chapter_id: String) -> void:
 func return_to_title() -> void:
 	if not _has_main():
 		return
+	VNEngineMain.save_data().flush()
 	var root: VNEngineMain = _vn_main()
 	root.overlay_stack.close_all()
 	root.screen_stack.clear_stack()
@@ -267,21 +247,22 @@ func on_story_ended(reason: int, ending_id: String, state: VNEngineStoryState) -
 			finish_chapter(state)
 		VNEngineStoryRunner.EndReason.RUNAWAY_GUARD:
 			var msg: String = "Runaway guard triggered at node '%s' in '%s', possible infinite loop" % [state.current_node_id, state.current_file]
-			VNEngineLog.error("VNGame", msg)
+			VNEngineLog.error("Game", msg)
 			show_error(state.current_file, msg)
 		_:
-			VNEngineLog.error("VNGame", "on_story_ended(): unknown end_reason: %d" % reason)
+			VNEngineLog.error("Game", "on_story_ended(): unknown end_reason: %d" % reason)
 
 
 func finish_chapter(state: VNEngineStoryState) -> void:
+	VNEngineMain.save_data().flush()
 	if manifest == null:
-		VNEngineLog.warn("VNGame", "finish_chapter(): no manifest loaded")
+		VNEngineLog.warn("Game", "finish_chapter(): no manifest loaded")
 		return_to_title()
 		return
 
 	var chapter: VNEngineChapterDef = manifest.find_chapter(state.chapter_id)
 	if chapter == null:
-		VNEngineLog.warn("VNGame", "finish_chapter(): current chapter not found: '%s', falling back to default_ending" % state.chapter_id)
+		VNEngineLog.warn("Game", "finish_chapter(): current chapter not found: '%s', falling back to default_ending" % state.chapter_id)
 		trigger_ending(manifest.default_ending)
 		return
 
@@ -303,26 +284,28 @@ func trigger_ending(ending_id: String) -> void:
 	if not _has_main():
 		return
 	if ending_id == "":
-		VNEngineLog.warn("VNGame", "trigger_ending(): empty ending_id, no ending selected")
+		VNEngineLog.warn("Game", "trigger_ending(): empty ending_id, no ending selected")
 		return_to_title()
 		return
 
 	if manifest == null:
-		VNEngineLog.warn("VNGame", "trigger_ending('%s'): no manifest loaded" % ending_id)
+		VNEngineLog.warn("Game", "trigger_ending('%s'): no manifest loaded" % ending_id)
 		return_to_title()
 		return
 
 	var ending: VNEngineEndingDef = manifest.find_ending(ending_id)
 	if ending == null:
-		VNEngineLog.warn("VNGame", "trigger_ending(): ending not found: '%s'" % ending_id)
+		VNEngineLog.warn("Game", "trigger_ending(): ending not found: '%s'" % ending_id)
 		return_to_title()
 		return
 
 	_set_state(AppState.ENDING)
-	VNSave.mark_ending_seen(ending.id)
-	VNSave.increment_cleared_count()
+	var save_data: VNEngineSaveData = VNEngineMain.save_data()
+	save_data.mark_ending_seen(ending.id)
+	save_data.increment_cleared_count()
 	for unlock_id in ending.unlocks:
-		VNSave.set_global_flag(unlock_id, true)
+		save_data.set_global_flag(unlock_id, true)
+	save_data.flush()
 
 	var root: VNEngineMain = _vn_main()
 	await _ending_player.present(root, ending, _current_stage_screen(), _shared_asset_resolver)
@@ -347,7 +330,7 @@ func seed_flags(state: VNEngineStoryState) -> void:
 	if manifest == null or manifest.flags == null:
 		return
 	var seed: Dictionary = manifest.flags.default_vars()
-	var globals: Dictionary = VNSave.global_data.get("flags", {})
+	var globals: Dictionary = VNEngineMain.save_data().global_data.get("flags", {})
 	for key in globals.keys():
 		seed[key] = globals[key]
 	for key in seed.keys():
@@ -402,7 +385,7 @@ func _load_manifest() -> void:
 	var manifest_res: Resource = load(manifest_path)
 	manifest = manifest_res as VNEngineGameManifest
 	if manifest == null:
-		VNEngineLog.warn("VNGame", "Manifest failed to load or is not a GameManifest: '%s'" % manifest_path)
+		VNEngineLog.warn("Game", "Manifest failed to load or is not a GameManifest: '%s'" % manifest_path)
 		return
 
 	_state = AppState.BOOT if manifest.has_boot_sequence() else AppState.TITLE
@@ -412,7 +395,7 @@ func _load_manifest() -> void:
 			continue
 		var expected_id: String = chapter.script_path.get_base_dir().get_file()
 		if chapter.id != expected_id:
-			VNEngineLog.warn("VNGame", "Chapter id '%s' does not match its folder name '%s'" % [chapter.id, expected_id])
+			VNEngineLog.warn("Game", "Chapter id '%s' does not match its folder name '%s'" % [chapter.id, expected_id])
 
 
 func _first_matching_ending(state: VNEngineStoryState) -> VNEngineEndingDef:
@@ -475,7 +458,7 @@ func _enter_chapter_via_loading(chapter: VNEngineChapterDef, resume_state: Dicti
 		loading_params["min_duration"] = ui.loading_min_duration
 	if ui.loading_show_chapter_title and chapter.intro_style == "none":
 		loading_params["title"] = _chapter_title(chapter)
-		loading_params["subtitle"] = _translated_or_empty(chapter.subtitle_key)
+		loading_params["subtitle"] = chapter.subtitle
 	if chapter.intro_background != "":
 		loading_params["background_path"] = _shared_asset_resolver.resolve("background", chapter.intro_background)
 
@@ -483,15 +466,7 @@ func _enter_chapter_via_loading(chapter: VNEngineChapterDef, resume_state: Dicti
 
 
 func _chapter_title(chapter: VNEngineChapterDef) -> String:
-	var title: String = _translated_or_empty(chapter.title_key)
-	return title if title != "" else chapter.id.capitalize()
-
-
-func _translated_or_empty(key: String) -> String:
-	if key == "":
-		return ""
-	var text: String = tr(key)
-	return "" if text == key else text
+	return chapter.title if chapter.title != "" else chapter.id.capitalize()
 
 
 func _set_state(new_state: AppState) -> void:
@@ -501,7 +476,7 @@ func _set_state(new_state: AppState) -> void:
 func _has_main() -> bool:
 	if _vn_main() != null:
 		return true
-	VNEngineLog.error("VNGame", "vn_main.tscn is not running. Change to it or add it to the scene tree first.")
+	VNEngineLog.error("Game", "vn_main.tscn is not running. Change to it or add it to the scene tree first.")
 	return false
 
 

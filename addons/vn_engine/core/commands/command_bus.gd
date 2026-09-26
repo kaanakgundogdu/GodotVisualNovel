@@ -11,12 +11,6 @@ func register(cmd: VNEngineCommand) -> void:
 	_commands[cmd.command_name()] = cmd
 
 
-func known_commands() -> Array[String]:
-	var out: Array[String] = []
-	for cmd_name in _commands.keys():
-		out.append(cmd_name)
-	return out
-
 func apply(name: String, args: String, ctx: VNEngineCommandContext) -> void:
 	if not _commands.has(name):
 		VNEngineLog.warn("CommandBus", "Unknown command, skipping: '@%s'" % name)

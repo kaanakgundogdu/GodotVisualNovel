@@ -2,8 +2,7 @@
 class_name VNEngineCreditsSection
 extends Resource
 
-## Translation key for this role's label, like "credits.role.director".
-@export var role_key: String = ""
-## Proper names for this role, listed as they should display. Not
-## translated.
+## Role label shown above the names in the credits screen.
+@export var role: String = ""
+## Proper names for this role, listed as they should display.
 @export var names: PackedStringArray = []

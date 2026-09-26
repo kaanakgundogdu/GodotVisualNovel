@@ -64,8 +64,8 @@ func _update_slot_grid() -> void:
 		child.queue_free()
 
 	if current_page == 1:
-		slot_grid.add_child(_build_special_card(VNSave.AUTOSAVE_SLOT, "Autosave"))
-		slot_grid.add_child(_build_special_card(VNSave.QUICKSAVE_SLOT, "Quicksave"))
+		slot_grid.add_child(_build_special_card(VNEngineSaveData.AUTOSAVE_SLOT, "Autosave"))
+		slot_grid.add_child(_build_special_card(VNEngineSaveData.QUICKSAVE_SLOT, "Quicksave"))
 
 	var regular_capacity: int = SLOTS_PER_PAGE - (2 if current_page == 1 else 0)
 	var start_slot: int = _regular_slots_before_page(current_page) + 1
@@ -113,7 +113,7 @@ func _card_style(bg: Color, border: Color) -> StyleBoxFlat:
 
 
 func _build_card(slot_id: int, display_name: String) -> Button:
-	var status: VNSave.SlotStatus = VNSave.get_slot_status(slot_id)
+	var status: VNEngineSaveData.SlotStatus = VNEngineMain.saves().get_slot_status(slot_id)
 
 	var slot_btn := Button.new()
 	slot_btn.custom_minimum_size = Vector2(340, 250)
@@ -143,12 +143,12 @@ func _build_card(slot_id: int, display_name: String) -> Button:
 	vbox.add_child(lbl)
 
 	match status:
-		VNSave.SlotStatus.OK:
+		VNEngineSaveData.SlotStatus.OK:
 			lbl.text = display_name + " (Used)"
-			var thumb: Texture2D = VNSave.get_save_thumbnail(slot_id)
+			var thumb: Texture2D = VNEngineMain.saves().get_save_thumbnail(slot_id)
 			if thumb:
 				tex_rect.texture = thumb
-		VNSave.SlotStatus.CORRUPT:
+		VNEngineSaveData.SlotStatus.CORRUPT:
 			lbl.text = "Corrupted save"
 			tex_rect.modulate = Color(0, 0, 0, 0.5)
 			slot_btn.disabled = true
@@ -170,20 +170,20 @@ func _on_actual_load_pressed() -> void:
 func _on_slot_pressed(slot_id: int) -> void:
 	if is_save_mode:
 		_handle_save_slot_pressed(slot_id)
-	elif VNSave.get_slot_status(slot_id) == VNSave.SlotStatus.OK:
+	elif VNEngineMain.saves().get_slot_status(slot_id) == VNEngineSaveData.SlotStatus.OK:
 		load_requested.emit(slot_id)
 
 
 func _handle_save_slot_pressed(slot_id: int) -> void:
-	var occupied: bool = VNSave.get_slot_status(slot_id) != VNSave.SlotStatus.EMPTY
-	var manifest: VNEngineGameManifest = VNGame.get_manifest()
+	var occupied: bool = VNEngineMain.saves().get_slot_status(slot_id) != VNEngineSaveData.SlotStatus.EMPTY
+	var manifest: VNEngineGameManifest = VNEngineMain.game().get_manifest()
 	var ui_def: VNEngineUiDef = manifest.get_ui() if manifest != null else VNEngineUiDef.new()
 
 	if not (occupied and ui_def.confirm_overwrite_save):
 		save_requested.emit(slot_id)
 		return
 
-	VNGame.open_overlay(&"confirm", {
+	VNEngineMain.game().open_overlay(&"confirm", {
 		"message": "Overwrite this save?",
 		"confirm_text": "Overwrite",
 		"cancel_text": "Cancel",
@@ -195,22 +195,22 @@ func _on_overwrite_confirmed(slot_id: int) -> void:
 
 
 func _most_recent_quick_slot() -> int:
-	var quick_ok: bool = VNSave.get_slot_status(VNSave.QUICKSAVE_SLOT) == VNSave.SlotStatus.OK
-	var auto_ok: bool = VNSave.get_slot_status(VNSave.AUTOSAVE_SLOT) == VNSave.SlotStatus.OK
+	var quick_ok: bool = VNEngineMain.saves().get_slot_status(VNEngineSaveData.QUICKSAVE_SLOT) == VNEngineSaveData.SlotStatus.OK
+	var auto_ok: bool = VNEngineMain.saves().get_slot_status(VNEngineSaveData.AUTOSAVE_SLOT) == VNEngineSaveData.SlotStatus.OK
 
 	if quick_ok and auto_ok:
-		if _slot_modified_time(VNSave.AUTOSAVE_SLOT) > _slot_modified_time(VNSave.QUICKSAVE_SLOT):
-			return VNSave.AUTOSAVE_SLOT
-		return VNSave.QUICKSAVE_SLOT
+		if _slot_modified_time(VNEngineSaveData.AUTOSAVE_SLOT) > _slot_modified_time(VNEngineSaveData.QUICKSAVE_SLOT):
+			return VNEngineSaveData.AUTOSAVE_SLOT
+		return VNEngineSaveData.QUICKSAVE_SLOT
 	if quick_ok:
-		return VNSave.QUICKSAVE_SLOT
+		return VNEngineSaveData.QUICKSAVE_SLOT
 	if auto_ok:
-		return VNSave.AUTOSAVE_SLOT
+		return VNEngineSaveData.AUTOSAVE_SLOT
 	return -1
 
 
 func _slot_modified_time(slot_id: int) -> int:
-	var path: String = VNSave.slot_path(slot_id)
+	var path: String = VNEngineMain.save_data().slot_path(slot_id)
 	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if file != null:
 		var parsed: Variant = JSON.parse_string(file.get_as_text())

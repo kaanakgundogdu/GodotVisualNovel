@@ -5,10 +5,10 @@ extends Resource
 @export_group("Identity")
 ## Must equal the folder name of script_path. Prefixes generated line_ids.
 @export var id: String = ""
-## Translation key for the chapter title, like "chapter.chapter1.title".
-@export var title_key: String = ""
-## Translation key for the chapter subtitle. Empty means no subtitle.
-@export var subtitle_key: String = ""
+## Chapter title shown in the chapter-select screen and title cards.
+@export var title: String = ""
+## Chapter subtitle. Empty means no subtitle.
+@export var subtitle: String = ""
 ## Path to this chapter's script file, example
 ## "res://<content>/scenario/chapter1/script.txt".
 @export var script_path: String = ""

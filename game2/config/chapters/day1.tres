@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("1_script")
 id = "day1"
-title_key = "Day 1"
-subtitle_key = ""
+title = "Day 1"
+subtitle = ""
 script_path = "res://game2/scenario/day1/scenario1.txt"
 intro_style = "none"
 intro_background = ""

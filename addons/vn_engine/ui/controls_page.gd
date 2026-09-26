@@ -40,7 +40,7 @@ func _ready() -> void:
 	_status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(_status_label)
 
-	VNSettings.settings_changed.connect(_on_settings_changed)
+	VNEngineMain.settings().changed.connect(_on_settings_changed)
 
 	refresh()
 
@@ -138,7 +138,6 @@ func _try_rebind(event: InputEvent) -> void:
 	_capturing = false
 	_capture_action = &""
 	_capture_slot = -1
-	VNSettings.store_input_bindings()
 	_set_status("")
 	refresh()
 
@@ -160,7 +159,6 @@ func _on_reset_action_pressed(action: StringName) -> void:
 	if _capturing:
 		cancel_capture()
 	VNEngineInput.reset(action)
-	VNSettings.store_input_bindings()
 	refresh()
 
 
@@ -168,7 +166,6 @@ func _on_reset_all_pressed() -> void:
 	if _capturing:
 		cancel_capture()
 	VNEngineInput.reset_all()
-	VNSettings.store_input_bindings()
 	refresh()
 
 

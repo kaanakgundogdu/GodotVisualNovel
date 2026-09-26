@@ -6,17 +6,6 @@ static func evaluate(expr: String, vars: Dictionary) -> bool:
 	return bool(evaluate_value(expr, vars))
 
 
-static func evaluate_term(vars: Dictionary, var_name: String, op: String, value_str: String) -> bool:
-	var target: Variant = _coerce_literal(value_str)
-	var expect_bool: bool = typeof(target) == TYPE_BOOL
-
-	if (op == "<" or op == ">" or op == "<=" or op == ">=") and typeof(target) == TYPE_STRING:
-		return false
-
-	var current: Variant = get_var(vars, var_name, expect_bool)
-	return compare(current, op, target)
-
-
 static func get_var(vars: Dictionary, name: String, expect_bool: bool = false) -> Variant:
 	var key: String = name.to_lower()
 	if vars.has(key):
@@ -41,33 +30,6 @@ static func compare(current: Variant, op: String, target: Variant) -> bool:
 		"<=":
 			return float(current) <= float(target)
 	return false
-
-
-static func apply_set_var(vars: Dictionary, var_name: String, op: String, value_str: String) -> void:
-	var key: String = var_name.to_lower()
-
-	if op == "=":
-		vars[key] = _coerce_literal(value_str)
-		return
-
-	var raw_current: Variant = get_var(vars, key, false)
-	var raw_value: Variant = _coerce_literal(value_str)
-
-	var current: float = _to_float(raw_current)
-	var value: float = _to_float(raw_value)
-
-	match op:
-		"+=":
-			vars[key] = current + value
-		"-=":
-			vars[key] = current - value
-		"*=":
-			vars[key] = current * value
-		"/=":
-			if value == 0.0:
-				pass
-			else:
-				vars[key] = current / value
 
 
 static func evaluate_value(expr: String, vars: Dictionary) -> Variant:

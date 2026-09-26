@@ -47,8 +47,8 @@ func enter(params: Dictionary) -> void:
 	video_player.hide()
 
 	var def: VNEngineCreditsDef = null
-	if VNGame.manifest != null:
-		def = VNGame.manifest.credits
+	if VNEngineMain.game().manifest != null:
+		def = VNEngineMain.game().manifest.credits
 	if def == null:
 		VNEngineLog.warn("CreditsScreen", "GameManifest.credits is missing, skipping credits")
 		_finish()
@@ -61,7 +61,7 @@ func enter(params: Dictionary) -> void:
 	_allow_skip = def.allow_skip
 	_scroll_speed = maxf(def.scroll_speed, 1.0)
 
-	var resolver: VNEngineAssetResolver = VNGame.get_shared_asset_resolver()
+	var resolver: VNEngineAssetResolver = VNEngineMain.game().get_shared_asset_resolver()
 	if def.background != "":
 		var bg_path: String = resolver.resolve("background", def.background)
 		if bg_path != "":
@@ -102,7 +102,7 @@ func _build_sections(def: VNEngineCreditsDef) -> void:
 			continue
 
 		var role_label := Label.new()
-		role_label.text = tr(section.role_key)
+		role_label.text = section.role
 		role_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		role_label.theme_type_variation = &"VNSubheadingLabel"
 		role_label.add_theme_color_override("font_color", Color(0.45, 0.8, 1.0, 1.0))
@@ -122,7 +122,7 @@ func _build_sections(def: VNEngineCreditsDef) -> void:
 		content_box.add_child(spacer)
 
 	if def.end_logo != "":
-		var logo_resolver: VNEngineAssetResolver = VNGame.get_shared_asset_resolver()
+		var logo_resolver: VNEngineAssetResolver = VNEngineMain.game().get_shared_asset_resolver()
 		var logo_path: String = logo_resolver.resolve("background", def.end_logo)
 		if logo_path != "":
 			var logo_rect := TextureRect.new()
@@ -144,4 +144,4 @@ func _finish() -> void:
 		return
 	_finished_called = true
 	set_process(false)
-	VNGame.return_to_title()
+	VNEngineMain.game().return_to_title()

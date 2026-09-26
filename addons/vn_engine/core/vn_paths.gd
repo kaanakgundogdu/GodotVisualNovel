@@ -2,19 +2,18 @@
 extends RefCounted
 class_name VNEnginePaths
 
-## A global static class that only holds read only paths for others
-
-const SETTING_KEY := "vn_engine/content/root"
 const DEFAULT_ROOT := "res://addons/vn_engine/sample_game/"
 
-static func content_root() -> String:
-	var raw: Variant = ProjectSettings.get_setting(SETTING_KEY, DEFAULT_ROOT)
-	var root: String = str(raw).strip_edges()
-	if root == "":
-		root = DEFAULT_ROOT
+static var _root: String = DEFAULT_ROOT
+
+static func set_content_root(path: String) -> void:
+	var root: String = path.strip_edges()
 	if not root.ends_with("/"):
 		root += "/"
-	return root
+	_root = root
+
+static func content_root() -> String:
+	return _root
 
 static func config_dir() -> String:
 	return content_root() + "config/"
@@ -30,18 +29,3 @@ static func cast_file() -> String:
 
 static func scenario_root() -> String:
 	return content_root() + "scenario/"
-
-static func locale_dir() -> String:
-	return content_root() + "locale/"
-
-static func line_ids() -> String:
-	return locale_dir() + "line_ids.txt"
-
-static func dialog_csv() -> String:
-	return locale_dir() + "dialog.csv"
-
-static func settings_file() -> String:
-	return "user://vn_engine/settings.json"
-
-static func save_dir(save_namespace: String) -> String:
-	return "user://vn_engine/saves/" + save_namespace + "/"

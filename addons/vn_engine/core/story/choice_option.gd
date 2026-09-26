@@ -10,6 +10,3 @@ class_name VNEngineChoiceOption
 @export var once: bool = false
 @export var line_id: String = ""
 @export var line: int = 0
-
-func is_conditional() -> bool:
-	return condition != "" or disabled_if != ""

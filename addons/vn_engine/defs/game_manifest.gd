@@ -6,8 +6,6 @@ extends Resource
 ## Unique id for this game, like "my_first_vn". Used to separate save
 ## files between games.
 @export var game_id: String = ""
-## Translation key for the game's title.
-@export var title_key: String = ""
 ## Game version, like "0.1.0".
 @export var version: String = "0.1.0"
 
@@ -39,10 +37,6 @@ extends Resource
 ## Engine UI behaviour tuning. null means default UI behaviour.
 @export var ui: VNEngineUiDef
 
-@export_group("Localization")
-## Locale codes offered in the language menu, like ["tr", "en"]. Fewer
-## than two locales hides the language tab.
-@export var locales: PackedStringArray = ["tr", "en"]
 
 func get_boot() -> VNEngineBootDef:
 	return boot if boot != null else VNEngineBootDef.new()

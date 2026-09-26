@@ -123,7 +123,7 @@ func _play_audio(channel_name: String, file_name: String, speaker_id: String = "
 	var base_db: float = config.base_volume_db
 
 	if channel_name == "voice" and speaker_id != "":
-		var voice_mult: float = VNSettings.data["audio"]["voice_volume"].get(speaker_id, 1.0)
+		var voice_mult: float = VNEngineMain.settings().speaker_voice_volume.get(speaker_id, 1.0)
 		base_db += maxf(linear_to_db(voice_mult), -80.0)
 
 	if config.use_fade:

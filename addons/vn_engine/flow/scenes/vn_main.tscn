@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://crk3wahaeo62d"]
+[gd_scene load_steps=10 format=3 uid="uid://crk3wahaeo62d"]
 
 [ext_resource type="Script" uid="uid://bnhomoyhjnsjv" path="res://addons/vn_engine/flow/vn_main.gd" id="1"]
 [ext_resource type="Script" uid="uid://c2o5rgbkq17tp" path="res://addons/vn_engine/flow/transition_player.gd" id="2"]
@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" path="res://addons/vn_engine/ui/scenes/card_overlay.tscn" id="6_cardov"]
 [ext_resource type="PackedScene" path="res://addons/vn_engine/ui/scenes/dev_overlay.tscn" id="7_devov"]
 [ext_resource type="PackedScene" uid="uid://dfp4gfwud3o4r" path="res://addons/vn_engine/systems/scenes/audio_system.tscn" id="8_paudio"]
+[ext_resource type="Script" path="res://addons/vn_engine/systems/save_system.gd" id="9_saves"]
+[ext_resource type="Script" path="res://addons/vn_engine/flow/vn_game.gd" id="10_game"]
 
 [sub_resource type="ShaderMaterial" id="1"]
 shader = ExtResource("3")
@@ -47,4 +49,10 @@ visible = false
 
 [node name="Systems" type="Node" parent="."]
 
+[node name="Game" type="Node" parent="Systems"]
+script = ExtResource("10_game")
+
 [node name="PersistentAudio" parent="Systems" instance=ExtResource("8_paudio")]
+
+[node name="Saves" type="Node" parent="Systems"]
+script = ExtResource("9_saves")

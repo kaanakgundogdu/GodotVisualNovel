@@ -158,21 +158,13 @@ static func _lint_command(cmd: Dictionary, script: VNEngineStoryScript, reachabl
 
 
 static func _lint_jump_if(args: String, line_no: int, script: VNEngineStoryScript, reachable: Dictionary) -> void:
-	var condition: String = ""
-	var target: String = ""
+	if not args.contains("->"):
+		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@jump_if' expects '<condition> -> <target>'"))
+		return
 
-	if args.contains("->"):
-		var parts: PackedStringArray = args.split("->", true, 1)
-		condition = parts[0].strip_edges()
-		target = (parts[1].strip_edges() if parts.size() > 1 else "")
-	else:
-		var tokens: PackedStringArray = args.split(" ", false)
-		if tokens.size() < 4:
-			script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@jump_if' expects a target"))
-			return
-		target = tokens[tokens.size() - 1]
-		condition = " ".join(tokens.slice(0, tokens.size() - 1))
-		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, line_no, "Using the old positional '@jump_if' form", "suggested: '@jump_if %s -> %s'" % [condition, target]))
+	var parts: PackedStringArray = args.split("->", true, 1)
+	var condition: String = parts[0].strip_edges()
+	var target: String = parts[1].strip_edges()
 
 	if condition == "":
 		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@jump_if' has an empty expression"))
@@ -192,8 +184,6 @@ static func _lint_scene(args: String, line_no: int, script: VNEngineStoryScript)
 	if args == "":
 		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, line_no, "'@scene' expects a file path"))
 		return
-
-	script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.INFO, line_no, "'@scene' is parsed but not executed yet"))
 
 	var tokens: PackedStringArray = args.split(" ", false)
 	var file_arg: String = tokens[0]
@@ -278,13 +268,9 @@ static func _suggest(name: String) -> String:
 
 
 static func _extract_jump_if_condition(args: String) -> String:
-	if args.contains("->"):
-		var parts: PackedStringArray = args.split("->", true, 1)
-		return parts[0].strip_edges()
-	var tokens: PackedStringArray = args.split(" ", false)
-	if tokens.size() < 4:
+	if not args.contains("->"):
 		return ""
-	return " ".join(tokens.slice(0, tokens.size() - 1))
+	return args.split("->", true, 1)[0].strip_edges()
 
 
 static func _validate_expression(expr: String, line_no: int, script: VNEngineStoryScript) -> void:

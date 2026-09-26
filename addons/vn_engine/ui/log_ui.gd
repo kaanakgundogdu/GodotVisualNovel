@@ -109,7 +109,7 @@ func _build_entry(entry: Dictionary) -> Control:
 	text_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
-	var display_text: String = VNEngineText.line_text(line_id, text_raw)
+	var display_text: String = text_raw
 	if is_narrator or speaker_id == "":
 		text_label.text = "[i]%s[/i]" % display_text
 		text_label.modulate = Color(1.0, 1.0, 1.0, NARRATOR_DIM)
@@ -125,7 +125,8 @@ func _build_name_row(speaker_id: String, line_id: String, char_entry: VNEngineCa
 	row.add_theme_constant_override("separation", 8)
 
 	var name_label := Label.new()
-	name_label.text = VNEngineText.speaker_name(speaker_id)
+	var display_name: String = char_entry.display_name if char_entry != null and char_entry.display_name != "" else speaker_id.capitalize().to_upper()
+	name_label.text = display_name
 	name_label.add_theme_constant_override("outline_size", 4)
 	name_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.55))
 	name_label.add_theme_color_override("font_color", _name_color(char_entry))
@@ -150,7 +151,7 @@ func _name_color(char_entry: VNEngineCastMember) -> Color:
 
 
 func _log_use_character_colors() -> bool:
-	var manifest: VNEngineGameManifest = VNGame.get_manifest()
+	var manifest: VNEngineGameManifest = VNEngineMain.game().get_manifest()
 	if manifest == null:
 		return true
 	return manifest.get_ui().log_use_character_colors

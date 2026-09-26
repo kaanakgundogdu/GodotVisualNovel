@@ -53,10 +53,10 @@ func enter(_params: Dictionary) -> void:
 
 func _build_queue() -> Array[VNEngineBootScreenDef]:
 	var queue: Array[VNEngineBootScreenDef] = []
-	if VNGame.manifest == null:
+	if VNEngineMain.game().manifest == null:
 		return queue
 
-	var boot: VNEngineBootDef = VNGame.manifest.get_boot()
+	var boot: VNEngineBootDef = VNEngineMain.game().manifest.get_boot()
 	for screen: VNEngineBootScreenDef in boot.boot_screens:
 		if screen != null and screen.enabled:
 			queue.append(screen)
@@ -174,4 +174,4 @@ func _finish() -> void:
 		video_player.stop()
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
-	VNGame.return_to_title()
+	VNEngineMain.game().return_to_title()

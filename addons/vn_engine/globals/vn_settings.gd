@@ -1,6 +1,7 @@
-extends Node
+class_name VNEngineSettings
+extends RefCounted
 
-signal settings_changed
+signal changed
 
 const TEXT_SPEED_MIN := 0.005
 const TEXT_SPEED_MAX := 0.10
@@ -20,132 +21,119 @@ const FALLBACK_WINDOW_SIZE := Vector2i(1280, 720)
 
 const REQUIRED_BUSES: Array[String] = ["Music", "Sfx", "Voice"]
 
-var data: Dictionary = {}
+var fullscreen: bool = false
+var window_size: Vector2i = Vector2i.ZERO
+var vsync: bool = true
 
-var _muted_by_focus_loss: bool = false
+var master_volume: float = 1.0
+var music_volume: float = 1.0
+var sfx_volume: float = 1.0
+var voice_volume: float = 1.0
+var speaker_voice_volume: Dictionary = {}
+var mute_on_focus_loss: bool = false
 
-var _started: bool = false
+var text_speed: float = 0.05
+var auto_speed: float = 2.0
+var skip_unread: bool = false
+var window_opacity: float = 0.85
+
+var autosave: bool = true
+
+var input_overrides: Dictionary = {}
+
+var _path: String = ""
+
+static var _focus_muted: bool = false
 
 
-func _init() -> void:
-	data = default_data()
+static func load_from(path: String) -> VNEngineSettings:
+	var settings: VNEngineSettings = VNEngineSettings.new()
+	settings._path = path
+	settings._load_from_disk()
+	return settings
 
 
-## Startup work moved to VNGame.start_engine(), autoload stays passive
-## until the engine actually starts.
-func start() -> void:
-	_started = true
-	_ensure_audio_buses()
-	_load_settings()
-	apply_all_settings()
+static func make_draft() -> VNEngineSettings:
+	var draft: VNEngineSettings = VNEngineSettings.new()
+	var base: VNEngineSettings = VNEngineMain.settings()
+	if base != null:
+		draft.copy_from(base)
+	return draft
 
 
-func _notification(what: int) -> void:
-	if not _started:
+static func commit(draft: VNEngineSettings) -> void:
+	var current: VNEngineSettings = VNEngineMain.settings()
+	if current == null:
 		return
-	match what:
-		NOTIFICATION_APPLICATION_FOCUS_OUT:
-			if bool(data["audio"]["mute_on_focus_loss"]):
-				_muted_by_focus_loss = true
-				_apply_audio()
-		NOTIFICATION_APPLICATION_FOCUS_IN:
-			if _muted_by_focus_loss:
-				_muted_by_focus_loss = false
-				_apply_audio()
+	current.copy_from(draft)
+	current.apply_all()
+	current.save_to_disk()
+	current.changed.emit()
 
 
-static func default_data() -> Dictionary:
-	return {
-		"display": {
-			"fullscreen": false,
-			"window_size": "",
-			"vsync": true,
-		},
-		"audio": {
-			"master": 1.0,
-			"music": 1.0,
-			"sfx": 1.0,
-			"voice": 1.0,
-			"voice_volume": {},
-			"mute_on_focus_loss": false,
-		},
-		"text": {
-			"speed": 0.05,
-			"auto_speed": 2.0,
-			"skip_unread": false,
-			"window_opacity": 0.85,
-			"language": "",
-		},
-		"autosave": true,
-		"input": {},
-	}
+static func set_focus_muted(muted: bool) -> void:
+	var settings: VNEngineSettings = VNEngineMain.settings()
+	if settings == null:
+		return
+	if muted and not settings.mute_on_focus_loss:
+		return
+	if _focus_muted == muted:
+		return
+	_focus_muted = muted
+	settings.apply_audio()
 
 
-func save_settings() -> void:
-	DirAccess.make_dir_recursive_absolute(VNEnginePaths.settings_file().get_base_dir())
-	var file: FileAccess = FileAccess.open(VNEnginePaths.settings_file(), FileAccess.WRITE)
-	if file != null:
-		file.store_string(JSON.stringify(data, "\t"))
-		file.close()
+func copy_from(other: VNEngineSettings) -> void:
+	fullscreen = other.fullscreen
+	window_size = other.window_size
+	vsync = other.vsync
+	master_volume = other.master_volume
+	music_volume = other.music_volume
+	sfx_volume = other.sfx_volume
+	voice_volume = other.voice_volume
+	speaker_voice_volume = other.speaker_voice_volume.duplicate()
+	mute_on_focus_loss = other.mute_on_focus_loss
+	text_speed = other.text_speed
+	auto_speed = other.auto_speed
+	skip_unread = other.skip_unread
+	window_opacity = other.window_opacity
+	autosave = other.autosave
+	input_overrides = other.input_overrides.duplicate()
 
 
-func reset_to_defaults() -> void:
-	data = default_data()
-	apply_all_settings()
-	save_settings()
+func apply_all() -> void:
+	_ensure_audio_buses()
+	apply_display()
+	apply_audio()
+	apply_input()
 
 
-func apply_all_settings() -> void:
-	_apply_display()
-	_apply_audio()
-	_apply_language()
-	_apply_input()
-	settings_changed.emit()
+func apply_audio() -> void:
+	var master_bus: int = AudioServer.get_bus_index("Master")
+	AudioServer.set_bus_volume_db(master_bus, linear_to_db(master_volume))
+	AudioServer.set_bus_mute(master_bus, _focus_muted)
+
+	var music_idx: int = AudioServer.get_bus_index("Music")
+	if music_idx != -1:
+		AudioServer.set_bus_volume_db(music_idx, linear_to_db(music_volume))
+
+	var sfx_idx: int = AudioServer.get_bus_index("Sfx")
+	if sfx_idx != -1:
+		AudioServer.set_bus_volume_db(sfx_idx, linear_to_db(sfx_volume))
+
+	var voice_idx: int = AudioServer.get_bus_index("Voice")
+	if voice_idx != -1:
+		AudioServer.set_bus_volume_db(voice_idx, linear_to_db(voice_volume))
 
 
-func get_window_size() -> Vector2i:
-	var parsed: Vector2i = _parse_size(String(data["display"]["window_size"]))
-	if parsed != Vector2i.ZERO:
-		return parsed
-	var window_width: int = int(ProjectSettings.get_setting("display/window/size/window_width_override", 0))
-	var window_height: int = int(ProjectSettings.get_setting("display/window/size/window_height_override", 0))
-	if window_width > 0 and window_height > 0:
-		return Vector2i(window_width, window_height)
-	return FALLBACK_WINDOW_SIZE
-
-
-func set_window_size(size: Vector2i) -> void:
-	data["display"]["window_size"] = "%dx%d" % [size.x, size.y]
-
-
-func set_text_speed_normalized(t: float) -> void:
-	t = clampf(t, 0.0, 1.0)
-	data["text"]["speed"] = lerpf(TEXT_SPEED_MAX, TEXT_SPEED_MIN, t)
-
-
-func get_text_speed_normalized() -> float:
-	var speed: float = clampf(data["text"]["speed"], TEXT_SPEED_MIN, TEXT_SPEED_MAX)
-	return inverse_lerp(TEXT_SPEED_MAX, TEXT_SPEED_MIN, speed)
-
-
-func set_auto_speed_normalized(t: float) -> void:
-	t = clampf(t, 0.0, 1.0)
-	data["text"]["auto_speed"] = lerpf(AUTO_SPEED_MAX, AUTO_SPEED_MIN, t)
-
-
-func get_auto_speed_normalized() -> float:
-	var auto_speed: float = clampf(data["text"]["auto_speed"], AUTO_SPEED_MIN, AUTO_SPEED_MAX)
-	return inverse_lerp(AUTO_SPEED_MAX, AUTO_SPEED_MIN, auto_speed)
-
-
-func _apply_display() -> void:
+func apply_display() -> void:
 	if DisplayServer.get_name() == "headless":
 		return
-	var window: Window = get_window()
-	if bool(data["display"]["fullscreen"]):
+	var window: Window = (Engine.get_main_loop() as SceneTree).root
+	if fullscreen:
 		window.mode = Window.MODE_FULLSCREEN
 	else:
-		var target: Vector2i = get_window_size()
+		var target: Vector2i = effective_window_size()
 		var was_windowed: bool = window.mode == Window.MODE_WINDOWED
 		window.mode = Window.MODE_WINDOWED
 		if not was_windowed or window.size != target:
@@ -153,8 +141,53 @@ func _apply_display() -> void:
 			var screen_rect: Rect2i = DisplayServer.screen_get_usable_rect(window.current_screen)
 			window.position = screen_rect.position + (screen_rect.size - target) / 2
 
-	var vsync_mode: DisplayServer.VSyncMode = DisplayServer.VSYNC_ENABLED if bool(data["display"]["vsync"]) else DisplayServer.VSYNC_DISABLED
+	var vsync_mode: DisplayServer.VSyncMode = DisplayServer.VSYNC_ENABLED if vsync else DisplayServer.VSYNC_DISABLED
 	DisplayServer.window_set_vsync_mode(vsync_mode)
+
+
+func apply_input() -> void:
+	var overrides: Variant = input_overrides
+	if not overrides is Dictionary:
+		overrides = {}
+	VNEngineInput.apply_overrides(overrides)
+
+
+func effective_window_size() -> Vector2i:
+	if window_size != Vector2i.ZERO:
+		return window_size
+	var window_width: int = int(ProjectSettings.get_setting("display/window/size/window_width_override", 0))
+	var window_height: int = int(ProjectSettings.get_setting("display/window/size/window_height_override", 0))
+	if window_width > 0 and window_height > 0:
+		return Vector2i(window_width, window_height)
+	return FALLBACK_WINDOW_SIZE
+
+
+var text_speed_normalized: float:
+	get:
+		var speed: float = clampf(text_speed, TEXT_SPEED_MIN, TEXT_SPEED_MAX)
+		return inverse_lerp(TEXT_SPEED_MAX, TEXT_SPEED_MIN, speed)
+	set(t):
+		t = clampf(t, 0.0, 1.0)
+		text_speed = lerpf(TEXT_SPEED_MAX, TEXT_SPEED_MIN, t)
+
+
+var auto_speed_normalized: float:
+	get:
+		var speed: float = clampf(auto_speed, AUTO_SPEED_MIN, AUTO_SPEED_MAX)
+		return inverse_lerp(AUTO_SPEED_MAX, AUTO_SPEED_MIN, speed)
+	set(t):
+		t = clampf(t, 0.0, 1.0)
+		auto_speed = lerpf(AUTO_SPEED_MAX, AUTO_SPEED_MIN, t)
+
+
+func save_to_disk() -> void:
+	if _path == "":
+		return
+	DirAccess.make_dir_recursive_absolute(_path.get_base_dir())
+	var file: FileAccess = FileAccess.open(_path, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify(_to_dict(), "\t"))
+		file.close()
 
 
 func _ensure_audio_buses() -> void:
@@ -166,34 +199,75 @@ func _ensure_audio_buses() -> void:
 			AudioServer.set_bus_send(idx, "Master")
 
 
-func _apply_audio() -> void:
-	var master_bus: int = AudioServer.get_bus_index("Master")
-	AudioServer.set_bus_volume_db(master_bus, linear_to_db(data["audio"]["master"]))
-	AudioServer.set_bus_mute(master_bus, _muted_by_focus_loss)
-
-	for bus_key: String in ["music", "sfx", "voice"]:
-		var idx: int = AudioServer.get_bus_index(bus_key.capitalize())
-		if idx != -1:
-			AudioServer.set_bus_volume_db(idx, linear_to_db(data["audio"][bus_key]))
-
-
-func _apply_input() -> void:
-	var overrides: Variant = data["input"]
-	if not overrides is Dictionary:
-		overrides = {}
-	VNEngineInput.apply_overrides(overrides)
-
-
-func store_input_bindings() -> void:
-	data["input"] = VNEngineInput.export_overrides()
-	save_settings()
+func _to_dict() -> Dictionary:
+	return {
+		"fullscreen": fullscreen,
+		"window_size": "%dx%d" % [window_size.x, window_size.y] if window_size != Vector2i.ZERO else "",
+		"vsync": vsync,
+		"master_volume": master_volume,
+		"music_volume": music_volume,
+		"sfx_volume": sfx_volume,
+		"voice_volume": voice_volume,
+		"speaker_voice_volume": speaker_voice_volume,
+		"mute_on_focus_loss": mute_on_focus_loss,
+		"text_speed": text_speed,
+		"auto_speed": auto_speed,
+		"skip_unread": skip_unread,
+		"window_opacity": window_opacity,
+		"autosave": autosave,
+		"input_overrides": input_overrides,
+	}
 
 
-func _apply_language() -> void:
-	var code: String = String(data["text"]["language"])
-	if code == "" or TranslationServer.get_locale() == code:
+func _load_from_disk() -> void:
+	if not FileAccess.file_exists(_path):
 		return
-	VNLocale.set_language(code)
+
+	var file: FileAccess = FileAccess.open(_path, FileAccess.READ)
+	var json_str: String = file.get_as_text()
+	file.close()
+
+	var json: JSON = JSON.new()
+	if json.parse(json_str) != OK:
+		VNEngineLog.warn("VNEngineSettings", "settings.json could not be parsed, using defaults")
+		return
+
+	var loaded_data: Variant = json.get_data()
+	if not loaded_data is Dictionary:
+		VNEngineLog.warn("VNEngineSettings", "settings.json has an unexpected shape, using defaults")
+		return
+
+	var loaded: Dictionary = loaded_data
+	if loaded.has("fullscreen"):
+		fullscreen = bool(loaded["fullscreen"])
+	if loaded.has("window_size"):
+		window_size = _parse_size(String(loaded["window_size"]))
+	if loaded.has("vsync"):
+		vsync = bool(loaded["vsync"])
+	if loaded.has("master_volume"):
+		master_volume = float(loaded["master_volume"])
+	if loaded.has("music_volume"):
+		music_volume = float(loaded["music_volume"])
+	if loaded.has("sfx_volume"):
+		sfx_volume = float(loaded["sfx_volume"])
+	if loaded.has("voice_volume"):
+		voice_volume = float(loaded["voice_volume"])
+	if loaded.has("speaker_voice_volume") and loaded["speaker_voice_volume"] is Dictionary:
+		speaker_voice_volume = loaded["speaker_voice_volume"]
+	if loaded.has("mute_on_focus_loss"):
+		mute_on_focus_loss = bool(loaded["mute_on_focus_loss"])
+	if loaded.has("text_speed"):
+		text_speed = float(loaded["text_speed"])
+	if loaded.has("auto_speed"):
+		auto_speed = float(loaded["auto_speed"])
+	if loaded.has("skip_unread"):
+		skip_unread = bool(loaded["skip_unread"])
+	if loaded.has("window_opacity"):
+		window_opacity = float(loaded["window_opacity"])
+	if loaded.has("autosave"):
+		autosave = bool(loaded["autosave"])
+	if loaded.has("input_overrides") and loaded["input_overrides"] is Dictionary:
+		input_overrides = loaded["input_overrides"]
 
 
 func _parse_size(text: String) -> Vector2i:
@@ -201,30 +275,3 @@ func _parse_size(text: String) -> Vector2i:
 	if parts.size() != 2 or not parts[0].is_valid_int() or not parts[1].is_valid_int():
 		return Vector2i.ZERO
 	return Vector2i(parts[0].to_int(), parts[1].to_int())
-
-
-func _load_settings() -> void:
-	if not FileAccess.file_exists(VNEnginePaths.settings_file()):
-		return
-
-	var file: FileAccess = FileAccess.open(VNEnginePaths.settings_file(), FileAccess.READ)
-	var json_str: String = file.get_as_text()
-	file.close()
-
-	var json: JSON = JSON.new()
-	if json.parse(json_str) != OK:
-		VNEngineLog.warn("VNSettings", "settings.json could not be parsed, using defaults")
-		return
-
-	var loaded_data: Variant = json.get_data()
-	if not loaded_data is Dictionary:
-		VNEngineLog.warn("VNSettings", "settings.json has an unexpected shape, using defaults")
-		return
-	for category: Variant in loaded_data.keys():
-		if not data.has(category):
-			continue
-		if data[category] is Dictionary and loaded_data[category] is Dictionary:
-			for key: Variant in loaded_data[category].keys():
-				data[category][key] = loaded_data[category][key]
-		else:
-			data[category] = loaded_data[category]

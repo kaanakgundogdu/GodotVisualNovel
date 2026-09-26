@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("1_script")
 id = "chapter1"
-title_key = "chapter.chapter1.title"
-subtitle_key = ""
+title = "Chapter 1"
+subtitle = ""
 script_path = "res://game/scenario/chapter1/scenario1.txt"
 intro_style = "card"
 intro_background = ""

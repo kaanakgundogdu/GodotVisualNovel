@@ -22,7 +22,7 @@ func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	if i < tokens.size() and tokens[i].is_valid_float():
 		duration = tokens[i].to_float()
 
-	VNSave.unlock_cg(cg_id)
+	VNEngineMain.save_data().unlock_cg(cg_id)
 	ctx.state.cg = cg_id
 
 	if ctx.characters:

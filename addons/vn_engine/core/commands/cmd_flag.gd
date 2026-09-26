@@ -47,7 +47,7 @@ func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	if flag_list != null:
 		var def: VNEngineFlagDef = flag_list.find(flag_id)
 		if def != null and def.scope == "global":
-			VNSave.set_global_flag(flag_id, new_value)
+			VNEngineMain.save_data().set_global_flag(flag_id, new_value)
 
 func _literal(value_str: String) -> Variant:
 	var text: String = value_str.strip_edges()

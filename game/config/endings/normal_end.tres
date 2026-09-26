@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_script")
 id = "normal_end"
-title_key = "ending.normal_end.title"
+title = "Normal Ending"
 rank = "normal"
 number = 1
 is_secret = false

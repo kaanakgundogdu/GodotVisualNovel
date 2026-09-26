@@ -280,7 +280,7 @@ func _start_close() -> void:
 		return
 
 	if _current_mode == MODE_MOVIE and _current_movie_id != "":
-		VNSave.unlock_movie(_current_movie_id)
+		VNEngineMain.save_data().unlock_movie(_current_movie_id)
 
 	_close_timer.stop()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE

@@ -12,7 +12,6 @@
 [resource]
 script = ExtResource("1_script")
 game_id = "laundromat_shift"
-title_key = ""
 version = "0.1.0"
 first_chapter = "day1"
 boot = ExtResource("8_boot")
@@ -21,4 +20,3 @@ chapters = Array[ExtResource("2_chapterscript")]([ExtResource("3_day1")])
 endings = Array[ExtResource("4_endingscript")]([ExtResource("5_quiet_end")])
 flags = ExtResource("6_flags")
 title = ExtResource("7_title")
-locales = PackedStringArray("en")

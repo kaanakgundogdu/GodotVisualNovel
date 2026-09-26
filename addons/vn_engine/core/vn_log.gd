@@ -2,11 +2,11 @@
 class_name VNEngineLog
 extends RefCounted
 
-const SETTING_VERBOSE := "vn_engine/debug/verbose_log"
+static var verbose: bool = false
 
 
 static func debug(tag: String, message: String) -> void:
-	if OS.is_debug_build() and bool(ProjectSettings.get_setting(SETTING_VERBOSE, false)):
+	if OS.is_debug_build() and verbose:
 		print(_format(tag, message))
 
 

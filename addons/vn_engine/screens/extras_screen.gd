@@ -82,7 +82,7 @@ func _dismiss_or_leave() -> bool:
 	if _gallery_instance != null and _gallery_instance.handle_back():
 		return true
 
-	VNGame.return_to_title()
+	VNEngineMain.game().return_to_title()
 	return true
 
 
@@ -96,7 +96,7 @@ func _on_tab_changed(tab_index: int) -> void:
 
 
 func _get_extras_def() -> VNEngineExtrasDef:
-	var manifest: VNEngineGameManifest = VNGame.get_manifest()
+	var manifest: VNEngineGameManifest = VNEngineMain.game().get_manifest()
 	if manifest == null:
 		return VNEngineExtrasDef.new()
 	return manifest.get_extras()
@@ -137,7 +137,7 @@ func _build_entries(kind: String, def_items: Array[VNEngineExtrasItem], resolver
 
 func _display_name(item: VNEngineExtrasItem, unlocked: bool, def: VNEngineExtrasDef) -> String:
 	if unlocked:
-		return tr(item.title_key) if item.title_key != "" else item.id
+		return item.title if item.title != "" else item.id
 	return item.locked_text if item.locked_text != "" else def.locked_name_text
 
 
@@ -154,21 +154,21 @@ func _populate_gallery_tab() -> void:
 	close_btn.hide()
 
 	instance.set_extras_def(_extras_def)
-	instance.set_asset_resolver(VNGame.get_shared_asset_resolver())
+	instance.set_asset_resolver(VNEngineMain.game().get_shared_asset_resolver())
 	instance.open_panel()
 
 
 func _populate_music_tab() -> void:
 	_clear_children(music_list)
 
-	var resolver: VNEngineAssetResolver = VNGame.get_shared_asset_resolver()
+	var resolver: VNEngineAssetResolver = VNEngineMain.game().get_shared_asset_resolver()
 	var entries: Array[VNEngineExtrasItem] = _build_entries("music", _extras_def.music_items, resolver)
 	if entries.is_empty():
 		_add_info_row(music_list, "No music yet.")
 		return
 
 	for item: VNEngineExtrasItem in entries:
-		var unlocked: bool = VNSave.is_music_unlocked(item.id)
+		var unlocked: bool = VNEngineMain.save_data().is_music_unlocked(item.id)
 		if item.hidden_until_unlocked and not unlocked:
 			continue
 		_add_music_row(item, unlocked)
@@ -200,7 +200,7 @@ func _on_music_play_pressed(id: String, btn: Button) -> void:
 		_stop_music_preview()
 		return
 
-	var resolver: VNEngineAssetResolver = VNGame.get_shared_asset_resolver()
+	var resolver: VNEngineAssetResolver = VNEngineMain.game().get_shared_asset_resolver()
 	var path: String = resolver.resolve("music", id)
 	if path == "":
 		return
@@ -235,7 +235,7 @@ func _stop_music_preview() -> void:
 func _populate_endings_tab() -> void:
 	_clear_children(endings_list)
 
-	var manifest: VNEngineGameManifest = VNGame.get_manifest()
+	var manifest: VNEngineGameManifest = VNEngineMain.game().get_manifest()
 	if manifest == null or manifest.endings.is_empty():
 		_add_info_row(endings_list, "Ending info unavailable.")
 		endings_counter_label.text = "0 / 0"
@@ -245,7 +245,7 @@ func _populate_endings_tab() -> void:
 	for ending: VNEngineEndingDef in manifest.endings:
 		if ending == null:
 			continue
-		var seen: bool = VNSave.is_ending_seen(ending.id)
+		var seen: bool = VNEngineMain.save_data().is_ending_seen(ending.id)
 		if seen:
 			seen_count += 1
 		_add_ending_row(ending, seen)
@@ -273,7 +273,7 @@ func _add_ending_row(ending: VNEngineEndingDef, seen: bool) -> void:
 
 	var title_label: Label = Label.new()
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title_label.text = tr(ending.title_key) if seen else _extras_def.locked_name_text
+	title_label.text = ending.title if seen else _extras_def.locked_name_text
 	row.add_child(title_label)
 
 	if seen:
@@ -288,14 +288,14 @@ func _add_ending_row(ending: VNEngineEndingDef, seen: bool) -> void:
 func _populate_movies_tab() -> void:
 	_clear_children(movies_list)
 
-	var resolver: VNEngineAssetResolver = VNGame.get_shared_asset_resolver()
+	var resolver: VNEngineAssetResolver = VNEngineMain.game().get_shared_asset_resolver()
 	var entries: Array[VNEngineExtrasItem] = _build_entries("movie", _extras_def.movie_items, resolver)
 	if entries.is_empty():
 		_add_info_row(movies_list, "No movies yet.")
 		return
 
 	for item: VNEngineExtrasItem in entries:
-		var unlocked: bool = VNSave.is_movie_unlocked(item.id)
+		var unlocked: bool = VNEngineMain.save_data().is_movie_unlocked(item.id)
 		if item.hidden_until_unlocked and not unlocked:
 			continue
 		_add_movie_row(item, unlocked)
@@ -323,7 +323,7 @@ func _add_movie_row(item: VNEngineExtrasItem, unlocked: bool) -> void:
 
 
 func _on_movie_play_pressed(id: String) -> void:
-	var resolver: VNEngineAssetResolver = VNGame.get_shared_asset_resolver()
+	var resolver: VNEngineAssetResolver = VNEngineMain.game().get_shared_asset_resolver()
 	var path: String = resolver.resolve("movie", id)
 	if path == "":
 		return

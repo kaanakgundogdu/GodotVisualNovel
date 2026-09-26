@@ -60,10 +60,11 @@ func _init_menu_state() -> void:
 
 
 func _apply_title_variant() -> void:
-	if VNGame.manifest == null or VNGame.manifest.title == null:
+	var game: VNEngineGame = VNEngineMain.game()
+	if game.manifest == null or game.manifest.title == null:
 		return
-	var def: VNEngineTitleScreenDef = VNGame.manifest.title
-	var cleared: bool = VNSave.global_data.get("cleared_count", 0) > 0
+	var def: VNEngineTitleScreenDef = game.manifest.title
+	var cleared: bool = VNEngineMain.save_data().global_data.get("cleared_count", 0) > 0
 
 	var bg_id: String = def.background
 	if cleared and def.cleared_background != "":
@@ -72,7 +73,7 @@ func _apply_title_variant() -> void:
 	if cleared and def.cleared_bgm != "":
 		bgm_id = def.cleared_bgm
 
-	var resolver: VNEngineAssetResolver = VNGame.get_shared_asset_resolver()
+	var resolver: VNEngineAssetResolver = game.get_shared_asset_resolver()
 	if bg_id != "":
 		var bg_path: String = resolver.resolve("background", bg_id)
 		if bg_path != "":
@@ -89,8 +90,9 @@ func _apply_title_variant() -> void:
 
 func _apply_menu_alignment() -> void:
 	var alignment: String = "center"
-	if VNGame.manifest != null and VNGame.manifest.title != null:
-		alignment = VNGame.manifest.title.menu_alignment
+	var game: VNEngineGame = VNEngineMain.game()
+	if game.manifest != null and game.manifest.title != null:
+		alignment = game.manifest.title.menu_alignment
 	match alignment:
 		"left":
 			menu_vbox.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -102,8 +104,9 @@ func _apply_menu_alignment() -> void:
 
 func _apply_menu_visibility() -> void:
 	var def: VNEngineTitleScreenDef = null
-	if VNGame.manifest != null:
-		def = VNGame.manifest.title
+	var game: VNEngineGame = VNEngineMain.game()
+	if game.manifest != null:
+		def = game.manifest.title
 	if def == null:
 		def = VNEngineTitleScreenDef.new()
 
@@ -121,18 +124,19 @@ func _visibility_for(when: String) -> bool:
 		"":
 			return true
 		"cleared_once":
-			return VNSave.global_data.get("cleared_count", 0) > 0
+			return VNEngineMain.save_data().global_data.get("cleared_count", 0) > 0
 		"never":
 			return false
 		_:
-			var flags: Dictionary = VNSave.global_data.get("flags", {})
+			var flags: Dictionary = VNEngineMain.save_data().global_data.get("flags", {})
 			return VNEngineExpressionEvaluator.evaluate(when, flags)
 
 
 func _apply_logo() -> void:
 	var logo_value: String = ""
-	if VNGame.manifest != null and VNGame.manifest.title != null:
-		logo_value = VNGame.manifest.title.logo
+	var game: VNEngineGame = VNEngineMain.game()
+	if game.manifest != null and game.manifest.title != null:
+		logo_value = game.manifest.title.logo
 	if logo_value == "":
 		return
 
@@ -141,7 +145,7 @@ func _apply_logo() -> void:
 		if ResourceLoader.exists(logo_value):
 			texture = load(logo_value) as Texture2D
 	else:
-		var resolver: VNEngineAssetResolver = VNGame.get_shared_asset_resolver()
+		var resolver: VNEngineAssetResolver = game.get_shared_asset_resolver()
 		var resolved_path: String = resolver.resolve("background", logo_value)
 		if resolved_path == "":
 			resolved_path = resolver.resolve("cg", logo_value)
@@ -158,20 +162,21 @@ func _apply_logo() -> void:
 
 
 func _on_new_game_pressed() -> void:
-	VNGame.start_new_game()
+	VNEngineMain.game().start_new_game()
 
 
 func _on_load_game_pressed() -> void:
-	VNGame.open_overlay(&"load", {"save_mode": false}).load_requested.connect(_on_load_requested)
+	VNEngineMain.game().open_overlay(&"load", {"save_mode": false}).load_requested.connect(_on_load_requested)
 
 
 func _on_load_requested(slot_id: int) -> void:
-	VNGame.close_overlay()
-	VNGame.load_slot(slot_id)
+	var game: VNEngineGame = VNEngineMain.game()
+	game.close_overlay()
+	game.load_slot(slot_id)
 
 
 func _on_settings_pressed() -> void:
-	VNGame.open_overlay(&"settings")
+	VNEngineMain.game().open_overlay(&"settings")
 
 
 func _on_extras_pressed() -> void:
@@ -183,13 +188,14 @@ func _on_chapter_select_pressed() -> void:
 
 
 func _on_quit_pressed() -> void:
-	var manifest: VNEngineGameManifest = VNGame.get_manifest()
+	var game: VNEngineGame = VNEngineMain.game()
+	var manifest: VNEngineGameManifest = game.get_manifest()
 	var ui_def: VNEngineUiDef = manifest.get_ui() if manifest != null else VNEngineUiDef.new()
 	if not ui_def.confirm_quit:
-		VNGame.quit_game()
+		game.quit_game()
 		return
 
-	VNGame.open_overlay(&"confirm", {
+	game.open_overlay(&"confirm", {
 		"message": "Quit the game?",
 		"confirm_text": "Quit",
 		"cancel_text": "Cancel",
@@ -197,4 +203,4 @@ func _on_quit_pressed() -> void:
 
 
 func _on_quit_confirmed() -> void:
-	VNGame.quit_game()
+	VNEngineMain.game().quit_game()

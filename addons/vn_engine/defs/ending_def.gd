@@ -5,8 +5,8 @@ extends Resource
 @export_group("Identity")
 ## Ending id, like "true_end". Used by @end <id>.
 @export var id: String = ""
-## Translation key for the ending title, like "ending.true_end.title".
-@export var title_key: String = ""
+## Ending title shown on the ending card and in the extras gallery.
+@export var title: String = ""
 ## Ending rank shown in the extras gallery. Display only, does not
 ## affect which ending plays.
 @export_enum("true", "good", "normal", "bad", "joke") var rank: String = "normal"

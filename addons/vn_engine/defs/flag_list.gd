@@ -50,15 +50,6 @@ func default_vars() -> Dictionary:
 	return result
 
 
-func global_defaults() -> Dictionary:
-	var result: Dictionary = {}
-	for flag: VNEngineFlagDef in flags:
-		if flag == null or flag.scope != "global":
-			continue
-		result[flag.id.to_lower()] = coerce(flag.id, flag.default_value)
-	return result
-
-
 func coerce(id: String, value: Variant) -> Variant:
 	var flag: VNEngineFlagDef = find(id)
 	if flag == null:

@@ -8,18 +8,14 @@ func title() -> String:
 
 
 func run(ctx: VNEngineAssetLintContext) -> void:
-	if not FileAccess.file_exists(VNEnginePaths.line_ids()):
-		ctx.info("line_ids.txt has not been generated yet (run line_id_tool) -- expected, 0 findings")
-		return
-
 	var line_ids: Dictionary = {}
-	var line_ids_file: FileAccess = FileAccess.open(VNEnginePaths.line_ids(), FileAccess.READ)
-	if line_ids_file:
-		while not line_ids_file.eof_reached():
-			var line: String = line_ids_file.get_line().strip_edges()
-			if line != "":
-				line_ids[line] = true
-		line_ids_file.close()
+	for story: VNEngineStoryScript in ctx.scripts:
+		for node in story.nodes:
+			if node.line_id != "":
+				line_ids[node.line_id] = true
+			for choice in node.choices:
+				if choice.line_id != "":
+					line_ids[choice.line_id] = true
 
 	var voices_root: String = ""
 	if ctx.asset_map != null:

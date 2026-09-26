@@ -2,12 +2,13 @@
 extends EditorScript
 
 
-const REPORT_DEFAULT_DIR := "res://vn_engine_reports/"
-const REPORT_SETTING := "vn_engine/tools/report_dir"
+const CONTENT_ROOT := "res://addons/vn_engine/sample_game/"
+const REPORT_DIR := "res://vn_engine_reports/"
 const REPORT_FILENAME := "asset_lint_report.md"
 
 
 func _run() -> void:
+	VNEnginePaths.set_content_root(CONTENT_ROOT)
 	var ctx := VNEngineAssetLintContext.new()
 	if not ctx.setup():
 		return
@@ -19,7 +20,6 @@ func _run() -> void:
 		VNEngineCgBackgroundMixupRule.new(),
 		VNEngineSpriteMatrixGapRule.new(),
 		VNEngineUnmatchedVoiceRule.new(),
-		VNEngineDeadTranslationKeyRule.new(),
 		VNEngineCgChapterFolderRule.new(),
 		VNEngineManifestReferenceRule.new(),
 		VNEngineDuplicateIdRule.new(),
@@ -37,12 +37,7 @@ func _run() -> void:
 
 
 func _report_path() -> String:
-	var dir: String = str(ProjectSettings.get_setting(REPORT_SETTING, REPORT_DEFAULT_DIR)).strip_edges()
-	if dir == "":
-		dir = REPORT_DEFAULT_DIR
-	if not dir.ends_with("/"):
-		dir += "/"
-	return dir + REPORT_FILENAME
+	return REPORT_DIR + REPORT_FILENAME
 
 
 func _write_report(sections: Array[String], scenario_file_count: int) -> void:

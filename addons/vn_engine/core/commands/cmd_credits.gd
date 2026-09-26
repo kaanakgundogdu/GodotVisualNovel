@@ -5,5 +5,5 @@ func command_name() -> String:
 	return "credits"
 
 func apply(args: String, ctx: VNEngineCommandContext) -> void:
-	VNGame.play_credits(args.strip_edges())
+	VNEngineMain.game().play_credits(args.strip_edges())
 	ctx.runner._jumped = true

@@ -17,9 +17,9 @@ func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	var card_params: Dictionary = {}
 
 	if tokens.is_empty():
-		var manifest: VNEngineGameManifest = VNGame.get_manifest()
+		var manifest: VNEngineGameManifest = VNEngineMain.game().get_manifest()
 		if manifest == null:
-			VNEngineLog.warn("CmdChapterTitle", "VNGame.get_manifest() is null, resolving block immediately")
+			VNEngineLog.warn("CmdChapterTitle", "get_manifest() is null, resolving block immediately")
 			if ctx.bus:
 				ctx.bus.resolve_block()
 			return
@@ -31,8 +31,8 @@ func apply(args: String, ctx: VNEngineCommandContext) -> void:
 				ctx.bus.resolve_block()
 			return
 
-		title_text = tr(chapter.title_key)
-		subtitle_text = tr(chapter.subtitle_key)
+		title_text = chapter.title
+		subtitle_text = chapter.subtitle
 		duration = chapter.intro_duration
 
 		match chapter.intro_style:

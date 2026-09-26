@@ -69,7 +69,7 @@ func open_overlay(id: StringName, params: Dictionary = {}) -> Control:
 	_layer.add_child(overlay)
 
 	if overlay is ColorRect:
-		var manifest: VNEngineGameManifest = VNGame.get_manifest()
+		var manifest: VNEngineGameManifest = VNEngineMain.game().get_manifest()
 		var ui_def: VNEngineUiDef = manifest.get_ui() if manifest != null else VNEngineUiDef.new()
 		(overlay as ColorRect).color = ui_def.overlay_backdrop_color
 

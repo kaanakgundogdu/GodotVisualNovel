@@ -16,7 +16,6 @@
 [resource]
 script = ExtResource("1_script")
 game_id = "vn_demo"
-title_key = ""
 version = "0.1.0"
 first_chapter = "chapter1"
 boot = ExtResource("11_boot")
@@ -28,4 +27,3 @@ credits = ExtResource("7_credits")
 title = ExtResource("8_title")
 extras = ExtResource("9_extras")
 ui = ExtResource("10_ui")
-locales = PackedStringArray("en")

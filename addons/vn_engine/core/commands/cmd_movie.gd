@@ -13,7 +13,7 @@ func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	if ctx.video:
 		var can_play := movie_id != "" and ctx.assets != null and ctx.assets.resolve("movie", movie_id) != ""
 		if can_play and ctx.bus:
-			ctx.bus.blocked_finished.connect(func(): VNSave.unlock_movie(movie_id), CONNECT_ONE_SHOT)
+			ctx.bus.blocked_finished.connect(func(): VNEngineMain.save_data().unlock_movie(movie_id), CONNECT_ONE_SHOT)
 		ctx.video.play_movie(movie_id)
 	else:
 		VNEngineLog.warn("CmdMovie", "No VideoSystem in scene, resolving block immediately: %s" % movie_id)

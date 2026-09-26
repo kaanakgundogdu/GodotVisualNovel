@@ -4,7 +4,7 @@ extends VNEngineAssetLintRule
 
 
 func title() -> String:
-	return "11. Unknown commands"
+	return "10. Unknown commands"
 
 
 func run(ctx: VNEngineAssetLintContext) -> void:

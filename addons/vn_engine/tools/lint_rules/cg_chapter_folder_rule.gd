@@ -4,7 +4,7 @@ extends VNEngineAssetLintRule
 
 
 func title() -> String:
-	return "8. CG chapter folder layout"
+	return "7. CG chapter folder layout"
 
 
 func run(ctx: VNEngineAssetLintContext) -> void:

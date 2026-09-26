@@ -26,3 +26,14 @@ func is_narrator(id: String) -> bool:
 		return true
 
 	return entry.is_narrator
+
+
+func display_name_of(id: String) -> String:
+	if id == "":
+		return ""
+
+	var entry: VNEngineCastMember = get_entry(id)
+	if entry != null and entry.display_name != "":
+		return entry.display_name
+
+	return id.capitalize().to_upper()

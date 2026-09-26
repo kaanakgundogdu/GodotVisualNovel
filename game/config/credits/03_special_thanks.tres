@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_script")
-role_key = "Special Thanks"
+role = "Special Thanks"
 names = PackedStringArray("Godot Engine")

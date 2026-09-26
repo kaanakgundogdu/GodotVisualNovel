@@ -34,7 +34,7 @@ func enter(_params: Dictionary) -> void:
 
 
 func handle_back() -> bool:
-	VNGame.return_to_title()
+	VNEngineMain.game().return_to_title()
 	return true
 
 
@@ -45,7 +45,7 @@ func _on_back_pressed() -> void:
 func _populate_chapters() -> void:
 	_clear_list()
 
-	var manifest: VNEngineGameManifest = VNGame.get_manifest()
+	var manifest: VNEngineGameManifest = VNEngineMain.game().get_manifest()
 	if manifest == null:
 		empty_label.text = "Chapter list unavailable (manifest not found)."
 		empty_label.show()
@@ -58,7 +58,7 @@ func _populate_chapters() -> void:
 
 	empty_label.hide()
 
-	var flags: Dictionary = VNSave.global_data.get("flags", {})
+	var flags: Dictionary = VNEngineMain.save_data().global_data.get("flags", {})
 
 	for chapter in manifest.chapters:
 		if chapter == null:
@@ -80,9 +80,9 @@ func _is_unlocked(chapter: VNEngineChapterDef, flags: Dictionary) -> bool:
 
 
 func _display_name(chapter: VNEngineChapterDef) -> String:
-	if chapter.title_key == "":
+	if chapter.title == "":
 		return chapter.id
-	return tr(chapter.title_key)
+	return chapter.title
 
 
 func _card_style(bg: Color, border: Color) -> StyleBoxFlat:
@@ -115,8 +115,8 @@ func _create_chapter_button(chapter: VNEngineChapterDef, flags: Dictionary) -> v
 
 	if unlocked:
 		var title: String = _display_name(chapter)
-		if chapter.subtitle_key != "":
-			btn.text = "%s\n%s" % [title, tr(chapter.subtitle_key)]
+		if chapter.subtitle != "":
+			btn.text = "%s\n%s" % [title, chapter.subtitle]
 		else:
 			btn.text = title
 		btn.pressed.connect(_on_chapter_pressed.bind(chapter.id))
@@ -129,4 +129,4 @@ func _create_chapter_button(chapter: VNEngineChapterDef, flags: Dictionary) -> v
 
 
 func _on_chapter_pressed(chapter_id: String) -> void:
-	VNGame.goto_chapter(chapter_id)
+	VNEngineMain.game().goto_chapter(chapter_id)

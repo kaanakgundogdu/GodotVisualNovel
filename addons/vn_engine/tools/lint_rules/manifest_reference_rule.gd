@@ -4,7 +4,7 @@ extends VNEngineAssetLintRule
 
 
 func title() -> String:
-	return "9. Manifest references"
+	return "8. Manifest references"
 
 
 func run(ctx: VNEngineAssetLintContext) -> void:

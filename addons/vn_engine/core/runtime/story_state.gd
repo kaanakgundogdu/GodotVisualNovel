@@ -23,21 +23,6 @@ var call_stack: Array[Dictionary] = []
 
 var history: Array[Dictionary] = []
 
-func reset_state() -> void:
-	current_file = ""
-	current_node_id = ""
-	chapter_id = ""
-	playtime_sec = 0
-	flags.clear()
-	bg = ""
-	cg = ""
-	audio.clear()
-	characters.clear()
-	last_speaker = ""
-	seen_choices.clear()
-	call_stack.clear()
-	history.clear()
-
 func set_flag(flag_name: String, value: Variant) -> void:
 	flags[flag_name.to_lower()] = value
 

@@ -11,16 +11,9 @@ config_version=5
 [application]
 
 config/name="Visual_Novel_Engine"
-run/main_scene="res://addons/vn_engine/flow/scenes/vn_main.tscn"
+run/main_scene="res://game/play_game.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
-
-[autoload]
-
-VNSave="*res://addons/vn_engine/globals/vn_save.gd"
-VNSettings="*res://addons/vn_engine/globals/vn_settings.gd"
-VNLocale="*res://addons/vn_engine/globals/vn_locale.gd"
-VNGame="*res://addons/vn_engine/flow/vn_game.gd"
 
 [display]
 
@@ -100,12 +93,3 @@ vn_open_log={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":76,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 ]
 }
-
-[internationalization]
-
-locale/translations=PackedStringArray("res://game/locale/dialog.en.translation")
-
-[vn_engine]
-
-content/root="res://game"
-tools/report_dir="res://kaan_ignore/"

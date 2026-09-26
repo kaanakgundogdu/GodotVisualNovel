@@ -4,7 +4,7 @@ extends VNEngineAssetLintRule
 
 
 func title() -> String:
-	return "10. Duplicate ids"
+	return "9. Duplicate ids"
 
 
 func run(ctx: VNEngineAssetLintContext) -> void:

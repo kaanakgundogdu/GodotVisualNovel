@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_script")
-role_key = "Art and Assets"
+role = "Art and Assets"
 names = PackedStringArray("Backgrounds: \"Cozy Cottage\" by vanilleblooms (CC BY 4.0)", "Character: Free Female Character by Odyssey Creations")

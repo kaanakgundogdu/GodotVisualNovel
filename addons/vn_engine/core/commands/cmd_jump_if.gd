@@ -5,20 +5,13 @@ func command_name() -> String:
 	return "jump_if"
 
 func apply(args: String, ctx: VNEngineCommandContext) -> void:
-	var condition: String = ""
-	var target: String = ""
+	if not args.contains("->"):
+		VNEngineLog.warn("CmdJumpIf", "Invalid jump_if format: %s" % args)
+		return
 
-	if args.contains("->"):
-		var arrow_parts: PackedStringArray = args.split("->", true, 1)
-		condition = arrow_parts[0].strip_edges()
-		target = (arrow_parts[1].strip_edges() if arrow_parts.size() > 1 else "")
-	else:
-		var tokens: PackedStringArray = args.split(" ", false)
-		if tokens.size() < 4:
-			VNEngineLog.warn("CmdJumpIf", "Invalid jump_if format: %s" % args)
-			return
-		target = tokens[tokens.size() - 1]
-		condition = " ".join(tokens.slice(0, tokens.size() - 1))
+	var arrow_parts: PackedStringArray = args.split("->", true, 1)
+	var condition: String = arrow_parts[0].strip_edges()
+	var target: String = arrow_parts[1].strip_edges()
 
 	if condition == "" or target == "":
 		VNEngineLog.warn("CmdJumpIf", "Invalid jump_if format: %s" % args)

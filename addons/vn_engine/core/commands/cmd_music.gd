@@ -12,7 +12,7 @@ func apply(args: String, ctx: VNEngineCommandContext) -> void:
 	else:
 		ctx.state.audio["music"] = value
 		if value != "":
-			VNSave.unlock_music(value)
+			VNEngineMain.save_data().unlock_music(value)
 
 	if ctx.audio:
 		ctx.audio.play_channel("music", value)

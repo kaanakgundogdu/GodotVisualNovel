@@ -4,9 +4,8 @@ extends Resource
 
 ## Asset id, like "cg_cottage_fire_01".
 @export var id: String = ""
-## Display name, as a translation key or plain text. Empty means show
-## the id.
-@export var title_key: String = ""
+## Display name shown in the extras gallery. Empty means show the id.
+@export var title: String = ""
 ## Optional res:// image used as the card image, instead of the asset
 ## itself.
 @export var thumbnail: String = ""
