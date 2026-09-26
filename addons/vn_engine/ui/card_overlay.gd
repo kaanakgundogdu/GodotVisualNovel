@@ -2,6 +2,7 @@ class_name VNEngineCardOverlay
 extends Control
 
 signal finished
+signal covered
 
 const MODE_TITLE: String = "title"
 const MODE_IMAGE: String = "image"
@@ -89,6 +90,7 @@ func open(mode: String, params: Dictionary, duration: float = 2.0, fade_duration
 
 	_tween = create_tween()
 	_tween.tween_property(self, "modulate:a", 1.0, fade_duration)
+	_tween.tween_callback(covered.emit)
 
 	if mode == MODE_MOVIE:
 		_video_player.play()

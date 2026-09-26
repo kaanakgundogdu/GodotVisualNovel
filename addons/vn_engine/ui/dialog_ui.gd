@@ -52,6 +52,11 @@ func _ready() -> void:
 	VNSettings.settings_changed.connect(_on_settings_changed)
 	_apply_window_opacity()
 
+	var vn_main: VNEngineMain = VNEngineMain.instance()
+	var card_overlay: VNEngineCardOverlay = vn_main.get_card_overlay() if vn_main != null else null
+	if card_overlay != null:
+		card_overlay.covered.connect(clear_text)
+
 
 func toggle_ui() -> void:
 	is_ui_hidden = !is_ui_hidden
@@ -116,6 +121,17 @@ func _apply_speaker(speaker_id: String) -> void:
 		_apply_name_plate_style(name_color)
 		if name_row:
 			name_row.show()
+
+
+func clear_text() -> void:
+	if _text_tween and _text_tween.is_valid():
+		_text_tween.kill()
+	auto_timer.stop()
+	_hide_continue_indicator()
+	dialog_label.text = ""
+	speaker_label.text = ""
+	if name_row:
+		name_row.hide()
 
 
 func _show_choice_prompt() -> void:
