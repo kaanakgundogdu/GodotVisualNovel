@@ -355,8 +355,12 @@ func backfill_chapter_id(state: VNEngineStoryState) -> void:
 func show_error(source: String, message: String) -> void:
 	if not _has_main():
 		return
-	var diagnostic: VNEngineParseDiagnostic = VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.ERROR, 0, message)
 	var root: VNEngineMain = _vn_main()
+	if not OS.is_debug_build() or not root.screen_stack.has_screen(&"diagnostics"):
+		push_error("Game: %s: %s" % [source, message])
+		return_to_title()
+		return
+	var diagnostic: VNEngineParseDiagnostic = VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.ERROR, 0, message)
 	root.screen_stack.push_screen(&"diagnostics", {"source": source, "diagnostics": [diagnostic], "exit_to_title": true})
 
 

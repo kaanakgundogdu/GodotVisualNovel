@@ -103,11 +103,22 @@ func list_all(kind: String) -> Array[String]:
 		_warn_once(kind, "", "list_all: no entry for kind '%s' in asset_map.tres" % kind)
 		return result
 
-	_scan_dir(entry.root, entry.root, entry.extensions, result)
+	var relative_paths: Dictionary = {}
+	_scan_dir(entry.root, entry.root, relative_paths)
+
+	var ids: Dictionary = {}
+	for rel: String in relative_paths:
+		for ext: String in entry.extensions:
+			if rel.ends_with(ext):
+				ids[rel.substr(0, rel.length() - ext.length())] = true
+				break
+
+	result.assign(ids.keys())
+	result.sort()
 	return result
 
 
-func _scan_dir(root: String, current_path: String, extensions: Array[String], out: Array[String]) -> void:
+func _scan_dir(root: String, current_path: String, out: Dictionary) -> void:
 	var dir: DirAccess = DirAccess.open(current_path)
 	if not dir:
 		return
@@ -123,14 +134,15 @@ func _scan_dir(root: String, current_path: String, extensions: Array[String], ou
 		var full_path: String = current_path + file_name if current_path.ends_with("/") else current_path + "/" + file_name
 
 		if dir.current_is_dir():
-			_scan_dir(root, full_path + "/", extensions, out)
+			_scan_dir(root, full_path + "/", out)
 		else:
-			for ext: String in extensions:
-				if file_name.ends_with(ext) and not file_name.ends_with(".import"):
-					var id: String = full_path.replace(root, "")
-					id = id.substr(0, id.length() - ext.length())
-					out.append(id)
-					break
+			var stripped_name: String = file_name
+			if stripped_name.ends_with(".import"):
+				stripped_name = stripped_name.substr(0, stripped_name.length() - 7)
+			elif stripped_name.ends_with(".remap"):
+				stripped_name = stripped_name.substr(0, stripped_name.length() - 6)
+			var stripped_path: String = current_path + stripped_name if current_path.ends_with("/") else current_path + "/" + stripped_name
+			out[stripped_path.replace(root, "")] = true
 
 		file_name = dir.get_next()
 

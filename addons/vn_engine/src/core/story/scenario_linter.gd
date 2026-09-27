@@ -187,7 +187,7 @@ static func _lint_scene(args: String, line_no: int, script: VNEngineStoryScript)
 
 	var tokens: PackedStringArray = args.split(" ", false)
 	var file_arg: String = tokens[0]
-	if file_arg.begins_with("res://") and not FileAccess.file_exists(file_arg):
+	if file_arg.begins_with("res://") and not ResourceLoader.exists(file_arg):
 		script.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.WARNING, line_no, "Scene file not found: '%s'" % file_arg))
 
 

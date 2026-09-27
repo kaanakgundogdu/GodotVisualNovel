@@ -6,7 +6,7 @@ static func parse_file(path: String, flag_list: VNEngineFlagList = null) -> VNEn
 	if not FileAccess.file_exists(path):
 		var missing: VNEngineStoryScript = VNEngineStoryScript.new()
 		missing.source_path = path
-		missing.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, 0, "File not found: %s" % path))
+		missing.diagnostics.append(VNEngineParseDiagnostic.new(VNEngineParseDiagnostic.Severity.ERROR, 0, "scenario file not found: %s (in exported games this usually means the VN Engine plugin was not enabled when exporting)" % path))
 		return missing
 
 	var file: FileAccess = FileAccess.open(path, FileAccess.READ)

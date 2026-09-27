@@ -164,6 +164,7 @@ func _format_percent(value: float) -> String:
 
 func _on_fullscreen_toggled(button_pressed: bool) -> void:
 	_draft.fullscreen = button_pressed
+	_draft.display_customized = true
 	window_size_option.disabled = button_pressed
 
 
@@ -171,10 +172,12 @@ func _on_window_size_selected(index: int) -> void:
 	if index < 0 or index >= _window_size_choices.size():
 		return
 	_draft.window_size = _window_size_choices[index]
+	_draft.display_customized = true
 
 
 func _on_vsync_toggled(button_pressed: bool) -> void:
 	_draft.vsync = button_pressed
+	_draft.display_customized = true
 
 
 func _on_master_volume_changed(value: float) -> void:

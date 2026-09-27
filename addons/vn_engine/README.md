@@ -151,6 +151,11 @@ Useful signals: `saved(slot_id)` and `loaded(slot_id)` on `saves()`,
 `returned_to_title` and `quit_requested` on `game()`, `global_changed`
 on `save_data()`.
 
+## Export
+The plugin must be enabled during export; otherwise, the scenario .txt files are not included in the .pck file. The error message now indicates this.
+In "Export selected scenes" mode, Godot does not automatically follow `class_name` references. In this mode, `addons/vn_engine/*` and `game_folder/*` must be added to the include filter. The "Export all resources" mode does not require additional settings.
+Scripts in `src/tools` cannot be excluded from the release export because Godot runs its own script export process before ours. They remain as approximately 40 KB of unused code. If desired, `addons/vn_engine/src/tools/*` can be added to the exclude filter; it is already included in this repository.
+
 ## License
 
 MIT, see `LICENSE`.

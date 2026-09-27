@@ -1,7 +1,9 @@
 class_name VNEngineMain
 extends Node
 
-@export_dir var content_root: String = "res://addons/vn_engine/sample_game/"
+const DEV_OVERLAY_SCENE := "res://addons/vn_engine/src/ui/scenes/dev_overlay.tscn"
+
+@export_dir var content_root: String = ""
 @export var save_folder: String = "user://vn_engine/{game_id}/saves/"
 @export var settings_file: String = "user://vn_engine/{game_id}/settings.json"
 @export var verbose_log: bool = false
@@ -16,6 +18,7 @@ extends Node
 
 var screen_stack: VNEngineScreenStack
 var overlay_stack: VNEngineOverlayStack
+var dev_overlay: Control = null
 
 @onready var screen_layer: CanvasLayer = $ScreenLayer
 @onready var overlay_layer: CanvasLayer = $OverlayLayer
@@ -25,7 +28,6 @@ var overlay_stack: VNEngineOverlayStack
 @onready var persistent_audio: VNEngineAudioSystem = $Systems/PersistentAudio
 @onready var _game: VNEngineGame = $Systems/Game
 @onready var _saves: VNEngineSaveSystem = $Systems/Saves
-@onready var dev_overlay: VNEngineDevOverlay = $SystemLayer/DevOverlay
 
 
 const DEFAULT_THEME_PATH := "res://addons/vn_engine/src/themes/vn_default.tres"
@@ -57,6 +59,8 @@ func _exit_tree() -> void:
 		return
 	if _save_data != null:
 		_save_data.flush()
+	if _settings != null:
+		_settings.restore_audio()
 	if _current == self:
 		_current = null
 	_restore_window_scaling()
@@ -126,6 +130,17 @@ func _notification(what: int) -> void:
 func _ready() -> void:
 	if _is_duplicate:
 		return
+	if content_root == "":
+		push_error("VNEngineMain: content_root is empty. Set it in the Inspector to your game folder (e.g. res://my_game/).")
+		return
+	if not ResourceLoader.exists(VNEnginePaths.manifest()):
+		push_error("VNEngineMain: no game manifest found at '%s'. Check content_root in the Inspector." % VNEnginePaths.manifest())
+		return
+	if OS.is_debug_build() and ResourceLoader.exists(DEV_OVERLAY_SCENE):
+		var dev_overlay_scene: PackedScene = load(DEV_OVERLAY_SCENE)
+		dev_overlay = dev_overlay_scene.instantiate()
+		dev_overlay.visible = false
+		system_layer.add_child(dev_overlay)
 	_game.start_engine()
 	_save_data = VNEngineSaveData.new(resolve_path(save_folder))
 	_settings = VNEngineSettings.load_from(resolve_path(settings_file))
@@ -139,10 +154,6 @@ func _ready() -> void:
 	var ui: VNEngineUiDef = _game.get_ui()
 	screen_stack = VNEngineScreenStack.new(screen_layer, ui.screens, engine_theme)
 	overlay_stack = VNEngineOverlayStack.new(overlay_layer, screen_stack, ui.overlays, engine_theme)
-
-	if not OS.is_debug_build():
-		dev_overlay.queue_free()
-		dev_overlay = null
 
 	screen_stack.push_screen(_game.start_screen())
 

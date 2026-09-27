@@ -115,6 +115,12 @@ func _on_parse_diagnostics_ready(diagnostics: Array) -> void:
 		return
 
 	var root: VNEngineMain = VNEngineMain.instance()
+	if not OS.is_debug_build() or not root.screen_stack.has_screen(&"diagnostics"):
+		if not game.should_report_diagnostics(source):
+			return
+		game.return_to_title()
+		return
+
 	if root.screen_stack.current_id() == &"diagnostics":
 		return
 

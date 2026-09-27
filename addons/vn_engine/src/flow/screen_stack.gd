@@ -1,15 +1,24 @@
 class_name VNEngineScreenStack
 extends RefCounted
 
+const _TITLE_SCENE: PackedScene = preload("res://addons/vn_engine/src/screens/scenes/title_screen.tscn")
+const _STAGE_SCENE: PackedScene = preload("res://addons/vn_engine/src/screens/scenes/vn_stage_screen.tscn")
+const _OPENING_SCENE: PackedScene = preload("res://addons/vn_engine/src/screens/scenes/opening_screen.tscn")
+const _CREDITS_SCENE: PackedScene = preload("res://addons/vn_engine/src/screens/scenes/credits_screen.tscn")
+const _EXTRAS_SCENE: PackedScene = preload("res://addons/vn_engine/src/screens/scenes/extras_screen.tscn")
+const _CHAPTER_SELECT_SCENE: PackedScene = preload("res://addons/vn_engine/src/screens/scenes/chapter_select_screen.tscn")
+const _LOADING_SCENE: PackedScene = preload("res://addons/vn_engine/src/screens/scenes/loading_screen.tscn")
+
+const DIAGNOSTICS_SCENE_PATH := "res://addons/vn_engine/src/screens/scenes/diagnostics_screen.tscn"
+
 const BUILTIN_SCREENS: Dictionary = {
-	&"title": "res://addons/vn_engine/src/screens/scenes/title_screen.tscn",
-	&"stage": "res://addons/vn_engine/src/screens/scenes/vn_stage_screen.tscn",
-	&"opening": "res://addons/vn_engine/src/screens/scenes/opening_screen.tscn",
-	&"credits": "res://addons/vn_engine/src/screens/scenes/credits_screen.tscn",
-	&"extras": "res://addons/vn_engine/src/screens/scenes/extras_screen.tscn",
-	&"chapter_select": "res://addons/vn_engine/src/screens/scenes/chapter_select_screen.tscn",
-	&"diagnostics": "res://addons/vn_engine/src/screens/scenes/diagnostics_screen.tscn",
-	&"loading": "res://addons/vn_engine/src/screens/scenes/loading_screen.tscn",
+	&"title": _TITLE_SCENE,
+	&"stage": _STAGE_SCENE,
+	&"opening": _OPENING_SCENE,
+	&"credits": _CREDITS_SCENE,
+	&"extras": _EXTRAS_SCENE,
+	&"chapter_select": _CHAPTER_SELECT_SCENE,
+	&"loading": _LOADING_SCENE,
 }
 
 var _layer: CanvasLayer
@@ -28,6 +37,8 @@ func _init(layer: CanvasLayer, overrides: Dictionary = {}, theme: Theme = null) 
 
 
 func has_screen(id: StringName) -> bool:
+	if id == &"diagnostics":
+		return _overrides.has(id) or ResourceLoader.exists(DIAGNOSTICS_SCENE_PATH)
 	return _overrides.has(id) or BUILTIN_SCREENS.has(id)
 
 
@@ -35,7 +46,10 @@ func scene_path(id: StringName) -> String:
 	var custom: PackedScene = _overrides.get(id) as PackedScene
 	if custom != null:
 		return custom.resource_path
-	return BUILTIN_SCREENS.get(id, "")
+	if id == &"diagnostics":
+		return DIAGNOSTICS_SCENE_PATH
+	var scene: PackedScene = BUILTIN_SCREENS.get(id, null) as PackedScene
+	return scene.resource_path if scene != null else ""
 
 
 func current_screen() -> VNEngineScreen:
@@ -69,8 +83,10 @@ func clear_stack() -> void:
 
 func _swap_to(id: StringName, params: Dictionary) -> VNEngineScreen:
 	var scene: PackedScene = _overrides.get(id) as PackedScene
-	if scene == null and BUILTIN_SCREENS.has(id):
-		scene = load(BUILTIN_SCREENS[id]) as PackedScene
+	if scene == null and id == &"diagnostics":
+		scene = load(DIAGNOSTICS_SCENE_PATH) as PackedScene
+	elif scene == null:
+		scene = BUILTIN_SCREENS.get(id, null) as PackedScene
 	if scene == null:
 		VNEngineLog.warn("ScreenStack", "Unknown screen id: '%s'" % id)
 		return null

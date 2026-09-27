@@ -17,13 +17,12 @@ const WINDOW_SIZES: Array[Vector2i] = [
 	Vector2i(2560, 1440),
 	Vector2i(3840, 2160),
 ]
-const FALLBACK_WINDOW_SIZE := Vector2i(1280, 720)
-
 const REQUIRED_BUSES: Array[String] = ["Music", "Sfx", "Voice"]
 
 var fullscreen: bool = false
 var window_size: Vector2i = Vector2i.ZERO
 var vsync: bool = true
+var display_customized: bool = false
 
 var master_volume: float = 1.0
 var music_volume: float = 1.0
@@ -44,6 +43,10 @@ var input_overrides: Dictionary = {}
 var _path: String = ""
 
 static var _focus_muted: bool = false
+
+static var _master_audio_saved: bool = false
+static var _master_volume_db_original: float = 0.0
+static var _master_muted_original: bool = false
 
 
 static func load_from(path: String) -> VNEngineSettings:
@@ -87,6 +90,7 @@ func copy_from(other: VNEngineSettings) -> void:
 	fullscreen = other.fullscreen
 	window_size = other.window_size
 	vsync = other.vsync
+	display_customized = other.display_customized
 	master_volume = other.master_volume
 	music_volume = other.music_volume
 	sfx_volume = other.sfx_volume
@@ -110,6 +114,10 @@ func apply_all() -> void:
 
 func apply_audio() -> void:
 	var master_bus: int = AudioServer.get_bus_index("Master")
+	if not _master_audio_saved:
+		_master_volume_db_original = AudioServer.get_bus_volume_db(master_bus)
+		_master_muted_original = AudioServer.is_bus_mute(master_bus)
+		_master_audio_saved = true
 	AudioServer.set_bus_volume_db(master_bus, linear_to_db(master_volume))
 	AudioServer.set_bus_mute(master_bus, _focus_muted)
 
@@ -130,19 +138,43 @@ func apply_display() -> void:
 	if DisplayServer.get_name() == "headless":
 		return
 	var window: Window = (Engine.get_main_loop() as SceneTree).root
-	if fullscreen:
-		window.mode = Window.MODE_FULLSCREEN
-	else:
-		var target: Vector2i = effective_window_size()
-		var was_windowed: bool = window.mode == Window.MODE_WINDOWED
-		window.mode = Window.MODE_WINDOWED
-		if not was_windowed or window.size != target:
-			window.size = target
-			var screen_rect: Rect2i = DisplayServer.screen_get_usable_rect(window.current_screen)
-			window.position = screen_rect.position + (screen_rect.size - target) / 2
+	if display_customized:
+		if fullscreen:
+			window.mode = Window.MODE_FULLSCREEN
+		else:
+			var target: Vector2i = effective_window_size()
+			var was_windowed: bool = window.mode == Window.MODE_WINDOWED
+			window.mode = Window.MODE_WINDOWED
+			if not was_windowed or window.size != target:
+				window.size = target
+				_center_window(window, target)
 
-	var vsync_mode: DisplayServer.VSyncMode = DisplayServer.VSYNC_ENABLED if vsync else DisplayServer.VSYNC_DISABLED
-	DisplayServer.window_set_vsync_mode(vsync_mode)
+		var vsync_mode: DisplayServer.VSyncMode = DisplayServer.VSYNC_ENABLED if vsync else DisplayServer.VSYNC_DISABLED
+		DisplayServer.window_set_vsync_mode(vsync_mode)
+
+	_fit_to_screen(window)
+
+
+func _fit_to_screen(window: Window) -> void:
+	if window.mode != Window.MODE_WINDOWED:
+		return
+	var usable: Rect2i = DisplayServer.screen_get_usable_rect(window.current_screen)
+	if window.size.x <= usable.size.x and window.size.y <= usable.size.y:
+		return
+	var target: Vector2i = Vector2i.ZERO
+	for size: Vector2i in WINDOW_SIZES:
+		if size.x <= usable.size.x and size.y <= usable.size.y and size.x * size.y > target.x * target.y:
+			target = size
+	if target == Vector2i.ZERO:
+		var scale: float = minf(float(usable.size.x) / window.size.x, float(usable.size.y) / window.size.y)
+		target = Vector2i(int(window.size.x * scale), int(window.size.y * scale))
+	window.size = target
+	_center_window(window, target, usable)
+
+
+func _center_window(window: Window, size: Vector2i, usable_rect: Variant = null) -> void:
+	var screen_rect: Rect2i = usable_rect if usable_rect is Rect2i else DisplayServer.screen_get_usable_rect(window.current_screen)
+	window.position = screen_rect.position + (screen_rect.size - size) / 2
 
 
 func apply_input() -> void:
@@ -155,11 +187,8 @@ func apply_input() -> void:
 func effective_window_size() -> Vector2i:
 	if window_size != Vector2i.ZERO:
 		return window_size
-	var window_width: int = int(ProjectSettings.get_setting("display/window/size/window_width_override", 0))
-	var window_height: int = int(ProjectSettings.get_setting("display/window/size/window_height_override", 0))
-	if window_width > 0 and window_height > 0:
-		return Vector2i(window_width, window_height)
-	return FALLBACK_WINDOW_SIZE
+	var window: Window = (Engine.get_main_loop() as SceneTree).root
+	return window.size
 
 
 var text_speed_normalized: float:
@@ -190,6 +219,14 @@ func save_to_disk() -> void:
 		file.close()
 
 
+func restore_audio() -> void:
+	if not _master_audio_saved:
+		return
+	var master_bus: int = AudioServer.get_bus_index("Master")
+	AudioServer.set_bus_volume_db(master_bus, _master_volume_db_original)
+	AudioServer.set_bus_mute(master_bus, _master_muted_original)
+
+
 func _ensure_audio_buses() -> void:
 	for bus_name: String in REQUIRED_BUSES:
 		if AudioServer.get_bus_index(bus_name) == -1:
@@ -204,6 +241,7 @@ func _to_dict() -> Dictionary:
 		"fullscreen": fullscreen,
 		"window_size": "%dx%d" % [window_size.x, window_size.y] if window_size != Vector2i.ZERO else "",
 		"vsync": vsync,
+		"display_customized": display_customized,
 		"master_volume": master_volume,
 		"music_volume": music_volume,
 		"sfx_volume": sfx_volume,
@@ -244,6 +282,8 @@ func _load_from_disk() -> void:
 		window_size = _parse_size(String(loaded["window_size"]))
 	if loaded.has("vsync"):
 		vsync = bool(loaded["vsync"])
+	if loaded.has("display_customized"):
+		display_customized = bool(loaded["display_customized"])
 	if loaded.has("master_volume"):
 		master_volume = float(loaded["master_volume"])
 	if loaded.has("music_volume"):

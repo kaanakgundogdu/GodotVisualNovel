@@ -2,7 +2,7 @@
 extends RefCounted
 class_name VNEnginePaths
 
-const DEFAULT_ROOT := "res://addons/vn_engine/sample_game/"
+const DEFAULT_ROOT := ""
 
 static var _root: String = DEFAULT_ROOT
 

@@ -1,12 +1,19 @@
 class_name VNEngineOverlayStack
 extends RefCounted
+const _SETTINGS_SCENE: PackedScene = preload("res://addons/vn_engine/src/ui/scenes/settings_panel.tscn")
+const _LOAD_SCENE: PackedScene = preload("res://addons/vn_engine/src/ui/scenes/load_panel.tscn")
+const _GALLERY_SCENE: PackedScene = preload("res://addons/vn_engine/src/ui/scenes/gallery_panel.tscn")
+const _LOG_SCENE: PackedScene = preload("res://addons/vn_engine/src/ui/scenes/log_ui.tscn")
+const _CONFIRM_SCENE: PackedScene = preload("res://addons/vn_engine/src/ui/scenes/confirm_dialog.tscn")
+const _GAME_MENU_SCENE: PackedScene = preload("res://addons/vn_engine/src/ui/scenes/game_menu.tscn")
+
 const BUILTIN_OVERLAYS: Dictionary = {
-	&"settings": "res://addons/vn_engine/src/ui/scenes/settings_panel.tscn",
-	&"load": "res://addons/vn_engine/src/ui/scenes/load_panel.tscn",
-	&"gallery": "res://addons/vn_engine/src/ui/scenes/gallery_panel.tscn",
-	&"log": "res://addons/vn_engine/src/ui/scenes/log_ui.tscn",
-	&"confirm": "res://addons/vn_engine/src/ui/scenes/confirm_dialog.tscn",
-	&"game_menu": "res://addons/vn_engine/src/ui/scenes/game_menu.tscn",
+	&"settings": _SETTINGS_SCENE,
+	&"load": _LOAD_SCENE,
+	&"gallery": _GALLERY_SCENE,
+	&"log": _LOG_SCENE,
+	&"confirm": _CONFIRM_SCENE,
+	&"game_menu": _GAME_MENU_SCENE,
 }
 
 var _layer: CanvasLayer
@@ -27,9 +34,7 @@ func scene_for(id: StringName) -> PackedScene:
 	var custom: PackedScene = _overrides.get(id) as PackedScene
 	if custom != null:
 		return custom
-	if BUILTIN_OVERLAYS.has(id):
-		return load(BUILTIN_OVERLAYS[id]) as PackedScene
-	return null
+	return BUILTIN_OVERLAYS.get(id, null) as PackedScene
 
 
 func is_empty() -> bool:
