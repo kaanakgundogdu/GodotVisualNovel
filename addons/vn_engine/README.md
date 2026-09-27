@@ -2,28 +2,36 @@
 
 A small visual novel engine for Godot 4.4. You write the story in plain
 text scenario files and set up the game with `.tres` resources in the
-Inspector. The engine does the rest. 
-Currently dialogue, characters, backgrounds,
-choices, flags, save and load, backlog, auto and skip, gallery, endings
-and credits supported.
+Inspector. The engine does the rest.
+Right now it supports dialogue, characters, backgrounds, choices, flags,
+save and load, backlog, auto and skip, gallery, endings and credits.
 
-Note: so far the engine is tested only inside the Godot 4.4 editor.
-Exported builds are not tested yet.
+I tested it in the Godot 4.4 editor and with a Windows export.
 
-The plugin adds nothing to your project. No autoloads, no project
-settings, no main scene change. If you don't use it, it does nothing.
+The plugin doesn't touch your project. No autoloads, no project
+settings, no main scene change. The only thing it adds is a small export
+step that puts your scenario files into the build. If you don't use the
+engine, it does nothing.
 
 ## Try the demo
 
-1. Copy the `addons/vn_engine/` folder into your project. Keep the same path
-   (`res://addons/vn_engine/`), the engine files use it.
+1. Copy the `addons/vn_engine/` folder into your project, or get it from
+   the Asset Library. Keep the same path (`res://addons/vn_engine/`),
+   the engine files use it.
 2. Open `addons/vn_engine/sample_game/play_sample_game.tscn`.
 3. Run that scene.
 
 The sample game is very small. Two chapters of text with choices, flags
-and two endings. You don't need to enable the plugin for this.
+and two endings. You don't need to enable the plugin to play it in the
+editor.
 
 ## Add it to your own game
+
+First, enable the plugin: **Project > Project Settings > Plugins**, turn
+on **VN Engine**. Your game will run in the editor without it, but when
+you export, the scenario `.txt` files will be missing and the game will
+show a "scenario file not found" error. So turn it on now and forget
+about it.
 
 A game is a folder with the same shape as `sample_game/`:
 
@@ -40,24 +48,8 @@ There is no guide for the scenario syntax yet. Read
 
 The engine runs inside one scene: `res://addons/vn_engine/src/flow/scenes/vn_main.tscn`.
 When this scene is in the tree, the engine works. When it is removed,
-the engine is gone.  Root of the scene or the root node has these settings in the Inspector:
-
-| Setting | Default | What it is |
-|---|---|---|
-| `content_root` | `res://addons/vn_engine/sample_game/` | Your game folder |
-| `save_folder` | `user://vn_engine/{game_id}/saves/` | Where save slots go |
-| `settings_file` | `user://vn_engine/{game_id}/settings.json` | Player settings (volume, text speed, keys) |
-| `verbose_log` | off | Extra logs in debug builds |
-| `design_resolution` | `1920x1080` | Resolution the engine UI is drawn for |
-| `manage_window_scaling` | on | Scale the window to `design_resolution` while the VN runs |
-
-`{game_id}` is the `game_id` in your `game.tres`. So every game gets its
-own saves and settings, and the engine never writes over your own save
-files.
-
-See [Config files](#config-files) for what each file does.
-
-Pick one of these ways to start it.
+the engine is gone. Don't edit this file directly, it belongs to the
+addon. Use one of these two ways instead.
 
 ### 1. The VN is the whole game
 
@@ -78,16 +70,35 @@ func start_vn() -> void:
 	add_child(vn)
 ```
 
+### Settings
+
+`content_root` is the only setting you must set. The others work fine
+as they are:
+
+- `save_folder`: where save slots go. Default: `user://vn_engine/{game_id}/saves/`
+- `settings_file`: player settings like volume, text speed and keys. Default: `user://vn_engine/{game_id}/settings.json`
+- `verbose_log`: extra logs in debug builds. Off by default.
+- `design_resolution`: the resolution the UI is made for. Default: 1920x1080.
+- `manage_window_scaling`: scales the window to `design_resolution` while the VN runs. On by default.
+
+`{game_id}` is the `game_id` in your `game.tres`. So every game gets its
+own saves and settings, and the engine never writes over your own save
+files.
+
+See [Config files](#config-files) for what each file does.
+
 
 ## Config files
 
 
 A `.tres` file is a Godot resource saved as text. It keeps data, not code.
-Double click it in the folder and edit it in the inspector.
+Double click it in the FileSystem dock and edit it in the Inspector.
 Each config file uses one engine class from `src/defs/`. A file that starts
 with `_` is a list: it only collects the other files in its folder.
 
-Note: Maybe making these config files was terrible solution but for now it looks ok.
+Note: I'm not sure yet if config files are the best way to set up a
+game, but they work fine for now. Maybe later I'll make an editor tool
+for them.
 
 ```
 config/
@@ -126,35 +137,62 @@ config/
 or `ui` files, so these are not needed to start.
 
 
-## Resolution
-
-The engine UI is made for 1920x1080 (16:9).
-
-
 ## Using the engine from code
 
-Call functions to do things. Listen to signals when you want to know
-the result.
+While the VN is running, you can reach its parts from anywhere with
+`VNEngineMain`:
 
-| What | How |
-|---|---|
-| Game flow (chapters, endings, title) | `VNEngineMain.game()` |
-| Save and load slots | `VNEngineMain.saves().save_game(state, slot)` |
-| Unlocks, global flags, seen lines | `VNEngineMain.save_data()` |
-| Player settings | `VNEngineMain.settings()` |
-| Files of the running game | `VNEnginePaths` |
+- `VNEngineMain.game()` for the game flow: start a new game, go to a
+  chapter, return to title, quit.
+- `VNEngineMain.saves()` for save slots, like `save_game(state, slot)`.
+- `VNEngineMain.save_data()` for things that stay between saves:
+  unlocked CGs and music, seen endings, global flags, seen lines.
+- `VNEngineMain.settings()` for the player settings.
+- `VNEnginePaths` for the paths of the running game's files.
 
-All of them belong to the running VN. They are loaded when it starts,
-written to disk when it closes, and return `null` when no VN is running.
+They are loaded when the VN starts and written to disk when it closes.
+When no VN is running, they return `null`.
 
-Useful signals: `saved(slot_id)` and `loaded(slot_id)` on `saves()`,
-`returned_to_title` and `quit_requested` on `game()`, `global_changed`
-on `save_data()`.
+For example, if the VN is only one part of your game, you probably don't
+want "Quit" to close everything. If you connect to `quit_requested`,
+the engine doesn't quit and lets you decide:
+
+```gdscript
+func start_vn() -> void:
+	var vn: VNEngineMain = VN_SCENE.instantiate()
+	vn.content_root = "res://my_game/"
+	add_child(vn)
+	VNEngineMain.game().quit_requested.connect(_on_vn_quit)
+
+func _on_vn_quit() -> void:
+	VNEngineMain.instance().queue_free()
+	# back to your own menu here
+```
+
+Other signals you may need: `saved(slot_id)` and `loaded(slot_id)` on
+`saves()`, `returned_to_title` on `game()` and `global_changed` on
+`save_data()`.
 
 ## Export
-The plugin must be enabled during export; otherwise, the scenario .txt files are not included in the .pck file. The error message now indicates this.
-In "Export selected scenes" mode, Godot does not automatically follow `class_name` references. In this mode, `addons/vn_engine/*` and `game_folder/*` must be added to the include filter. The "Export all resources" mode does not require additional settings.
-Scripts in `src/tools` cannot be excluded from the release export because Godot runs its own script export process before ours. They remain as approximately 40 KB of unused code. If desired, `addons/vn_engine/src/tools/*` can be added to the exclude filter; it is already included in this repository.
+
+Things to know before you export:
+
+- **The plugin must be enabled.** The engine packs the scenario `.txt`
+  files into the `.pck` during export. If the plugin is off, they are
+  left out and the game shows a "scenario file not found" error.
+- **`sample_game/` is left out of release builds**, unless your main
+  scene is inside it. So it doesn't make your game bigger. Debug builds
+  still have it.
+- **Export mode.** With "Export all resources" (the default) you don't
+  need to do anything. With "Export selected scenes", Godot doesn't follow
+  `class_name` references, so add `addons/vn_engine/*` and your game
+  folder (for example `my_game/*`) to the include filter.
+- **Editor tools in release builds.** The scripts in `src/tools/` are
+  only for the editor, but the engine can't remove them from the build
+  on its own (Godot handles scripts before our export step runs). They
+  are about 40 KB and do nothing in the game. If you want them out, add
+  `addons/vn_engine/src/tools/*` to the exclude filter in your export
+  preset.
 
 ## License
 
