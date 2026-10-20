@@ -9,13 +9,14 @@ Narrator: It was a peaceful afternoon. The sun was slowly setting over the hills
 # id: 1
 @show hana normal at center
 Hana: Oh, it's [b]you[/b]. I didn't expect to see you here.
+Hana[nod]: Well, since you're here anyway...
 
 # id: 2
-Mei: Hey there! We were just heading to the arcade. Want to come?
+Mei[jump]: Hey there! We were just heading to the arcade. Want to come?
 
 # id: 3
 @show hana angry at center
-Hana: Mei! Don't just invite people without asking me! And why are you staring at me like that? Do I have something on my face?!
+Hana[wave]: Mei! Don't just invite people without asking me! And why are you staring at me like that? Do I have something on my face?!
 
 # id: 4
 - Sorry, I just zoned out for a second. -> 5
@@ -25,6 +26,7 @@ Hana: Mei! Don't just invite people without asking me! And why are you staring a
 # id: 5
 @sfx sfx_ui_item
 @show hana shocked at center
+@animate hana bounce
 Hana: Wh-what? You zoned out?
 
 # id: 6
@@ -38,6 +40,7 @@ Hana: [color=gray]*sigh*[/color] You are always so spacey. Try to pay more atten
 @set_var hana_affection += 5
 @shake 20
 @show hana angry at center
+@animate hana shake strength=2
 Hana: [color=red]EXCUSE ME?![/color] What exactly is wrong with my clothes?!
 
 # id: 8
@@ -45,7 +48,7 @@ Mei: Calm down, Hana. I think it was a compliment... probably.
 
 # id: 9
 @show hana angry at center
-Hana: You have exactly [b]three seconds[/b] to run before I kick you!
+Hana[jump height=40]: You have exactly [b]three seconds[/b] to run before I kick you!
 @jump 13
 
 # id: 10
@@ -56,6 +59,7 @@ Hana: Wait, really? For me?
 # id: 11
 @sfx sfx_ui_item
 @show hana normal at center
+@animate hana wave times=3 wait
 Hana: I... I suppose you can be somewhat thoughtful sometimes. 
 
 # id: 12
@@ -84,7 +88,7 @@ Narrator: The weather suddenly turned terrible, matching her mood.
 
 # id: 17
 @show hana angry at center
-Hana: This is all your fault! If you hadn't made me mad, we would be home before the rain!
+Hana[shake]: This is all your fault! If you hadn't made me mad, we would be home before the rain!
 
 # id: 18
 @leave hana
@@ -98,11 +102,9 @@ Narrator: Inside, the fire painted the room in a warm, gentle glow.
 # id: 21
 @show hana normal at center
 Hana: You know... today wasn't [i]completely[/i] awful.
-
-# id: 22
 @sfx sfx_ui_item
 @show hana shocked at center
-Hana: D-don't get the wrong idea! I just meant the weather was nice! And the snack was... acceptable!
+Hana[bounce]: D-don't get the wrong idea! I just meant the weather was nice! And the snack was... acceptable!
 
 # id: 23
 @leave hana
@@ -125,4 +127,11 @@ Narrator: She waved briefly and went upstairs. A completely ordinary end to the 
 # id: 27
 @bg bg_cottage_ext_day
 @music stop
+@if hana_affection >= 15
+  Narrator: Ending reached: a warm evening by the fire.
+@elif teased_hana
+  Narrator: Ending reached: a walk home in the storm.
+@else
+  Narrator: Ending reached: an ordinary day.
+@endif
 Narrator: [center][b]--- END OF COMPREHENSIVE ENGINE TEST ---[/b][/center]
