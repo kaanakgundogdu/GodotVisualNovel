@@ -1,5 +1,6 @@
 # id: 0
 @bg bg_cottage_bed_dawn
+@zoom 1.25 at 0.5 0.45 time=3
 Narrator: The next morning came quietly. Chapter two is a short loading-screen test.
 
 # id: 1
@@ -24,6 +25,7 @@ Narrator: I stayed under the blanket and listened to the birds outside. Five mor
 # id: 4
 @adv
 @ambient stop fade=2
+@zoom reset time=2
 
 # id: 5
 @show hana normal at center
