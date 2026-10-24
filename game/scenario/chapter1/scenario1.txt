@@ -93,7 +93,8 @@ Narrator: As evening approached, the sky began to shift rapidly.
 # id: 16
 @flow "The Storm"
 @bg bg_cottage_ext_night
-@music stop
+@music stop fade=3
+@ambient amb_rain fade=2
 Narrator: The weather suddenly turned terrible, matching her mood.
 
 # id: 17
@@ -139,6 +140,7 @@ Narrator: She waved briefly and went upstairs. A completely ordinary end to the 
 # id: 27
 @bg bg_cottage_ext_day
 @music stop
+@ambient stop fade=2
 @if hana_affection >= 15
   Narrator: Ending reached: a warm evening by the fire.
 @elif teased_hana
