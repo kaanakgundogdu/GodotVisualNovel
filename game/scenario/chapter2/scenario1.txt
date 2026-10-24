@@ -3,11 +3,32 @@
 Narrator: The next morning came quietly. Chapter two is a short loading-screen test.
 
 # id: 1
+@nvl
+Narrator: I didn't sleep well. The cottage roof creaked all night, and every creak brought back last summer.
+Narrator: The fireflies over the lake. Mei running ahead to the arcade.
+Mei: Hurry up, slowpoke! The new racing game won't wait for us.
+Hana: And don't fall asleep on the porch again, you'll catch a cold.
+Narrator: The bus comes in twenty minutes. I can get up now, or stay under the blanket a little longer.
+
+- Get up right away. -> 2
+- Pull the blanket over your head. -> 3
+
+# id: 2
+Narrator: I got up before the thought could change my mind and dressed in the dark.
+@jump 4
+
+# id: 3
+Narrator: I stayed under the blanket and listened to the birds outside. Five more minutes.
+
+# id: 4
+@adv
+
+# id: 5
 @show hana normal at center
 Hana[nod]: You're late. Again.
 @animate hana jump wait
 Hana: Come on, we'll miss the bus!
 
-# id: 2
+# id: 6
 @leave hana
 Narrator: And so the story continues.
