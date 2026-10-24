@@ -3,6 +3,7 @@ extends Control
 
 signal line_revealed
 
+const ADV_BOX_GROWTH: float = 180.0
 const NAME_COLOR_FALLBACK: Color = Color.WHITE
 const BOX_FADE_TIME: float = 0.2
 const BOX_SLIDE_DISTANCE: float = 12.0
@@ -50,6 +51,10 @@ var _voice_wait_serial: int = 0
 var _name_plate_style: StyleBoxFlat
 
 var _active_label: RichTextLabel
+var _applied_text_size: int = -1
+var _box_top_base: float = 0.0
+var _name_top_base: float = 0.0
+var _name_bottom_base: float = 0.0
 var _nvl_on: bool = false
 
 @onready var auto_timer: Timer = $AutoTimer
@@ -97,8 +102,12 @@ func _ready() -> void:
 		if box_style is StyleBoxFlat:
 			nvl_page.set_backdrop_color((box_style as StyleBoxFlat).bg_color)
 
+	_box_top_base = background_box.offset_top
+	_name_top_base = name_row.offset_top
+	_name_bottom_base = name_row.offset_bottom
 	VNEngineMain.settings().changed.connect(_on_settings_changed)
 	_apply_window_opacity()
+	_apply_text_scale()
 
 	var vn_main: VNEngineMain = VNEngineMain.instance()
 	var card_overlay: VNEngineCardOverlay = vn_main.get_card_overlay() if vn_main != null else null
@@ -789,9 +798,44 @@ func _is_input_locked() -> bool:
 
 func _on_settings_changed() -> void:
 	_apply_window_opacity()
+	_apply_text_scale()
 	_restart_text_tween()
 	if auto_timer:
 		auto_timer.wait_time = VNEngineMain.settings().auto_speed
+
+
+func _apply_text_scale() -> void:
+	var base: int = get_theme_default_font_size()
+	var size: int = VNEngineSettings.scaled_font_size(base)
+	if size == _applied_text_size:
+		return
+	var first: bool = _applied_text_size < 0
+	_applied_text_size = size
+	VNEngineSettings.apply_text_scale(dialog_label, base)
+	var grow: float = round(ADV_BOX_GROWTH * maxf(float(size) / base - 1.0, 0.0))
+	background_box.offset_top = _box_top_base - grow
+	name_row.offset_top = _name_top_base - grow
+	name_row.offset_bottom = _name_bottom_base - grow
+	if first or not _nvl_on or runner == null or runner.state == null:
+		return
+	var typing_nvl: bool = _active_label != dialog_label and is_instance_valid(_active_label)
+	var shown: int = _active_label.visible_characters if typing_nvl else -1
+	var shown_entries: Array[Dictionary] = nvl_page.entries()
+	var pending: Array[Dictionary] = []
+	for i in range(runner.state.nvl_page.size(), shown_entries.size()):
+		pending.append(shown_entries[i])
+	_rebuild_nvl_page(nvl_page.estimate_choices_height(runner.current_choices.size()), pending)
+	if typing_nvl:
+		var last: RichTextLabel = nvl_page.last_label()
+		if last == null:
+			_active_label = dialog_label
+			return
+		_active_label = last
+		_active_label.visible_characters = shown
+		_total_chars = _active_label.get_parsed_text().length()
+		_apply_seen_color()
+	else:
+		_active_label = dialog_label
 
 
 func _apply_window_opacity() -> void:
@@ -843,9 +887,16 @@ func _sync_nvl_page() -> void:
 	var expected: Array[Dictionary] = runner.state.nvl_page
 	if _same_entries(nvl_page.entries(), expected):
 		return
-	nvl_page.clear()
-	for entry in expected:
-		nvl_page.add_entry(String(entry.get("speaker", "")), String(entry.get("text", "")), String(entry.get("kind", "line")))
+	_rebuild_nvl_page(0.0, [] as Array[Dictionary])
+
+
+func _rebuild_nvl_page(reserve: float, pending: Array[Dictionary]) -> void:
+	var source: Array[Dictionary] = runner.state.nvl_page.duplicate()
+	source.append_array(pending)
+	var kept: Array[Dictionary] = nvl_page.rebuild(source, reserve)
+	var dropped: int = mini(source.size() - kept.size(), runner.state.nvl_page.size())
+	for i in dropped:
+		runner.state.nvl_page.remove_at(0)
 
 
 func _same_entries(shown: Array[Dictionary], expected: Array[Dictionary]) -> bool:
