@@ -269,6 +269,8 @@ func _refresh_nvl_button(btn: Button) -> void:
 
 
 func _play_nvl_enter_animation(time_scale: float) -> void:
+	if _choice_buttons.is_empty():
+		return
 	var index: int = 0
 	_enter_tween = create_tween().set_parallel(true)
 	for btn: Button in _choice_buttons.values():
@@ -278,6 +280,8 @@ func _play_nvl_enter_animation(time_scale: float) -> void:
 
 
 func _play_enter_animation(time_scale: float) -> void:
+	if button_container.get_child_count() == 0:
+		return
 	var index: int = 0
 	_enter_tween = create_tween().set_parallel(true)
 	for btn: Button in button_container.get_children():
