@@ -83,6 +83,9 @@ Narrator: We walked together along the path to the old cottage. The atmosphere w
 
 # id: 14
 @cg_hide
+@set_var hana_affection += rand(1, 3)
+Narrator: On the way we stopped at the arcade for one lucky round of the racing game. Hana won by a wheel, and her smile was [b]almost[/b] friendly.
+Narrator: Hana's mood score is now {$hana_affection}.
 Narrator: As evening approached, the sky began to shift rapidly.
 
 # id: 15
