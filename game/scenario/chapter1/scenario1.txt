@@ -10,13 +10,16 @@ Narrator: It was a peaceful afternoon. The sun was slowly setting over the hills
 @show hana normal at center
 Hana: Oh, it's [b]you[/b]. I didn't expect to see you here.
 Hana[nod]: Well, since you're here anyway...
+Hana: Don't get comfortable. Your affection score is {$hana_affection}, and I'm keeping track.
 
 # id: 2
 Mei[jump]: Hey there! We were just heading to the arcade. Want to come?
+Mei: Oh, and they just got a new racing game, you have to see the...{nw}
 
 # id: 3
 @show hana angry at center
 Hana[wave]: Mei! Don't just invite people without asking me! And why are you staring at me like that? Do I have something on my face?!
+Hana: Hmph.{w=0.5} Just don't do that again.
 
 # id: 4
 @flow "The Choice"
@@ -30,6 +33,7 @@ Hana[wave]: Mei! Don't just invite people without asking me! And why are you sta
 @show hana shocked at center
 @animate hana bounce
 Hana: Wh-what? You zoned out?
+Hana: You were spacing out?{p}Seriously, that's your excuse?
 
 # id: 6
 @set_var hana_affection -= 5
@@ -48,6 +52,7 @@ Hana: [color=red]EXCUSE ME?![/color] What exactly is wrong with my clothes?!
 
 # id: 8
 Mei: Calm down, Hana. I think it was a compliment... probably.
+Mei: {speed=0.5}Honestly, her face right now says it all.{/speed}
 
 # id: 9
 @show hana angry at center
