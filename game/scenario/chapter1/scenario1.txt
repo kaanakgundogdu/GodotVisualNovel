@@ -13,11 +13,14 @@ Hana[nod]: Well, since you're here anyway...
 Hana: Don't get comfortable. Your affection score is {$hana_affection}, and I'm keeping track.
 
 # id: 2
+@show hana normal at left
+@show mei happy at right
 Mei[jump]: Hey there! We were just heading to the arcade. Want to come?
 Mei: Oh, and they just got a new racing game, you have to see the...{nw}
 
 # id: 3
-@show hana angry at center
+@show hana angry at left
+@show mei worried at right
 Hana[wave]: Mei! Don't just invite people without asking me! And why are you staring at me like that? Do I have something on my face?!
 Hana: Hmph.{w=0.5} Just don't do that again.
 
@@ -30,14 +33,15 @@ Hana: Hmph.{w=0.5} Just don't do that again.
 # id: 5
 @flow "Zoning Out"
 @sfx sfx_ui_item
-@show hana shocked at center
+@show hana shocked at left
+@show mei normal at right
 @animate hana bounce
 Hana: Wh-what? You zoned out?
 Hana: You were spacing out?{p}Seriously, that's your excuse?
 
 # id: 6
 @set_var hana_affection -= 5
-@show hana normal at center
+@show hana normal at left
 Hana: [color=gray]*sigh*[/color] You are always so spacey. Try to pay more attention to your surroundings!
 @jump 13
 
@@ -46,37 +50,41 @@ Hana: [color=gray]*sigh*[/color] You are always so spacey. Try to pay more atten
 @set_var teased_hana = true
 @set_var hana_affection += 5
 @shake 20
-@show hana angry at center
+@show hana angry at left
 @animate hana shake strength=2
 Hana: [color=red]EXCUSE ME?![/color] What exactly is wrong with my clothes?!
 
 # id: 8
+@show mei smug at right
 Mei: Calm down, Hana. I think it was a compliment... probably.
 Mei: {speed=0.5}Honestly, her face right now says it all.{/speed}
 
 # id: 9
-@show hana angry at center
+@show hana angry at left
 Hana[jump height=40]: You have exactly [b]three seconds[/b] to run before I kick you!
 @jump 13
 
 # id: 10
 @flow "Bringing a Snack"
 @set_var hana_affection += 20
-@show hana shocked at center
+@show hana shocked at left
+@show mei happy at right
 Hana: Wait, really? For me? 
 
 # id: 11
 @sfx sfx_ui_item
-@show hana normal at center
+@show hana normal at left
 @animate hana wave times=3 wait
 Hana: I... I suppose you can be somewhat thoughtful sometimes. 
 
 # id: 12
+@show mei surprised at right
 Mei: Wow, you actually managed to calm her down. Impressive!
 @jump 13
 
 # id: 13
 @leave hana
+@leave mei
 @bg bg_cottage_ext_dawn
 @cg cg_cottage_fire_01
 Narrator: We walked together along the path to the old cottage. The atmosphere was certainly something.
