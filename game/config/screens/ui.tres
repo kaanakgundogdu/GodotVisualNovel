@@ -8,3 +8,7 @@ overlay_backdrop_color = Color(0.02, 0.02, 0.04, 0.92)
 confirm_quit = true
 confirm_overwrite_save = true
 log_use_character_colors = true
+screen_transitions = Dictionary[StringName, String]({
+&"extras": "slide_left",
+&"chapter_select": "slide_left"
+})

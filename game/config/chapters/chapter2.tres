@@ -15,3 +15,5 @@ bgm = ""
 autosave_on_enter = true
 next_chapter = ""
 unlock_condition = ""
+enter_transition = "wipe_left"
+enter_transition_time = 0.8
