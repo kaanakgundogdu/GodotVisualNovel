@@ -86,10 +86,12 @@ Mei: Wow, you actually managed to calm her down. Impressive!
 @leave hana
 @leave mei
 @bg bg_cottage_ext_dawn
+@weather fog strength=0.4 fade=2
 @cg cg_cottage_fire_01
 Narrator: We walked together along the path to the old cottage. The atmosphere was certainly something.
 
 # id: 14
+@weather stop fade=2
 @cg_hide
 @set_var hana_affection += rand(1, 3)
 Narrator: On the way we stopped at the arcade for one lucky round of the racing game. Hana won by a wheel, and her smile was [b]almost[/b] friendly.
@@ -106,6 +108,7 @@ Narrator: As evening approached, the sky began to shift rapidly.
 @bg bg_cottage_ext_night
 @music stop fade=3
 @ambient amb_rain fade=2
+@weather rain fade=2
 @zoom 1.2 at 0.5 0.4 time=4
 Narrator: The weather suddenly turned terrible, matching her mood.
 
@@ -157,6 +160,7 @@ Narrator: She waved briefly and went upstairs. A completely ordinary end to the 
 @bg bg_cottage_ext_day
 @music stop
 @ambient stop fade=2
+@weather stop fade=2
 @if hana_affection >= 15
   Narrator: Ending reached: a warm evening by the fire.
 @elif teased_hana

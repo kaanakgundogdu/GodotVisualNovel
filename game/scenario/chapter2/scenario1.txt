@@ -6,6 +6,7 @@ Narrator: The next morning came quietly. Chapter two is a short loading-screen t
 # id: 1
 @nvl
 @ambient amb_rain fade=2
+@weather rain strength=0.4 fade=2
 Narrator: I didn't sleep well. The cottage roof creaked all night, and every creak brought back last summer.
 Narrator: The fireflies over the lake. Mei running ahead to the arcade.
 Mei: Hurry up, slowpoke! The new racing game won't wait for us.
@@ -25,6 +26,7 @@ Narrator: I stayed under the blanket and listened to the birds outside. Five mor
 # id: 4
 @adv
 @ambient stop fade=2
+@weather stop fade=2
 @zoom reset time=2
 
 # id: 5

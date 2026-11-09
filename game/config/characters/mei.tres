@@ -12,3 +12,4 @@ default_outfit = "casual"
 default_pose = "base"
 default_expression = "normal"
 default_shot = "mid"
+blip_pitch = 1.3
